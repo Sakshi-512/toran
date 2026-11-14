@@ -1,0 +1,5 @@
+.env
+.DS_Store
+voice_notes/
+__pycache__/
+.venv/
