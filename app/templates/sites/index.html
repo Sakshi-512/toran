@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% macro picture(img, cls) -%}
+<img class="{{ cls }}" src="{{ img.src }}"{% if img.srcset %} srcset="{{ img.srcset }}" sizes="(min-width: 960px) 900px, 100vw"{% endif %} width="{{ img.width }}" height="{{ img.height }}" alt="{{ img.alt }}"{% if img.lazy %} loading="lazy" decoding="async"{% endif %}>
+{%- endmacro %}
+{% block content %}
+<section class="hero wrap">
+  {% if hero %}{{ picture(hero, "hero-img") }}{% endif %}
+  <h1>{{ name }}</h1>
+  <p class="tagline">{{ tagline }}</p>
+  {% if badges %}
+  <ul class="badges">{% for b in badges %}<li>{{ b }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if cta %}
+  <div class="cta">
+    {% if cta.wa_href %}<a class="btn btn-main" href="{{ cta.wa_href }}"{% if not is_sample %} rel="noopener"{% endif %}>{{ cta.wa_label }}</a>{% endif %}
+    <a class="btn btn-call" href="{{ cta.call_href }}">{{ cta.call_label }}</a>
+  </div>
+  {% endif %}
+</section>
+
+{% if products %}
+<section class="menu wrap" aria-labelledby="menu-title">
+  <h2 id="menu-title">{{ menu_title }}</h2>
+  <ul class="items">
+    {% for p in products %}
+    <li class="item">
+      {% if p.image %}{{ picture(p.image, "item-img") }}{% endif %}
+      <h3>{{ p.name }}</h3>
+      {% if p.notes %}<p class="notes">{{ p.notes }}</p>{% endif %}
+      {% if p.options %}
+      <dl class="prices">
+        {% for label, price in p.options %}<div><dt>{{ label }}</dt><dd class="price">{{ price }}</dd></div>{% endfor %}
+      </dl>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if steps %}
+<section class="howto wrap" aria-labelledby="howto-title">
+  <h2 id="howto-title">{{ howto_title }}</h2>
+  <ol class="steps">{% for s in steps %}<li>{{ s }}</li>{% endfor %}</ol>
+</section>
+{% endif %}
+
+{% if areas %}
+<section class="areas wrap" aria-labelledby="areas-title">
+  <h2 id="areas-title">{{ area_title }}</h2>
+  <ul class="area-list">{% for a in areas %}<li>{{ a }}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+
+{% if phone_text or area %}
+<section class="contact wrap" aria-labelledby="contact-title">
+  <h2 id="contact-title">{{ t('site.contact_title') }}</h2>
+  <dl class="contact-list">
+    {% if phone_text %}<div><dt>{{ t('site.contact_phone') }}</dt><dd>{% if phone_href %}<a href="{{ phone_href }}">{{ phone_text }}</a>{% else %}{{ phone_text }}{% endif %}</dd></div>{% endif %}
+    {% if area %}<div><dt>{{ t('site.contact_area') }}</dt><dd>{{ area }}</dd></div>{% endif %}
+  </dl>
+</section>
+{% endif %}
+
+<section class="enquiry wrap" aria-labelledby="enquiry-title">
+  <h2 id="enquiry-title">{{ t('site.enquiry_title') }}</h2>
+  <form method="post" action="{{ enquiry_url }}">
+    <input type="hidden" name="lang" value="{{ lang }}">
+    <label for="enq-name">{{ t('site.enquiry_name') }}</label>
+    <input id="enq-name" name="name" required maxlength="120" autocomplete="name">
+    <label for="enq-phone">{{ t('site.enquiry_phone') }}</label>
+    <input id="enq-phone" name="phone" type="tel" maxlength="20" autocomplete="tel" inputmode="tel">
+    <label for="enq-message">{{ t('site.enquiry_message') }}</label>
+    <textarea id="enq-message" name="message" required maxlength="2000" rows="4"></textarea>
+    <div class="trap" aria-hidden="true">
+      <label for="enq-website">{{ t('site.enquiry_trap') }}</label>
+      <input id="enq-website" name="website" tabindex="-1" autocomplete="off">
+    </div>
+    <button class="btn btn-main" type="submit">{{ t('site.enquiry_send') }}</button>
+  </form>
+</section>
+{% endblock %}
+{% block footer_extra %}
+{% if products %}<p>{{ t('site.prices_updated', date=updated) }}</p>{% endif %}
+{% endblock %}

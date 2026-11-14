@@ -17,6 +17,8 @@ COPY alembic.ini ./
 COPY migrations ./migrations
 COPY app ./app
 COPY scripts ./scripts
+# Sample business profiles, used by scripts.seed_samples.
+COPY tests/fixtures/profiles ./tests/fixtures/profiles
 
 # pwuser is the image's built-in non-root user.
 RUN mkdir -p /app/data /app/backups && chown -R pwuser:pwuser /app/data /app/backups

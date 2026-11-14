@@ -37,7 +37,9 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
             except Exception:
                 logger.exception("unhandled_error", extra={"route": _route_template(request)})
                 response = render_error(request, "error.generic", 500)
-            response.headers.update(security_headers(get_settings()))
+            # Business sites set their own stricter headers; keep those, fill in the rest.
+            for name, value in security_headers(get_settings()).items():
+                response.headers.setdefault(name, value)
             response.headers[_REQUEST_ID_HEADER] = request_id
             logger.info(
                 "request",

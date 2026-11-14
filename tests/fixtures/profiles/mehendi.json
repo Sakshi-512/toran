@@ -1,0 +1,71 @@
+{
+  "is_sample": true,
+  "slug": "rukhsar-mehendi",
+  "display_name": "Rukhsar Mehendi Art",
+  "theme": "elegant",
+  "photos": [
+    {
+      "subject": null,
+      "sample_svg": "sample-mehendi.svg"
+    }
+  ],
+  "profile": {
+    "business_name": "Rukhsar Mehendi Art",
+    "business_type": "mehendi",
+    "area": "Camp, Pune",
+    "delivery_areas": [
+      "Camp",
+      "Kondhwa",
+      "Wanowrie"
+    ],
+    "languages": [
+      "hi",
+      "en"
+    ],
+    "products": [
+      {
+        "name": "Bridal mehendi",
+        "unit": "hand",
+        "options": [
+          {
+            "label": "Both hands, full design",
+            "price": 2500
+          }
+        ],
+        "notes": "Home visits for brides."
+      },
+      {
+        "name": "Party mehendi",
+        "unit": "hand",
+        "options": [
+          {
+            "label": "One hand",
+            "price": 300
+          },
+          {
+            "label": "Both hands",
+            "price": 500
+          }
+        ],
+        "notes": ""
+      },
+      {
+        "name": "Arabic design",
+        "unit": "hand",
+        "options": [
+          {
+            "label": "One hand",
+            "price": 200
+          }
+        ],
+        "notes": ""
+      }
+    ],
+    "order_methods": [
+      "whatsapp"
+    ],
+    "lead_time": "1 week",
+    "phone": "+919000000004",
+    "missing": []
+  }
+}

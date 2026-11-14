@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+<rect width="800" height="600" fill="#FFF1DC"/>
+<ellipse cx="400" cy="440" rx="260" ry="36" fill="#D9A066"/><g fill="#FFFAF0" stroke="#D9B48A" stroke-width="6"><path d="M240 430 q-40-120 60-200 q100 80 60 200z"/><path d="M370 430 q-40-120 60-200 q100 80 60 200z"/><path d="M500 430 q-40-120 60-200 q100 80 60 200z"/></g>
+<rect x="250" y="520" width="300" height="50" rx="25" fill="#1F1B16" opacity="0.85"/>
+<text x="400" y="554" font-family="sans-serif" font-size="28" fill="#FFFFFF" text-anchor="middle">Sample photo</text>
+</svg>

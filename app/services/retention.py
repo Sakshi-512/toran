@@ -1,0 +1,87 @@
+"""Data retention, as promised on the privacy page.
+
+- Customer enquiries are deleted 90 days after they arrive.
+- Log files are deleted 30 days after the day they cover.
+Backups keep 7 days (scripts/backup.py). Voice recordings are deleted after processing (intake).
+"""
+
+import asyncio
+import logging
+import re
+from dataclasses import dataclass
+from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
+
+from sqlalchemy import delete
+from sqlalchemy.engine import Engine
+from sqlmodel import Session, col
+
+from app.models import Enquiry
+from app.services.logs import LOG_FILE
+
+logger = logging.getLogger(__name__)
+
+ENQUIRY_DAYS = 90
+LOG_DAYS = 30
+RUN_EVERY_SECONDS = 24 * 60 * 60
+_ROTATED = re.compile(rf"^{re.escape(LOG_FILE)}\.(\d{{4}}-\d{{2}}-\d{{2}})$")
+
+
+@dataclass(frozen=True)
+class RetentionResult:
+    """How much one cleanup run removed."""
+
+    enquiries_deleted: int
+    log_files_deleted: int
+
+
+def purge_enquiries(engine: Engine, now: datetime, days: int = ENQUIRY_DAYS) -> int:
+    """Delete enquiries older than `days`. Returns how many were deleted."""
+    cutoff = now - timedelta(days=days)
+    with Session(engine) as session:
+        result = session.exec(delete(Enquiry).where(col(Enquiry.created_at) < cutoff))
+        session.commit()
+        return int(result.rowcount or 0)
+
+
+def _log_file_day(path: Path) -> date | None:
+    match = _ROTATED.match(path.name)
+    return date.fromisoformat(match.group(1)) if match else None
+
+
+def purge_logs(log_dir: Path, now: datetime, days: int = LOG_DAYS) -> int:
+    """Delete rotated log files whose day is more than `days` ago. The current file is kept."""
+    if not log_dir.is_dir():
+        return 0
+    cutoff = (now - timedelta(days=days)).date()
+    deleted = 0
+    for path in log_dir.iterdir():
+        day = _log_file_day(path)
+        if day is not None and day < cutoff:
+            path.unlink()
+            deleted += 1
+    return deleted
+
+
+def run_retention(engine: Engine, log_dir: Path, now: datetime | None = None) -> RetentionResult:
+    """Run every cleanup once."""
+    moment = now or datetime.now(UTC)
+    result = RetentionResult(purge_enquiries(engine, moment), purge_logs(log_dir, moment))
+    logger.info(
+        "retention_run",
+        extra={
+            "enquiries_deleted": result.enquiries_deleted,
+            "log_files_deleted": result.log_files_deleted,
+        },
+    )
+    return result
+
+
+async def retention_loop(engine: Engine, log_dir: Path, every: float = RUN_EVERY_SECONDS) -> None:
+    """Run the cleanup now and then once a day until cancelled. Failures are logged, not raised."""
+    while True:
+        try:
+            await asyncio.to_thread(run_retention, engine, log_dir)
+        except Exception:
+            logger.exception("retention_failed")
+        await asyncio.sleep(every)

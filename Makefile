@@ -3,7 +3,7 @@ VENV := .venv
 PY := $(VENV)/bin/python
 BIN := $(VENV)/bin
 
-.PHONY: setup lock dev test lint format typecheck audit migrate migration up down backup
+.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs up down backup
 
 setup: ## Create the venv, install dependencies and git hooks
 	test -d $(VENV) || python3.12 -m venv $(VENV)
@@ -22,10 +22,10 @@ dev: ## Run the app locally with reload (http, so cookies are not Secure)
 test: ## Run tests (mock mode, no Claude credits)
 	CLAUDE_MOCK=1 $(BIN)/pytest
 
-lint: ## Lint, format check and type check
-	$(BIN)/ruff check .
-	$(BIN)/ruff format --check .
-	$(BIN)/mypy
+# Runs exactly the commit hooks on every tracked and new file, so a passing lint means the commit
+# hooks pass. Hooks that fix files (format, whitespace) fail the run; run make lint again after.
+lint: ## Run the commit hooks on all files
+	git ls-files -z --cached --others --exclude-standard | xargs -0 $(BIN)/pre-commit run --files
 
 format: ## Auto-fix lint issues and format
 	$(BIN)/ruff check --fix .
@@ -42,6 +42,15 @@ migrate: ## Apply database migrations
 
 migration: ## Create a migration: make migration msg="add x"
 	$(BIN)/alembic revision --autogenerate -m "$(msg)"
+
+seed: ## Create or update the sample businesses and build their sites
+	APP_ENV=development $(PY) -m scripts.seed_samples
+
+purge: ## Delete enquiries older than 90 days and log files older than 30 days
+	$(PY) -m scripts.purge
+
+logs: ## Follow the production app log file
+	docker compose exec app tail -f /app/data/logs/app.log
 
 up: ## Build and start the production stack
 	docker compose up -d --build

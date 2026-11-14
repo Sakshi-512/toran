@@ -2,7 +2,7 @@
 
 import os
 import secrets
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
 import pytest
@@ -11,6 +11,8 @@ from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy.engine import Engine
+
+from app.models import Business
 
 ROOT = Path(__file__).resolve().parents[1]
 # Generated per run so no secret-looking values are ever committed.
@@ -36,6 +38,9 @@ def clear_caches() -> None:
 
     get_settings.cache_clear()
     get_engine.cache_clear()
+    from app.routes.dev import _preview_build
+
+    _preview_build.cache_clear()
 
 
 def run_migrations(database_url: str) -> None:
@@ -53,7 +58,12 @@ def env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[str]:
         if key.startswith(("SMTP_", "GDDY_", "STT_")):
             monkeypatch.delenv(key, raising=False)
     database_url = f"sqlite:///{tmp_path / 'test.db'}"
-    for key, value in {**TEST_ENV, "DATABASE_URL": database_url}.items():
+    paths = {
+        "DATABASE_URL": database_url,
+        "SITES_DIR": str(tmp_path / "sites"),
+        "LOG_DIR": str(tmp_path / "logs"),
+    }
+    for key, value in {**TEST_ENV, **paths}.items():
         monkeypatch.setenv(key, value)
     monkeypatch.chdir(tmp_path)  # never read the developer's real .env
     clear_caches()
@@ -90,3 +100,30 @@ def client(app: FastAPI) -> Iterator[TestClient]:
     """Test client that returns 500 pages instead of raising."""
     with TestClient(app, raise_server_exceptions=False) as test_client:
         yield test_client
+
+
+@pytest.fixture
+def seed_sample(engine: Engine) -> Callable[[str], Business]:
+    """Create a sample business in the database and build its site into SITES_DIR."""
+    from datetime import date
+
+    from sqlmodel import Session
+
+    from app.config import get_settings
+    from app.services.samples import get_sample
+    from app.services.sites import build_business_site
+    from scripts.seed_samples import upsert_sample
+
+    def seed(slug: str) -> Business:
+        sample = get_sample(slug)
+        assert sample is not None
+        with Session(engine) as session:
+            business = upsert_sample(session, sample)
+            session.refresh(business)
+            session.expunge(business)
+        build_business_site(
+            business, sample.profile, get_settings(), date(2026, 11, 14), sample.photos
+        )
+        return business
+
+    return seed

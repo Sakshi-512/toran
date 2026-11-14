@@ -1,0 +1,18 @@
+{% extends "app/base.html" %}
+{% block title %}Themes · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>Themes (development only)</h1>
+{% for s in samples %}
+<section class="dev-sample">
+  <h2>{{ s.display_name }} <span class="muted">({{ s.profile.business_type }})</span></h2>
+  <div class="dev-grid">
+    {% for theme in themes %}
+    <figure>
+      <figcaption><a href="/dev/preview/{{ s.slug }}/{{ theme }}/">{{ theme }}</a></figcaption>
+      <iframe src="/dev/preview/{{ s.slug }}/{{ theme }}/" title="{{ s.display_name }}, {{ theme }}" width="360" height="640" loading="lazy"></iframe>
+    </figure>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

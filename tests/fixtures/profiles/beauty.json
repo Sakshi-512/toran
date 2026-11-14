@@ -1,0 +1,71 @@
+{
+  "is_sample": true,
+  "slug": "sunita-beauty-parlour",
+  "display_name": "Sunita Beauty Parlour",
+  "theme": "elegant",
+  "photos": [
+    {
+      "subject": null,
+      "sample_svg": "sample-beauty.svg"
+    }
+  ],
+  "profile": {
+    "business_name": "सुनीता ब्युटी पार्लर",
+    "business_type": "beauty",
+    "area": "Sinhagad Road, Pune",
+    "delivery_areas": [
+      "Sinhagad Road",
+      "Dhayari"
+    ],
+    "languages": [
+      "mr",
+      "hi"
+    ],
+    "products": [
+      {
+        "name": "Eyebrow threading",
+        "unit": "service",
+        "options": [
+          {
+            "label": "",
+            "price": 40
+          }
+        ],
+        "notes": ""
+      },
+      {
+        "name": "Facial",
+        "unit": "service",
+        "options": [
+          {
+            "label": "Fruit facial",
+            "price": 600
+          },
+          {
+            "label": "Gold facial",
+            "price": 1200
+          }
+        ],
+        "notes": "Takes about an hour."
+      },
+      {
+        "name": "Bridal makeup",
+        "unit": "service",
+        "options": [
+          {
+            "label": "Makeup with trial",
+            "price": 8000
+          }
+        ],
+        "notes": "Home visits available."
+      }
+    ],
+    "order_methods": [
+      "whatsapp",
+      "call"
+    ],
+    "lead_time": "1 day",
+    "phone": "+919000000005",
+    "missing": []
+  }
+}

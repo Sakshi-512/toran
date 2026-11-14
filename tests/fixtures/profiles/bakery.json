@@ -1,0 +1,80 @@
+{
+  "is_sample": true,
+  "slug": "asha-home-bakery",
+  "display_name": "Asha's Home Bakery",
+  "theme": "warm",
+  "photos": [
+    {
+      "subject": null,
+      "sample_svg": "sample-bakery.svg"
+    },
+    {
+      "subject": "उकडीचे मोदक (Ukadiche modak)",
+      "sample_svg": "sample-modak.svg"
+    }
+  ],
+  "profile": {
+    "business_name": "Asha's Home Bakery",
+    "business_type": "bakery",
+    "area": "Kothrud, Pune",
+    "delivery_areas": [
+      "Kothrud",
+      "Karve Nagar",
+      "Warje"
+    ],
+    "languages": [
+      "mr",
+      "en"
+    ],
+    "products": [
+      {
+        "name": "Chocolate cake",
+        "unit": "kg",
+        "options": [
+          {
+            "label": "Half kg",
+            "price": 450
+          },
+          {
+            "label": "1 kg",
+            "price": 850
+          }
+        ],
+        "notes": "Eggless available. Custom designs on request."
+      },
+      {
+        "name": "उकडीचे मोदक (Ukadiche modak)",
+        "unit": "box",
+        "options": [
+          {
+            "label": "Box of 11",
+            "price": 330
+          },
+          {
+            "label": "Box of 21",
+            "price": 600
+          }
+        ],
+        "notes": ""
+      },
+      {
+        "name": "Nankhatai",
+        "unit": "box",
+        "options": [
+          {
+            "label": "250 g box",
+            "price": 180
+          }
+        ],
+        "notes": ""
+      }
+    ],
+    "order_methods": [
+      "whatsapp",
+      "call"
+    ],
+    "lead_time": "2 days",
+    "phone": "+919000000001",
+    "missing": []
+  }
+}

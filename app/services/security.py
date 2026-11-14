@@ -107,3 +107,30 @@ def security_headers(settings: Settings) -> dict[str, str]:
     if settings.is_production:
         headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return headers
+
+
+def site_security_headers(
+    settings: Settings, form_origin: str, framable: bool = False
+) -> dict[str, str]:
+    """Headers for business sites: no scripts at all, forms may only post to the main app.
+
+    framable=True allows same-origin framing, used only by the development theme gallery.
+    """
+    ancestors = "'self'" if framable else "'none'"
+    csp = "; ".join(
+        [
+            "default-src 'none'",
+            "style-src 'self'",
+            "img-src 'self' data:",
+            "font-src 'self'",
+            f"form-action {form_origin}",
+            "base-uri 'none'",
+            f"frame-ancestors {ancestors}",
+        ]
+    )
+    headers = {
+        **security_headers(settings),
+        "Content-Security-Policy": csp,
+        "X-Frame-Options": "SAMEORIGIN" if framable else "DENY",
+    }
+    return headers

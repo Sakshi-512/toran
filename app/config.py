@@ -1,6 +1,7 @@
 """Application settings, read only from environment variables (or a local .env file)."""
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import Field, SecretStr, field_validator
@@ -25,6 +26,8 @@ class Settings(BaseSettings):
     app_env: AppEnv = "production"
     secret_key: SecretStr
     database_url: str = "sqlite:///./data/app.db"
+    sites_dir: Path = Path("data/sites")
+    log_dir: Path = Path("data/logs")
 
     anthropic_api_key: SecretStr | None = None
     claude_mock: bool = False

@@ -19,6 +19,7 @@ class Business(SQLModel, table=True):
     slug: str = Field(index=True, unique=True, max_length=63)
     display_name: str = Field(max_length=120)
     business_type: str = Field(default="other", max_length=20)
+    theme: str = Field(default="warm", max_length=20)
     owner_language: str = Field(default="en", max_length=5)
     status: str = Field(default="draft", max_length=20)
     is_sample: bool = Field(default=False, index=True)

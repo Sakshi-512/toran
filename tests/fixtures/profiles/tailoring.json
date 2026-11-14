@@ -1,0 +1,75 @@
+{
+  "is_sample": true,
+  "slug": "meena-tailors",
+  "display_name": "Meena Tailors",
+  "theme": "simple",
+  "photos": [
+    {
+      "subject": null,
+      "sample_svg": "sample-tailoring.svg"
+    }
+  ],
+  "profile": {
+    "business_name": "Meena Tailors",
+    "business_type": "tailoring",
+    "area": "Aundh, Pune",
+    "delivery_areas": [
+      "Aundh",
+      "Baner"
+    ],
+    "languages": [
+      "hi",
+      "en"
+    ],
+    "products": [
+      {
+        "name": "Blouse stitching",
+        "unit": "piece",
+        "options": [
+          {
+            "label": "Simple",
+            "price": 450
+          },
+          {
+            "label": "Designer",
+            "price": 900
+          }
+        ],
+        "notes": "Give a sample blouse or measurements."
+      },
+      {
+        "name": "Salwar suit stitching",
+        "unit": "piece",
+        "options": [
+          {
+            "label": "Without lining",
+            "price": 600
+          },
+          {
+            "label": "With lining",
+            "price": 800
+          }
+        ],
+        "notes": ""
+      },
+      {
+        "name": "Alterations",
+        "unit": "piece",
+        "options": [
+          {
+            "label": "Small alteration",
+            "price": 100
+          }
+        ],
+        "notes": ""
+      }
+    ],
+    "order_methods": [
+      "whatsapp",
+      "call"
+    ],
+    "lead_time": "5 days",
+    "phone": "+919000000002",
+    "missing": []
+  }
+}

@@ -23,12 +23,13 @@ jobs:
         run: |
           python -m venv .venv
           .venv/bin/pip install --require-hashes -r requirements-dev.txt
-      - name: Lint and format
-        run: |
-          .venv/bin/ruff check .
-          .venv/bin/ruff format --check .
-      - name: Type check
-        run: .venv/bin/mypy
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Commit hooks (lint, format, types, whitespace)
+        # Same hooks as make lint and git commit. Secrets are scanned over full history below.
+        run: SKIP=gitleaks .venv/bin/pre-commit run --all-files --show-diff-on-failure
       - name: Tests
         run: .venv/bin/pytest
       - name: Dependency audit

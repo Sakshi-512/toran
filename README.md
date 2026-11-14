@@ -10,7 +10,12 @@ Women running businesses from home in India: home bakers, beauty parlours, tailo
 
 ## What it does
 
-_To be completed as features land._ See `CLAUDE.md` for the full flow.
+See `CLAUDE.md` for the full flow. Built so far:
+
+- **Website builder** (`app/services/sitegen.py`): a confirmed `BusinessProfile` plus one of three themes (warm, elegant, simple) becomes a static, mobile-first site with separate English, Hindi and Marathi pages (`/`, `/hi/`, `/mr/`). Business text comes only from the profile. Prices are formatted in code, never translated. Anything that looks like a home address is left off and returned as a warning for the owner.
+- **Business sites** are served at `https://<slug>.BASE_DOMAIN` (or `http://<slug>.localhost:8000` in development). They load no JavaScript and no external files, use self-hosted Mukta and Rozha One fonts, and stay under 500 KB per page.
+- **Enquiry form** on every site posts to `/api/enquiry/<slug>` and is saved as an `Enquiry`. It is protected by an exact Origin check, a spam trap and a rate limit. Email delivery comes later.
+- **Privacy page** at `/privacy` in all three languages.
 
 ## Dependencies
 
@@ -38,7 +43,14 @@ make lint && make test
 
 ## How judges can test it
 
-_To be added with the intake flow._
+_The full judge flow comes with intake._ For now:
+
+```bash
+make migrate && make seed   # 5 sample businesses (marked Sample)
+make dev
+```
+
+Then open `http://asha-home-bakery.localhost:8000/` (also `/hi/` and `/mr/`) or the theme gallery at `http://localhost:8000/dev/themes` (development only).
 
 ## Measured vs AI-assessed
 
@@ -51,4 +63,7 @@ Each Claude call is logged with input, output and cache tokens and an **estimate
 ## Known limitations
 
 - Rate limits are kept in memory, which suits a single app process.
-- Not built yet: intake, site builder, customer tests, agent loop, mail, GoDaddy integration, privacy page.
+- Not built yet: intake, customer tests, agent loop, mail, GoDaddy integration, draft and live versions, the owner's one-click delete.
+- Business text (product names, notes) appears exactly as the owner gave it on every language page; only interface labels are translated.
+- Business sites are served by the app (Caddy compresses them); serving them straight from Caddy is a later step.
+- Retention cleanup (enquiries 90 days, log files 30 days) runs inside the app once a day; Docker's own console buffer is size-capped (2 x 1 MB), not time-capped.

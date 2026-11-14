@@ -5,9 +5,11 @@ Never pass audio, uploaded file bytes or full profiles to the logger.
 
 import json
 import logging
+import logging.handlers
 import re
 from contextvars import ContextVar
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 request_id_var: ContextVar[str] = ContextVar("request_id", default="-")
@@ -93,12 +95,31 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(safe, ensure_ascii=False, default=str)
 
 
-def setup_logging(secret_values: list[str], level: str = "INFO") -> None:
-    """Send all logs (app and uvicorn) to stdout as redacted JSON lines."""
-    handler = logging.StreamHandler()
-    handler.setFormatter(JsonFormatter(Redactor(secret_values)))
+LOG_FILE = "app.log"
+
+
+def setup_logging(
+    secret_values: list[str], log_dir: Path | None = None, level: str = "INFO"
+) -> None:
+    """Send all logs (app and uvicorn) as redacted JSON lines to stdout and, if log_dir is set,
+    to a file that rotates at midnight UTC (app.log.YYYY-MM-DD). Old files are removed by the
+    retention job.
+    """
+    formatter = JsonFormatter(Redactor(secret_values))
+    handlers: list[logging.Handler] = [logging.StreamHandler()]
+    if log_dir is not None:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        handlers.append(
+            logging.handlers.TimedRotatingFileHandler(
+                log_dir / LOG_FILE, when="midnight", utc=True, encoding="utf-8"
+            )
+        )
     root = logging.getLogger()
-    root.handlers = [handler]
+    for old in root.handlers:
+        old.close()
+    for handler in handlers:
+        handler.setFormatter(formatter)
+    root.handlers = handlers
     root.setLevel(level)
     for name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
         uv_logger = logging.getLogger(name)

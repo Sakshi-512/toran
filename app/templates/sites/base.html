@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ name }}{% endblock %}</title>
+  <meta name="description" content="{{ tagline }}">
+  {% if is_sample %}<meta name="robots" content="noindex">{% endif %}
+  <link rel="canonical" href="{{ canonical }}">
+  {% for code, href in alternates %}<link rel="alternate" hreflang="{{ code }}" href="{{ href }}">
+  {% endfor %}<link rel="alternate" hreflang="x-default" href="{{ alternates[0][1] }}">
+  <link rel="preload" href="{{ preload_href }}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{{ css_href }}">
+</head>
+<body class="theme-{{ theme.name }}">
+  <a class="skip" href="#main">{{ t('site.skip') }}</a>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="{{ home_href }}">{{ name }}</a>
+      {% if is_sample %}<span class="sample-badge">{{ t('label.sample') }}</span>{% endif %}
+      <nav class="langs" aria-label="{{ t('site.lang_switch_label') }}">
+        {% for l in languages %}
+        <a href="{{ l.href }}" lang="{{ l.code }}" hreflang="{{ l.code }}"{% if l.current %} aria-current="page" class="current"{% endif %}>{{ l.label }}</a>
+        {% endfor %}
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    {% if is_sample %}
+    <p class="wrap sample-note" id="sample-note">{{ t('site.sample_note') }}</p>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">
+    <div class="wrap">
+      {% block footer_extra %}{% endblock %}
+      <p>{{ t('site.made_with', app_name=app_name) }} · <a href="{{ privacy_href }}">{{ t('site.privacy') }}</a></p>
+    </div>
+  </footer>
+</body>
+</html>

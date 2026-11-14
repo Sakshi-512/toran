@@ -1,0 +1,57 @@
+{
+  "is_sample": true,
+  "slug": "sharma-tuition",
+  "display_name": "Sharma Tuition Classes",
+  "theme": "simple",
+  "photos": [
+    {
+      "subject": null,
+      "sample_svg": "sample-tuition.svg"
+    }
+  ],
+  "profile": {
+    "business_name": "Sharma Tuition Classes",
+    "business_type": "tuition",
+    "area": "Viman Nagar, Pune",
+    "delivery_areas": [],
+    "languages": [
+      "en",
+      "hi"
+    ],
+    "products": [
+      {
+        "name": "Maths",
+        "unit": "month",
+        "options": [
+          {
+            "label": "Class 8",
+            "price": 1500
+          },
+          {
+            "label": "Class 9 and 10",
+            "price": 2000
+          }
+        ],
+        "notes": "Evening batch, Monday to Friday. In person."
+      },
+      {
+        "name": "English",
+        "unit": "month",
+        "options": [
+          {
+            "label": "Class 5 to 7",
+            "price": 1200
+          }
+        ],
+        "notes": "Free trial class."
+      }
+    ],
+    "order_methods": [
+      "whatsapp",
+      "call"
+    ],
+    "lead_time": "",
+    "phone": "+919000000003",
+    "missing": []
+  }
+}

@@ -5,6 +5,7 @@ data
 backups
 voice_notes
 tests
+!tests/fixtures/profiles
 evals
 docs
 **/__pycache__

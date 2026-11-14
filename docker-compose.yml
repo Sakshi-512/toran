@@ -6,9 +6,17 @@ services:
     image: voice-site-agent:${IMAGE_TAG:-latest}
     build: .
     restart: unless-stopped
+    # Full logs live in LOG_DIR (deleted after 30 days). Docker keeps only a small rolling buffer.
+    logging:
+      driver: local
+      options:
+        max-size: "1m"
+        max-file: "2"
     env_file: .env
     environment:
       DATABASE_URL: sqlite:////app/data/app.db
+      SITES_DIR: /app/data/sites
+      LOG_DIR: /app/data/logs
       # Trust X-Forwarded-For only from the Caddy container's fixed address.
       FORWARDED_ALLOW_IPS: 172.30.0.10
     volumes:
@@ -29,6 +37,11 @@ services:
   caddy:
     image: caddy:2.10.2-alpine
     restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: "1m"
+        max-file: "2"
     depends_on:
       app:
         condition: service_healthy
