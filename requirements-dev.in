@@ -1,0 +1,9 @@
+# Direct development dependencies. Edit here, then run make lock.
+-r requirements.in
+httpx==0.28.1
+mypy==2.4.1
+pip-audit==2.10.1
+pip-tools==7.6.2
+pre-commit==4.7.0
+pytest==9.2.0
+ruff==0.17.5

@@ -1,0 +1,17 @@
+{% extends "app/base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>{{ t('home.title', lang, app_name=app_name) }}</h1>
+  <p class="tagline">{{ t('app.tagline', lang) }}</p>
+  <p>{{ t('home.intro', lang) }}</p>
+  <ol class="steps">
+    <li>{{ t('home.step_1', lang) }}</li>
+    <li>{{ t('home.step_2', lang) }}</li>
+    <li>{{ t('home.step_3', lang) }}</li>
+  </ol>
+  <p>
+    <span class="button disabled" aria-disabled="true">{{ t('home.try_now', lang) }} · {{ t('home.try_soon', lang) }}</span>
+  </p>
+  <p class="muted">{{ t('home.no_signup', lang) }}</p>
+</section>
+{% endblock %}

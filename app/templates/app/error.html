@@ -1,0 +1,9 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('error.title', lang) }} · {{ app_name }}{% endblock %}
+{% block content %}
+<section class="error">
+  <h1>{{ t('error.title', lang) }}</h1>
+  <p>{{ t(message_key, lang) }}</p>
+  <p><a class="button" href="/">{{ t('error.back_home', lang) }}</a></p>
+</section>
+{% endblock %}

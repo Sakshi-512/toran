@@ -1,0 +1,64 @@
+# Production stack: the app plus Caddy for HTTPS. Secrets come from .env on the server only.
+name: voice-site-agent
+
+services:
+  app:
+    image: voice-site-agent:${IMAGE_TAG:-latest}
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: sqlite:////app/data/app.db
+      # Trust X-Forwarded-For only from the Caddy container's fixed address.
+      FORWARDED_ALLOW_IPS: 172.30.0.10
+    volumes:
+      - app-data:/app/data
+      - ./backups:/app/backups
+    networks:
+      web:
+        ipv4_address: 172.30.0.20
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4).status == 200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      BASE_DOMAIN: ${BASE_DOMAIN:?set BASE_DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      web:
+        ipv4_address: 172.30.0.10
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  web:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  app-data:
+  caddy-data:
+  caddy-config:
