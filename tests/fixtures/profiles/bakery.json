@@ -6,11 +6,11 @@
   "photos": [
     {
       "subject": null,
-      "sample_svg": "sample-bakery.svg"
+      "sample_photo": "bakery.jpg"
     },
     {
       "subject": "उकडीचे मोदक (Ukadiche modak)",
-      "sample_svg": "sample-modak.svg"
+      "sample_photo": "modak.jpg"
     }
   ],
   "profile": {

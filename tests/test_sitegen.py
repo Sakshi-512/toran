@@ -7,11 +7,12 @@ from PIL import Image
 from app.services.page_weight import PAGE_WEIGHT_LIMIT, page_weight
 from app.services.samples import load_samples
 from app.services.site_images import SitePhoto
-from app.services.sitegen import format_inr, format_phone, whatsapp_link
+from app.services.sitegen import format_inr, format_phone, monogram, whatsapp_link
 from app.services.themes import THEMES
 from tests.site_helpers import (
     ALL_PAGES,
     PAGES,
+    Page,
     build,
     build_sample,
     numbers_in,
@@ -354,3 +355,202 @@ def test_real_business_shows_phone_link() -> None:
     p = page(build())
     assert "+91 98765 43210" in p.text
     assert any(a.get("href") == "tel:+919876543210" for a in p.find("a"))
+
+
+@pytest.mark.parametrize("slug", SAMPLE_SLUGS)
+def test_business_name_is_the_only_h1(slug: str) -> None:
+    site, prof = build_sample(slug)
+    for path in PAGES:
+        p = page(site, path)
+        assert p.html.count("<h1") == 1
+        h1 = p.html.split("<h1>")[1].split("</h1>")[0]
+        assert h1 == p.html.split("<title>")[1].split("</title>")[0]
+        topbar = p.html.split('<header class="topbar">')[1].split("</header>")[0]
+        assert "<h1" not in topbar and "<h2" not in topbar
+        # The name may appear in the top bar only as the plain desktop brand-name span.
+        brand = f'<span class="brand-name" aria-hidden="true">{h1}</span>'
+        assert brand in topbar
+        assert prof.business_name not in Page(topbar.replace(brand, "")).text
+
+
+@pytest.mark.parametrize(
+    ("name", "letter"),
+    [
+        ("Asha's Home Bakery", "A"),
+        ("meena", "M"),
+        ("सुनीता ब्युटी पार्लर", "सु"),
+        ("क्षमा केक्स", "क्ष"),
+        ("  priya", "P"),
+        ("", ""),
+    ],
+)
+def test_monogram(name: str, letter: str) -> None:
+    assert monogram(name) == letter
+
+
+def test_monogram_in_top_bar() -> None:
+    p = page(build())
+    link = next(a for a in p.find("a") if a.get("class") == "monogram")
+    assert link["aria-label"] == "Priya Cakes"
+    assert 'aria-hidden="true">P</span>' in p.html
+
+
+def test_chips_have_icons() -> None:
+    eggless = profile(
+        products=[
+            {"name": "Eggless cake", "unit": "kg", "options": [{"label": "1 kg", "price": 700}]}
+        ]
+    )
+    html = page(build(eggless)).html
+    badges = html.split('<ul class="badges">')[1].split("</ul>")[0]
+    assert badges.count('<li class="chip">') == 3
+    assert badges.count("<svg") == 3
+    assert 'aria-hidden="true"' in badges
+
+
+def test_buttons_have_icons() -> None:
+    cta = page(build()).html.split('<div class="cta">')[1].split("</div>")[0]
+    assert cta.count("<svg") == 2
+
+
+def test_no_photo_business_has_text_only_hero() -> None:
+    site, _ = build_sample("savitri-gruh-udyog")
+    for path in ALL_PAGES:
+        html = site.files[path].decode()
+        assert "<img" not in html
+        assert "has-image" not in html
+    assert "hero-grid no-photo" in page(site).html
+
+
+def test_items_without_photos_have_no_image_area() -> None:
+    site, _ = build_sample("asha-home-bakery")
+    html = page(site).html
+    assert html.count('class="item has-image"') == 1
+    assert html.count('class="item"') == 2
+
+
+def test_long_names_render_in_full() -> None:
+    site, prof = build_sample("savitri-gruh-udyog")
+    for path in PAGES:
+        text = page(site, path).text
+        assert prof.business_name in text
+        for product in prof.products:
+            assert product.name in text
+
+
+def test_step_numbers_come_from_css_not_text() -> None:
+    p = page(build())
+    steps = p.html.split('<ol class="steps">')[1].split("</ol>")[0]
+    assert not any(ch.isdigit() for ch in Page(steps).text.replace("3 days", ""))
+    css = next(v for k, v in build().files.items() if k.endswith(".css")).decode()
+    assert "counter(step)" in css
+
+
+def test_display_font_only_on_h1_and_h2() -> None:
+    css = next(v for k, v in build().files.items() if k.endswith(".css")).decode()
+    display_rules = [line for line in css.splitlines() if "var(--display)" in line]
+    assert len(display_rules) == 1 and display_rules[0].startswith("h1, h2 {")
+
+
+def test_brand_name_hidden_on_mobile_shown_on_desktop() -> None:
+    css = next(v for k, v in build().files.items() if k.endswith(".css")).decode()
+    assert ".brand-name { display: none;" in css
+    desktop = css.split("@media (min-width: 768px)")[1]
+    assert ".brand-name { display: inline; }" in desktop
+
+
+def test_single_unnamed_option_shows_price_beside_name() -> None:
+    cupcakes = page(build()).html.split("Cupcakes")[1].split("</li>")[0]
+    assert '<span class="price">₹300</span>' in cupcakes
+    assert '<span class="unit">/ box</span>' in cupcakes
+    assert '<dl class="prices">' not in cupcakes
+    assert "per box" not in cupcakes
+    hindi = page(build(), "hi/index.html").html.split("Cupcakes")[1].split("</li>")[0]
+    assert '<span class="unit">/ डिब्बा</span>' in hindi
+
+
+@pytest.mark.parametrize(
+    ("unit", "suffix"),
+    [
+        ("kg", "/ kg"),
+        ("box", "/ box"),
+        ("month", "/ month"),
+        ("hand", "/ hand"),
+        ("service", ""),
+        ("piece", ""),
+    ],
+)
+def test_unit_suffix_only_for_ambiguous_units(unit: str, suffix: str) -> None:
+    prof = profile(
+        products=[{"name": "Item", "unit": unit, "options": [{"label": "", "price": 1500}]}]
+    )
+    item = page(build(prof)).html.split('<li class="item">')[1].split("</li>")[0]
+    assert '<span class="price">₹1,500</span>' in item
+    if suffix:
+        assert f'<span class="unit">{suffix}</span>' in item
+    else:
+        assert 'class="unit"' not in item
+    assert "per service" not in item and "per piece" not in item
+
+
+def test_named_options_keep_price_rows() -> None:
+    chocolate = page(build()).html.split("Chocolate cake")[1].split("</li>")[0]
+    assert '<dl class="prices">' in chocolate and "single" not in chocolate
+
+
+@pytest.mark.parametrize(
+    ("area", "lang", "tagline"),
+    [
+        ("Kothrud, Pune", "en", "Bakery in Kothrud, Pune"),
+        ("FC Road, Pune", "en", "Bakery on FC Road, Pune"),
+        ("Sinhagad Road", "en", "Bakery on Sinhagad Road"),
+        ("Kothrud, Pune", "hi", "Kothrud, Pune में बेकरी"),
+        ("FC Road, Pune", "hi", "FC Road, Pune पर बेकरी"),
+        ("Sinhagad Road", "hi", "Sinhagad Road पर बेकरी"),
+        ("Kothrud, Pune", "mr", "Kothrud, Pune मधील बेकरी"),
+        ("FC Road, Pune", "mr", "FC Road, Pune वरील बेकरी"),
+        ("Sinhagad Road", "mr", "Sinhagad Road वरील बेकरी"),
+        ("Karve Nagar", "en", "Bakery in Karve Nagar"),
+        ("Tilak Marg", "en", "Bakery on Tilak Marg"),
+    ],
+)
+def test_tagline_uses_on_for_roads(area: str, lang: str, tagline: str) -> None:
+    path = {"en": "index.html", "hi": "hi/index.html", "mr": "mr/index.html"}[lang]
+    p = page(build(profile(area=area)), path)
+    assert p.html.split('<p class="overline">')[1].split("</p>")[0] == tagline
+
+
+def test_sample_photos_are_labelled_webp_within_budget() -> None:
+    site, _ = build_sample("asha-home-bakery")
+    images = {k: v for k, v in site.files.items() if k.startswith("assets/img/")}
+    assert images and all(k.endswith(".webp") for k in images)
+    for name, data in images.items():
+        limit = 90 * 1024 if "-960." in name else 40 * 1024
+        assert len(data) <= limit, name
+    label = '<span class="photo-label" aria-hidden="true">{}</span>'
+    assert page(site).html.count(label.format("Sample photo")) == 2
+    assert label.format("नमूना फ़ोटो") in page(site, "hi/index.html").html
+
+
+def test_real_photos_have_no_sample_label() -> None:
+    photos = (SitePhoto(data=_jpeg(800, 600)),)
+    assert "photo-label" not in page(build(photos=photos)).html
+
+
+def test_unknown_sample_photo_rejected() -> None:
+    from app.services.site_images import sample_photo_bytes
+
+    for name in ("../../config.py", "missing.jpg", "bakery.png"):
+        with pytest.raises(ValueError):
+            sample_photo_bytes(name)
+
+
+def test_alternate_sections_are_tinted() -> None:
+    css = next(v for k, v in build().files.items() if k.endswith(".css")).decode()
+    assert "main > section:nth-of-type(even) { background: var(--band); }" in css
+
+
+def test_photos_between_sizes_get_a_full_width_version() -> None:
+    site = build(photos=(SitePhoto(data=_jpeg(853, 1280)),))
+    srcset = page(site).find("img")[0]["srcset"]
+    assert "480w" in srcset and "853w" in srcset

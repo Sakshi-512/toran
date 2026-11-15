@@ -16,6 +16,7 @@ See `CLAUDE.md` for the full flow. Built so far:
 - **Business sites** are served at `https://<slug>.BASE_DOMAIN` (or `http://<slug>.localhost:8000` in development). They load no JavaScript and no external files, use self-hosted Mukta and Rozha One fonts, and stay under 500 KB per page.
 - **Enquiry form** on every site posts to `/api/enquiry/<slug>` and is saved as an `Enquiry`. It is protected by an exact Origin check, a spam trap and a rate limit. Email delivery comes later.
 - **Privacy page** at `/privacy` in all three languages.
+- **Sample businesses** use free Unsplash stock photos, always labelled "Sample photo" (credits in `docs/photo-credits.md`). Screenshots of each theme are in `docs/screenshots/`.
 
 ## Dependencies
 

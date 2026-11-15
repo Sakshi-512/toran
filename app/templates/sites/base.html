@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ name }}{% endblock %}</title>
   <meta name="description" content="{{ tagline }}">
+  <meta name="theme-color" content="{{ theme.background }}">
   {% if is_sample %}<meta name="robots" content="noindex">{% endif %}
   <link rel="canonical" href="{{ canonical }}">
   {% for code, href in alternates %}<link rel="alternate" hreflang="{{ code }}" href="{{ href }}">
@@ -14,27 +15,33 @@
 </head>
 <body class="theme-{{ theme.name }}">
   <a class="skip" href="#main">{{ t('site.skip') }}</a>
+  {% if is_sample %}
+  <p class="notice" id="sample-note"><span class="sample-badge">{{ t('label.sample') }}</span> {{ t('site.sample_note') }}</p>
+  {% endif %}
   <header class="topbar">
     <div class="wrap topbar-inner">
-      <a class="brand" href="{{ home_href }}">{{ name }}</a>
-      {% if is_sample %}<span class="sample-badge">{{ t('label.sample') }}</span>{% endif %}
+      <a class="monogram" href="{{ home_href }}" aria-label="{{ name }}"><span class="monogram-mark" aria-hidden="true">{{ monogram }}</span><span class="brand-name" aria-hidden="true">{{ name }}</span></a>
       <nav class="langs" aria-label="{{ t('site.lang_switch_label') }}">
-        {% for l in languages %}
-        <a href="{{ l.href }}" lang="{{ l.code }}" hreflang="{{ l.code }}"{% if l.current %} aria-current="page" class="current"{% endif %}>{{ l.label }}</a>
-        {% endfor %}
+        {% for l in languages %}<a href="{{ l.href }}" lang="{{ l.code }}" hreflang="{{ l.code }}"{% if l.current %} aria-current="page" class="current"{% endif %}>{{ l.label }}</a>{% endfor %}
       </nav>
     </div>
   </header>
   <main id="main">
-    {% if is_sample %}
-    <p class="wrap sample-note" id="sample-note">{{ t('site.sample_note') }}</p>
-    {% endif %}
     {% block content %}{% endblock %}
   </main>
   <footer class="footer">
-    <div class="wrap">
-      {% block footer_extra %}{% endblock %}
-      <p>{{ t('site.made_with', app_name=app_name) }} · <a href="{{ privacy_href }}">{{ t('site.privacy') }}</a></p>
+    <div class="wrap footer-inner">
+      <div class="footer-id">
+        <p class="footer-name">{{ name }}</p>
+        {% if area %}<p class="footer-area">{{ area }}</p>{% endif %}
+      </div>
+      <nav class="footer-langs" aria-label="{{ t('site.lang_switch_label') }}">
+        {% for l in languages %}<a href="{{ l.href }}" lang="{{ l.code }}" hreflang="{{ l.code }}"{% if l.current %} aria-current="page"{% endif %}>{{ l.label }}</a>{% endfor %}
+      </nav>
+      <div class="footer-meta">
+        {% block footer_extra %}{% endblock %}
+        <p>{{ t('site.made_with', app_name=app_name) }} · <a href="{{ privacy_href }}">{{ t('site.privacy') }}</a></p>
+      </div>
     </div>
   </footer>
 </body>

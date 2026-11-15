@@ -81,7 +81,9 @@ def test_main_domain_still_serves_app(client: TestClient, seeded: Business) -> N
 def test_dev_theme_gallery(client: TestClient) -> None:
     response = client.get("/dev/themes")
     assert response.status_code == 200
-    assert response.text.count("<iframe") == 15
+    from app.services.samples import load_samples
+
+    assert response.text.count("<iframe") == len(load_samples()) * 3
     preview = client.get("/dev/preview/meena-tailors/elegant/hi/")
     assert preview.status_code == 200
     assert '<html lang="hi">' in preview.text

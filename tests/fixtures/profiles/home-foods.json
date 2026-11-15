@@ -1,0 +1,67 @@
+{
+  "is_sample": true,
+  "slug": "savitri-gruh-udyog",
+  "display_name": "Savitri Gruh Udyog",
+  "theme": "warm",
+  "photos": [],
+  "profile": {
+    "business_name": "सावित्री गृहउद्योग: पापड, लोणची आणि मसाले",
+    "business_type": "other",
+    "area": "Hadapsar, Pune",
+    "delivery_areas": [
+      "Hadapsar",
+      "Magarpatta",
+      "Kharadi"
+    ],
+    "languages": [
+      "mr",
+      "hi"
+    ],
+    "products": [
+      {
+        "name": "घरगुती उडदाचे पापड, हाताने लाटलेले आणि उन्हात वाळवलेले",
+        "unit": "box",
+        "options": [
+          {
+            "label": "250 ग्रॅमचे पाकीट",
+            "price": 120
+          },
+          {
+            "label": "1 किलोचे मोठे कौटुंबिक पाकीट",
+            "price": 440
+          }
+        ],
+        "notes": "मध्यम तिखट."
+      },
+      {
+        "name": "हरी मिर्च और नींबू का अचार, सरसों के तेल में घर पर बना",
+        "unit": "box",
+        "options": [
+          {
+            "label": "500 ग्राम की काँच की बरनी",
+            "price": 260
+          }
+        ],
+        "notes": ""
+      },
+      {
+        "name": "Goda masala",
+        "unit": "box",
+        "options": [
+          {
+            "label": "200 g",
+            "price": 180
+          }
+        ],
+        "notes": ""
+      }
+    ],
+    "order_methods": [
+      "whatsapp",
+      "call"
+    ],
+    "lead_time": "1 day",
+    "phone": "+919000000006",
+    "missing": []
+  }
+}

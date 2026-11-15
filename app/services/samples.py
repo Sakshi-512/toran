@@ -13,7 +13,7 @@ SAMPLES_DIR = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "prof
 
 @dataclass(frozen=True)
 class Sample:
-    """One sample business: its record fields, profile and illustration photos."""
+    """One sample business: its record fields, profile and sample photos."""
 
     slug: str
     display_name: str
@@ -27,7 +27,7 @@ def _load(path: Path) -> Sample:
     if data.get("is_sample") is not True:
         raise ValueError(f"{path.name} must set is_sample: true")
     photos = tuple(
-        SitePhoto(subject=p.get("subject"), sample_svg=p["sample_svg"]) for p in data["photos"]
+        SitePhoto(subject=p.get("subject"), sample_photo=p["sample_photo"]) for p in data["photos"]
     )
     return Sample(
         slug=data["slug"],

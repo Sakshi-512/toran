@@ -9,6 +9,7 @@ write_site() swaps a finished build into place.
 import hashlib
 import shutil
 import tempfile
+import unicodedata
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date
@@ -29,6 +30,8 @@ SITE_TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates" / "site
 FONT_DIR = SITE_TEMPLATE_DIR / "assets" / "fonts"
 LANGUAGES: tuple[str, ...] = ("en", "hi", "mr")
 LANG_PREFIX = {"en": "", "hi": "hi/", "mr": "mr/"}
+ROAD_WORDS = frozenset({"road", "rd", "marg", "path", "रोड", "मार्ग", "पथ"})
+UNIT_SUFFIX_UNITS = frozenset({"kg", "box", "month", "hand"})
 EGGLESS_WORDS = (
     "eggless",
     "egg-free",
@@ -261,7 +264,10 @@ def _page_context(
         "hero": _image(assets.hero, root, tr, name, site.is_sample, lazy=False),
         "cta": _cta(site, name, kind, tr),
         "products": [_product(p, assets, root, tr, site.is_sample) for p in profile.products],
+        "monogram": monogram(name),
+        "menu_overline": tr(f"site.overline_menu_{kind}"),
         "menu_title": tr(f"site.menu_title_{kind}"),
+        "areas_overline": tr(f"site.overline_areas_{kind}"),
         "steps": _steps(profile, kind, tr),
         "howto_title": tr(f"site.howto_title_{kind}"),
         "areas": _area_list(areas),
@@ -297,26 +303,50 @@ def _language_links(lang: str, path: str, root: str) -> list[dict[str, Any]]:
     ]
 
 
+def is_road(area: str) -> bool:
+    """True when the area's first part names a road ("Sinhagad Road, Pune"), which takes "on"."""
+    first = area.split(",")[0].strip().lower().rstrip(".")
+    return bool(first) and first.split()[-1] in ROAD_WORDS
+
+
 def _tagline(profile: BusinessProfile, area: str, tr: Callable[..., str]) -> str:
     kind = profile.business_type
-    if area:
-        return tr(f"site.tagline.{kind}", area=area)
-    return tr(f"site.tagline_noarea.{kind}")
+    if not area:
+        return tr(f"site.tagline_noarea.{kind}")
+    key = "site.tagline_on" if is_road(area) else "site.tagline"
+    return tr(f"{key}.{kind}", area=area)
+
+
+def monogram(name: str) -> str:
+    """First letter of the name, kept whole for Devanagari (base letter plus its marks)."""
+    text = name.strip()
+    if not text:
+        return ""
+    letter = text[0]
+    for char in text[1:]:
+        if unicodedata.category(char) in ("Mn", "Mc") or char == "\u094d":
+            letter += char
+        else:
+            break
+    if letter.endswith("\u094d"):  # a half letter (virama) needs the next letter to render
+        letter += text[len(letter)] if len(text) > len(letter) else ""
+    return letter.upper()
 
 
 def _badges(
     profile: BusinessProfile, areas: dict[str, Any], kind: str, tr: Callable[..., str]
-) -> list[str]:
+) -> list[dict[str, str]]:
     badges = []
     texts = " ".join(f"{p.name} {p.notes}" for p in profile.products).lower()
     if any(word in texts for word in EGGLESS_WORDS):
-        badges.append(tr("site.badge_eggless"))
+        badges.append({"icon": "leaf", "text": tr("site.badge_eggless")})
     if profile.lead_time:
-        badges.append(tr(f"site.badge_lead_time_{kind}", lead_time=profile.lead_time))
+        lead = tr(f"site.badge_lead_time_{kind}", lead_time=profile.lead_time)
+        badges.append({"icon": "clock", "text": lead})
     delivery = areas["delivery"]
     if delivery:
         key = f"site.badge_area_{kind}" + ("_more" if len(delivery) > 1 else "")
-        badges.append(tr(key, area=delivery[0]))
+        badges.append({"icon": "pin", "text": tr(key, area=delivery[0])})
     return badges
 
 
@@ -339,6 +369,7 @@ def _image(
         "height": ref.height,
         "alt": tr(alt_key, subject=subject),
         "lazy": lazy,
+        "label": tr("site.sample_photo_label") if sample else "",
     }
 
 
@@ -364,10 +395,16 @@ def _product(
     product: Product, assets: _Assets, root: str, tr: Callable[..., str], sample: bool
 ) -> dict[str, Any]:
     unit = tr(f"site.unit.{product.unit}")
+    single = len(product.options) == 1 and not product.options[0].label
+    suffix = tr(f"site.per_unit.{product.unit}") if product.unit in UNIT_SUFFIX_UNITS else ""
     return {
         "name": product.name,
         "notes": product.notes,
-        "options": [(o.label or unit, format_inr(o.price)) for o in product.options],
+        "single_price": format_inr(product.options[0].price) if single else "",
+        "unit_suffix": suffix if single else "",
+        "options": []
+        if single
+        else [(o.label or unit, format_inr(o.price)) for o in product.options],
         "image": _image(
             assets.product_images.get(product.name), root, tr, product.name, sample, lazy=True
         ),

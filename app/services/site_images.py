@@ -1,36 +1,38 @@
-"""Images for business sites: uploads become resized WebP files; samples use built-in SVGs."""
+"""Images for business sites: uploads and bundled sample photos become resized WebP files."""
 
 import hashlib
 import io
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 from PIL import Image
 
 from app.services.uploads import check_image
 
-SAMPLE_SVG_DIR = Path(__file__).resolve().parent.parent / "templates" / "sites" / "img"
+# Free stock photos used only by sample businesses (credits in docs/photo-credits.md).
+SAMPLE_PHOTO_DIR = Path(__file__).resolve().parent.parent / "templates" / "sites" / "sample-photos"
 WIDTHS = (480, 960)
 WEBP_QUALITIES = (78, 65, 50, 35, 20)
 # Byte budget per image width, so photos cannot push a page past the 500 KB limit.
-BYTE_BUDGET = {480: 50 * 1024, 960: 110 * 1024}
+BYTE_BUDGET = {480: 40 * 1024, 960: 90 * 1024}
 
 
 @dataclass(frozen=True)
 class SitePhoto:
     """A photo for a site. subject is a product name, or None for the business itself.
 
-    Exactly one of data (an uploaded raster image) or sample_svg (a built-in file name) is set.
+    Exactly one of data (an uploaded image) or sample_photo (a bundled file name) is set.
     """
 
     subject: str | None = None
     data: bytes | None = None
-    sample_svg: str | None = None
+    sample_photo: str | None = None
 
     @property
     def is_sample(self) -> bool:
-        """True for built-in "Sample photo" illustrations."""
-        return self.sample_svg is not None
+        """True for bundled stock photos shown with a "Sample photo" label."""
+        return self.sample_photo is not None
 
 
 @dataclass(frozen=True)
@@ -49,36 +51,40 @@ def _short_hash(data: bytes) -> str:
 
 def prepare_photo(photo: SitePhoto, stem: str) -> tuple[ImageRef, dict[str, bytes]]:
     """Return the image reference and the files to write for one photo."""
-    if photo.sample_svg is not None:
-        return _prepare_svg(photo.sample_svg, stem)
-    if photo.data is None:
-        raise ValueError("SitePhoto needs data or sample_svg")
-    return _prepare_raster(photo.data, stem)
+    if photo.sample_photo is not None:
+        data = sample_photo_bytes(photo.sample_photo)
+    elif photo.data is not None:
+        data = photo.data
+    else:
+        raise ValueError("SitePhoto needs data or sample_photo")
+    ref, files = _prepare_raster(data, stem)
+    return ref, dict(files)
 
 
-def _prepare_svg(name: str, stem: str) -> tuple[ImageRef, dict[str, bytes]]:
-    path = (SAMPLE_SVG_DIR / name).resolve()
-    if path.parent != SAMPLE_SVG_DIR.resolve() or path.suffix != ".svg":
-        raise ValueError("unknown sample illustration")
-    data = path.read_bytes()
-    target = f"assets/img/{stem}.{_short_hash(data)}.svg"
-    return ImageRef(target, (), 800, 600), {target: data}
+def sample_photo_bytes(name: str) -> bytes:
+    """Read one bundled sample photo. Only plain .jpg names inside SAMPLE_PHOTO_DIR are allowed."""
+    path = (SAMPLE_PHOTO_DIR / name).resolve()
+    if path.parent != SAMPLE_PHOTO_DIR.resolve() or path.suffix != ".jpg" or not path.is_file():
+        raise ValueError("unknown sample photo")
+    return path.read_bytes()
 
 
-def _prepare_raster(data: bytes, stem: str) -> tuple[ImageRef, dict[str, bytes]]:
+@lru_cache(maxsize=32)
+def _prepare_raster(data: bytes, stem: str) -> tuple[ImageRef, tuple[tuple[str, bytes], ...]]:
+    """Check, strip and encode one image (cached: sample sites are rebuilt often)."""
     checked = check_image(data)
     files: dict[str, bytes] = {}
     srcset: list[tuple[str, int]] = []
     with Image.open(io.BytesIO(checked.data)) as img:
         for width in WIDTHS:
-            if width > img.width and srcset:
-                break
+            if srcset and srcset[-1][1] >= img.width:
+                break  # already have the image at its full width; never upscale
             encoded = _to_webp(img, width)
             target = f"assets/img/{stem}-{width}.{_short_hash(encoded)}.webp"
             files[target] = encoded
             srcset.append((target, min(width, img.width)))
         height = round(img.height * srcset[0][1] / img.width)
-    return ImageRef(srcset[0][0], tuple(srcset), srcset[0][1], height), files
+    return ImageRef(srcset[0][0], tuple(srcset), srcset[0][1], height), tuple(files.items())
 
 
 def _to_webp(img: Image.Image, width: int) -> bytes:

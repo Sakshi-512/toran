@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ t('site.thanks_title') }} · {{ name }}{% endblock %}
 {% block content %}
-<section class="hero wrap">
-  <h1>{{ t('site.thanks_title') }}</h1>
-  <p>{{ t('site.thanks_body', business_name=name) }}</p>
-  <p><a class="btn btn-main" href="{{ root }}{{ 'hi/' if lang == 'hi' else ('mr/' if lang == 'mr' else '') }}">{{ t('site.back', business_name=name) }}</a></p>
+<section class="hero">
+  <div class="wrap hero-grid no-photo">
+    <div class="hero-text">
+      <h1>{{ t('site.thanks_title') }}</h1>
+      <p class="lead">{{ t('site.thanks_body', business_name=name) }}</p>
+      <div class="cta"><a class="btn btn-main" href="{{ home_href }}">{{ t('site.back', business_name=name) }}</a></div>
+    </div>
+  </div>
 </section>
 {% endblock %}
