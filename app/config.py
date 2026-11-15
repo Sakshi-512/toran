@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./data/app.db"
     sites_dir: Path = Path("data/sites")
     log_dir: Path = Path("data/logs")
+    runs_dir: Path = Path("data/runs")
 
     anthropic_api_key: SecretStr | None = None
     claude_mock: bool = False

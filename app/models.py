@@ -103,3 +103,58 @@ class ClaudeUsage(SQLModel, table=True):
     is_mock: bool = False
     day_ist: date = Field(index=True)
     created_at: datetime = Field(default_factory=utcnow)
+
+
+class Job(SQLModel, table=True):
+    """A background job (for example a customer-test run) that the owner app polls."""
+
+    id: str = Field(primary_key=True, max_length=32)
+    kind: str = Field(max_length=30, index=True)
+    business_id: int | None = Field(default=None, foreign_key="business.id", index=True)
+    status: str = Field(default="queued", max_length=20, index=True)
+    attempts: int = 0
+    max_attempts: int = 2
+    timeout_seconds: int = 180
+    payload: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
+    error: str | None = Field(default=None, max_length=60)
+    run_id: int | None = None
+    created_at: datetime = Field(default_factory=utcnow)
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+
+
+class TestRun(SQLModel, table=True):
+    """One customer-test run of one version of a site, with its Readiness Score."""
+
+    __test__ = False  # not a pytest test class
+
+    id: int | None = Field(default=None, primary_key=True)
+    business_id: int = Field(foreign_key="business.id", index=True)
+    job_id: str | None = Field(default=None, foreign_key="job.id", index=True)
+    profile_version_id: int | None = Field(default=None, foreign_key="profileversion.id")
+    site_hash: str = Field(max_length=64)
+    site_kind: str = Field(default="live", max_length=10)
+    url: str = Field(max_length=300)
+    total: int = 0
+    possible_so_far: float = 0.0
+    pending_points: float = 0.0
+    screenshot_path: str | None = Field(default=None, max_length=300)
+    duration_seconds: float = 0.0
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+class ScoreItem(SQLModel, table=True):
+    """One scored check in a test run. source is measured or ai_assessed (rule 8)."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    run_id: int = Field(foreign_key="testrun.id", index=True)
+    part: str = Field(max_length=20)
+    key: str = Field(max_length=40)
+    source: str = Field(max_length=12)
+    status: str = Field(max_length=16)
+    points: float = 0.0
+    max_points: float = 0.0
+    reason_en: str = Field(sa_column=Column(Text, nullable=False))
+    reason_hi: str = Field(sa_column=Column(Text, nullable=False))
+    reason_mr: str = Field(sa_column=Column(Text, nullable=False))
+    detail: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))

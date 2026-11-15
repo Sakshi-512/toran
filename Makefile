@@ -3,12 +3,13 @@ VENV := .venv
 PY := $(VENV)/bin/python
 BIN := $(VENV)/bin
 
-.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs up down backup
+.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score up down backup
 
 setup: ## Create the venv, install dependencies and git hooks
 	test -d $(VENV) || python3.12 -m venv $(VENV)
 	$(PY) -m pip install --upgrade pip
 	$(PY) -m pip install --require-hashes -r requirements-dev.txt
+	$(BIN)/playwright install chromium
 	$(BIN)/pre-commit install
 
 lock: ## Re-pin every dependency (with hashes) after editing requirements*.in
@@ -48,6 +49,9 @@ seed: ## Create or update the sample businesses and build their sites
 
 purge: ## Delete enquiries older than 90 days and log files older than 30 days
 	$(PY) -m scripts.purge
+
+score: ## Run customer tests and score a site: make score slug=asha-home-bakery
+	APP_ENV=development $(PY) -m scripts.score_site $(slug)
 
 logs: ## Follow the production app log file
 	docker compose exec app tail -f /app/data/logs/app.log

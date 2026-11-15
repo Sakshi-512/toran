@@ -1,0 +1,32 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('score.title', lang) }} · {{ app_name }}{% endblock %}
+{% block content %}
+<p class="muted">{{ business.display_name }}{% if business.is_sample %} · {{ t('label.sample', lang) }}{% endif %} · {{ run.url }}</p>
+<h1>{{ t('score.title', lang) }}</h1>
+<p class="score-total"><strong>{{ t('score.so_far', lang, total=run.total, possible=run.possible_so_far|round|int) }}</strong></p>
+{% if run.pending_points %}<p class="muted">{{ t('score.pending_note', lang, points=run.pending_points|round|int) }}</p>{% endif %}
+<div class="score-layout">
+  <div>
+    {% for part in parts %}
+    <section class="score-part">
+      <h2>{{ t('score.part.' ~ part.key, lang) }} <span class="muted">{% if part.possible %}{{ part.points|round(1) }} / {{ part.possible|round(1) }}{% else %}{{ t('score.status.pending', lang) }}{% endif %}</span></h2>
+      <ul class="score-items">
+        {% for item in part.checks %}
+        <li class="score-item status-{{ item.status }}">
+          <div class="score-item-head">
+            <strong>{{ t('score.check.' ~ item.key, lang) }}</strong>
+            <span>{% if item.status == 'scored' %}{{ item.points|round(1) }} / {{ item.max_points|round(1) }}{% else %}{{ t('score.status.' ~ item.status, lang) }}{% endif %}</span>
+          </div>
+          <p>{{ item['reason_' ~ lang] }}</p>
+          <span class="tag">{{ t('score.' ~ item.source, lang) }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
+  </div>
+  <figure class="score-shot">
+    <img src="/dev/score/run/{{ run.id }}/screenshot.png" width="360" height="740" alt="{{ business.display_name }}, phone screenshot">
+  </figure>
+</div>
+{% endblock %}

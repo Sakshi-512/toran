@@ -50,12 +50,13 @@ Hackathon: GoDaddy Inclusive Innovation Hackathon 2026. Challenge: "Build agenti
 
 All settings come from environment variables, loaded with pydantic-settings. Never hard-code any of them. .env.example lists the names with empty values.
 
-APP_NAME, BASE_DOMAIN, SECRET_KEY, DATABASE_URL, ANTHROPIC_API_KEY, CLAUDE_MOCK, CLAUDE_DAILY_SPEND_CAP_USD, STT_PROVIDER, STT_API_KEY, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, CONTACT_TO_EMAIL, GDDY_PAT, APP_ENV, ACME_EMAIL, SITES_DIR, LOG_DIR
+APP_NAME, BASE_DOMAIN, SECRET_KEY, DATABASE_URL, ANTHROPIC_API_KEY, CLAUDE_MOCK, CLAUDE_DAILY_SPEND_CAP_USD, STT_PROVIDER, STT_API_KEY, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, CONTACT_TO_EMAIL, GDDY_PAT, APP_ENV, ACME_EMAIL, SITES_DIR, LOG_DIR, RUNS_DIR
 
 - APP_ENV: production (default) or development. development turns off the Secure cookie flag so local login and CSRF work over http://localhost.
 - ACME_EMAIL: used only by Caddy, as the contact email for Let's Encrypt certificates. The app does not read it.
 - SITES_DIR: folder where generated business sites are written (default data/sites; /app/data/sites in Docker).
 - LOG_DIR: folder for daily JSON log files (default data/logs; /app/data/logs in Docker). The retention job deletes files older than 30 days.
+- RUNS_DIR: folder for customer-test phone screenshots (default data/runs; /app/data/runs in Docker).
 
 SMTP: if login to smtp.titan.email is rejected, use smtpout.secureserver.net, with the full email address as the username.
 

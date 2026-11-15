@@ -1,0 +1,22 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('score.title', lang) }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ t('score.title', lang) }} (development only)</h1>
+<ul class="dev-list">
+  {% for b in businesses %}
+  <li>
+    <span>{{ b.display_name }}{% if b.is_sample %} <span class="tag">{{ t('label.sample', lang) }}</span>{% endif %}</span>
+    <form method="post" action="/dev/score/{{ b.slug }}">
+      <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+      <button class="button" type="submit">Run customer tests</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% if runs %}
+<h2>Recent runs</h2>
+<ul class="dev-list">
+  {% for r in runs %}<li><a href="/dev/score/run/{{ r.id }}">Run {{ r.id }}</a> <span class="muted">{{ r.url }} · {{ r.total }}/{{ r.possible_so_far|round|int }}</span></li>{% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

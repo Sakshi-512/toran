@@ -31,4 +31,5 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+markers = ["browser: runs real Chromium (needs: playwright install chromium)"]
 filterwarnings = ["error::DeprecationWarning:app.*"]

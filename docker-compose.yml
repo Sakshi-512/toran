@@ -17,6 +17,7 @@ services:
       DATABASE_URL: sqlite:////app/data/app.db
       SITES_DIR: /app/data/sites
       LOG_DIR: /app/data/logs
+      RUNS_DIR: /app/data/runs
       # Trust X-Forwarded-For only from the Caddy container's fixed address.
       FORWARDED_ALLOW_IPS: 172.30.0.10
     volumes:

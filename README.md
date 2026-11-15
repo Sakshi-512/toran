@@ -16,6 +16,7 @@ See `CLAUDE.md` for the full flow. Built so far:
 - **Business sites** are served at `https://<slug>.BASE_DOMAIN` (or `http://<slug>.localhost:8000` in development). They load no JavaScript and no external files, use self-hosted Mukta and Rozha One fonts, and stay under 500 KB per page.
 - **Enquiry form** on every site posts to `/api/enquiry/<slug>` and is saved as an `Enquiry`. It is protected by an exact Origin check, a spam trap and a rate limit. Email delivery comes later.
 - **Privacy page** at `/privacy` in all three languages.
+- **Customer tests and Readiness Score** (`app/services/customer_tests.py`, `app/services/score.py`): real Chromium visits a site as a customer would: a phone at 360 px, a laptop at 1280 px, and a slow network (1.5 Mbps, 300 ms latency). Each check runs three times and the middle result counts. The score follows `docs/score.md`. Every item records whether it was measured or AI-assessed, and AI-assessed items show as pending until the AI checks exist, so the report reads "X of Y possible so far". Runs happen as background jobs (at most 2 Chromium instances, a 180 s timeout, one retry), and each run is stored with the profile version and a hash of the exact site files tested.
 - **Sample businesses** use free Unsplash stock photos, always labelled "Sample photo" (credits in `docs/photo-credits.md`). Screenshots of each theme are in `docs/screenshots/`.
 
 ## Dependencies
@@ -51,9 +52,11 @@ make migrate && make seed   # 5 sample businesses (marked Sample)
 make dev
 ```
 
-Then open `http://asha-home-bakery.localhost:8000/` (also `/hi/` and `/mr/`) or the theme gallery at `http://localhost:8000/dev/themes` (development only).
+Then open `http://asha-home-bakery.localhost:8000/` (also `/hi/` and `/mr/`), the theme gallery at `http://localhost:8000/dev/themes`, or run the customer tests at `http://localhost:8000/dev/score` (development only; `make score slug=asha-home-bakery` does the same from the command line).
 
 ## Measured vs AI-assessed
+
+Measured today (median of three Chromium runs): time to main content on a slow network, page weight, order button visible on a phone, tap targets of at least 44 px, no sideways scrolling, nothing overflowing on a laptop, phone number shown, delivery area shown with no address, HTTPS (live site only). AI-assessed, pending until the Claude checks are built: language clarity, real photos, ordering or refund policy, and customer questions answered. Checks that do not apply (the phone number on sample sites, HTTPS locally) give their points to the other checks in the same part.
 
 Every score item records whether it is `measured` (by the browser) or `ai_assessed` (by Claude). See `docs/score.md`.
 

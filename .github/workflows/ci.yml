@@ -23,6 +23,7 @@ jobs:
         run: |
           python -m venv .venv
           .venv/bin/pip install --require-hashes -r requirements-dev.txt
+          .venv/bin/playwright install --with-deps chromium
       - uses: actions/cache@v4
         with:
           path: ~/.cache/pre-commit
