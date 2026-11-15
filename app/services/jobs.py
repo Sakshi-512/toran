@@ -20,9 +20,9 @@ from app.models import Job, utcnow
 logger = logging.getLogger(__name__)
 
 Runner = Callable[[str], Awaitable[int | None]]
-# A full score job (3 runs, each with phone, laptop and slow-network checks) measured 10-16 s
-# locally; 180 s leaves ample room for a slower server running two jobs at once.
-DEFAULT_TIMEOUT_SECONDS = 180
+# A score job is 3 browser runs (measured 10-16 s locally) plus one Claude call (60 s timeout,
+# 2 attempts with backoff). 300 s covers the worst case on a slower server running two jobs.
+DEFAULT_TIMEOUT_SECONDS = 300
 DEFAULT_CONCURRENCY = 2
 
 
@@ -32,6 +32,7 @@ def enqueue(
     business_id: int | None = None,
     payload: dict[str, Any] | None = None,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
+    max_attempts: int = 2,
 ) -> str:
     """Queue a job and return its unguessable id."""
     job_id = secrets.token_hex(16)
@@ -41,6 +42,7 @@ def enqueue(
         business_id=business_id,
         payload=payload,
         timeout_seconds=timeout_seconds,
+        max_attempts=max_attempts,
     )
     with Session(engine) as session:
         session.add(job)

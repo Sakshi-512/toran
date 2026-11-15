@@ -554,3 +554,22 @@ def test_photos_between_sizes_get_a_full_width_version() -> None:
     site = build(photos=(SitePhoto(data=_jpeg(853, 1280)),))
     srcset = page(site).find("img")[0]["srcset"]
     assert "480w" in srcset and "853w" in srcset
+
+
+def test_policy_section_shows_owner_text_only_when_present() -> None:
+    text = "50% advance. Cancel up to 24 hours before. ₹50 delivery outside Baner."
+    with_policy = build(profile(policy=text))
+    for path, heading in (
+        ("index.html", "Ordering policy"),
+        ("hi/index.html", "ऑर्डर के नियम"),
+        ("mr/index.html", "ऑर्डरचे नियम"),
+    ):
+        p = page(with_policy, path)
+        assert heading in p.text
+        assert text in p.text  # the owner's words, never translated
+    assert 'class="policy"' not in page(build()).html
+
+
+def test_samples_with_and_without_policy() -> None:
+    with_policy = {s.slug for s in load_samples() if s.profile.policy}
+    assert with_policy == {"asha-home-bakery", "rukhsar-mehendi"}

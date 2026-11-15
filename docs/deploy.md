@@ -28,8 +28,14 @@ IMAGE_TAG=<previous tag> docker compose up -d app
 ## Backups
 
 - Back up now: `docker compose exec app python -m scripts.backup --dir /app/backups` (keeps 7 days)
-- Daily cron on the host: `0 2 * * * cd /srv/voice-site-agent && docker compose exec -T app python -m scripts.backup --dir /app/backups`
+- Daily cron on the host: `0 2 * * * cd /srv/toran && docker compose exec -T app python -m scripts.backup --dir /app/backups`
 - Restore: `docker compose stop app`, then `docker compose run --rm app python -m scripts.backup --restore /app/backups/<file>.db`, then `docker compose start app`
+
+## Email
+
+- Set `SMTP_HOST`, `SMTP_PORT` (465), `SMTP_USER` (the full mailbox address), `SMTP_PASSWORD` and `CONTACT_TO_EMAIL` in `.env`. If `smtp.titan.email` rejects the login, use `smtpout.secureserver.net`.
+- Check it after a deploy: send a message from the contact form on the home page, then look in the `CONTACT_TO_EMAIL` inbox. A rejected login shows as `mail_failed` in `make logs`.
+- Messages in the mailbox fall under the same 90-day retention as enquiries; delete older ones from the mailbox by hand.
 
 ## Logs and retention
 

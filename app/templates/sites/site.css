@@ -143,6 +143,9 @@ main > section:nth-of-type(even) { background: var(--band); }
 .steps li::before { content: counter(step); position: absolute; left: 0; top: -6px; width: 56px;
   font-family: var(--body); font-weight: 700; font-size: 48px; line-height: 56px; color: var(--accent); }
 
+/* Ordering policy: the owner's own words. */
+.policy-text { max-width: 720px; white-space: pre-line; }
+
 /* Enquiry form. */
 form { display: grid; gap: var(--s1); max-width: 640px; background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-card); box-shadow: var(--shadow); padding: var(--s3); }

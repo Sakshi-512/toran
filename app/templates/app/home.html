@@ -14,4 +14,27 @@
   </p>
   <p class="muted">{{ t('home.no_signup', lang) }}</p>
 </section>
+
+<section class="contact-section" id="contact" aria-labelledby="contact-title">
+  <h2 id="contact-title">{{ t('contact.title', lang) }}</h2>
+  {% if sent %}
+  <p class="notice-ok" role="status">{{ t('contact.thanks', lang) }}</p>
+  {% else %}
+  <p>{{ t('contact.intro', lang) }}</p>
+  <form class="form" method="post" action="/contact">
+    <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+    <label for="c-name">{{ t('contact.name', lang) }}</label>
+    <input id="c-name" name="name" required maxlength="120" autocomplete="name">
+    <label for="c-contact">{{ t('contact.contact', lang) }}</label>
+    <input id="c-contact" name="contact" required maxlength="254" autocomplete="email">
+    <label for="c-message">{{ t('contact.message', lang) }}</label>
+    <textarea id="c-message" name="message" required maxlength="2000" rows="5"></textarea>
+    <div class="trap" aria-hidden="true">
+      <label for="c-website">{{ t('site.enquiry_trap', lang) }}</label>
+      <input id="c-website" name="{{ SPAM_TRAP_FIELD }}" tabindex="-1" autocomplete="off">
+    </div>
+    <button class="button" type="submit">{{ t('contact.send', lang) }}</button>
+  </form>
+  {% endif %}
+</section>
 {% endblock %}

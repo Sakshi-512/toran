@@ -77,14 +77,20 @@ class ActionLog(SQLModel, table=True):
 
 
 class Enquiry(SQLModel, table=True):
-    """A customer enquiry. The full phone is stored so the owner can call back; logs redact it."""
+    """A customer enquiry, or a main-site contact message when business_id is empty.
+
+    The full phone is stored so the owner can call back; logs redact it. notified_at is set when
+    the notification email has been sent.
+    """
 
     id: int | None = Field(default=None, primary_key=True)
     business_id: int | None = Field(default=None, foreign_key="business.id", index=True)
     name: str = Field(max_length=120)
     phone: str | None = Field(default=None, max_length=20)
+    email: str | None = Field(default=None, max_length=254)
     message: str = Field(sa_column=Column(Text, nullable=False))
     status: str = Field(default="new", max_length=20)
+    notified_at: datetime | None = None
     created_at: datetime = Field(default_factory=utcnow)
 
 
@@ -114,7 +120,7 @@ class Job(SQLModel, table=True):
     status: str = Field(default="queued", max_length=20, index=True)
     attempts: int = 0
     max_attempts: int = 2
-    timeout_seconds: int = 180
+    timeout_seconds: int = 300
     payload: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
     error: str | None = Field(default=None, max_length=60)
     run_id: int | None = None
@@ -140,6 +146,9 @@ class TestRun(SQLModel, table=True):
     pending_points: float = 0.0
     screenshot_path: str | None = Field(default=None, max_length=300)
     duration_seconds: float = 0.0
+    ai_status: str | None = Field(default=None, max_length=16)
+    ai_model: str | None = Field(default=None, max_length=60)
+    ai_cost_usd_estimate: float = 0.0
     created_at: datetime = Field(default_factory=utcnow)
 
 

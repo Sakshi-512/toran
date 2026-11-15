@@ -28,6 +28,7 @@ TEST_ENV = {
     "CLAUDE_DAILY_SPEND_CAP_USD": "1.0",
     "ANTHROPIC_API_KEY": TEST_ANTHROPIC_KEY,
     "SMTP_PASSWORD": TEST_SMTP_PASSWORD,
+    "CONTACT_TO_EMAIL": "team@example.test",
 }
 
 
@@ -127,3 +128,20 @@ def seed_sample(engine: Engine) -> Callable[[str], Business]:
         return business
 
     return seed
+
+
+@pytest.fixture(autouse=True)
+def no_real_email(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Tests never send real email: SMTP connections fail loudly; the outbox starts empty."""
+    import smtplib
+
+    from app.services import mailer
+
+    def refuse(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("a test tried to open a real SMTP connection")
+
+    monkeypatch.setattr(smtplib, "SMTP", refuse)
+    monkeypatch.setattr(smtplib, "SMTP_SSL", refuse)
+    mailer.outbox.outbox.clear()
+    yield
+    mailer.outbox.outbox.clear()

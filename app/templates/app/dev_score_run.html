@@ -5,6 +5,8 @@
 <h1>{{ t('score.title', lang) }}</h1>
 <p class="score-total"><strong>{{ t('score.so_far', lang, total=run.total, possible=run.possible_so_far|round|int) }}</strong></p>
 {% if run.pending_points %}<p class="muted">{{ t('score.pending_note', lang, points=run.pending_points|round|int) }}</p>{% endif %}
+{% if run.ai_model %}<p class="muted">{{ t('score.ai_model', lang, model=run.ai_model, cost='%.4f'|format(run.ai_cost_usd_estimate)) }}</p>{% endif %}
+{% if run.ai_status and run.ai_status != 'done' %}<p class="muted">{{ t('score.ai_status', lang, status=run.ai_status) }}</p>{% endif %}
 <div class="score-layout">
   <div>
     {% for part in parts %}

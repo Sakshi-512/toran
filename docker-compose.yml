@@ -1,9 +1,9 @@
 # Production stack: the app plus Caddy for HTTPS. Secrets come from .env on the server only.
-name: voice-site-agent
+name: toran
 
 services:
   app:
-    image: voice-site-agent:${IMAGE_TAG:-latest}
+    image: toran:${IMAGE_TAG:-latest}
     build: .
     restart: unless-stopped
     # Full logs live in LOG_DIR (deleted after 30 days). Docker keeps only a small rolling buffer.

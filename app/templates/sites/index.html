@@ -65,6 +65,15 @@
 </section>
 {% endif %}
 
+{% if policy %}
+<section class="policy" aria-labelledby="policy-title">
+  <div class="wrap">
+    {{ section_head(t('site.overline_policy'), t('site.policy_heading'), "policy-title") }}
+    <p class="policy-text">{{ policy }}</p>
+  </div>
+</section>
+{% endif %}
+
 {% if areas %}
 <section class="areas" aria-labelledby="areas-title">
   <div class="wrap">

@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     stt_api_key: SecretStr | None = None
 
     smtp_host: str | None = None
-    smtp_port: int = 587
+    smtp_port: int = 465
     smtp_user: str | None = None
     smtp_password: SecretStr | None = None
     contact_to_email: str | None = None

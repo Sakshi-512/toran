@@ -4,6 +4,7 @@ Every run is linked to the profile version and a hash of the exact site files te
 before and after fixes can be compared.
 """
 
+import asyncio
 import hashlib
 import logging
 import time
@@ -16,6 +17,7 @@ from app.config import Settings
 from app.models import Business, Job, ProfileVersion, ScoreItem, TestRun
 from app.schemas import BusinessProfile
 from app.services.address_guard import looks_like_address
+from app.services.ai_checks import AIResult, run_ai_checks
 from app.services.customer_tests import Expectations, median_measurements, run_customer_tests
 from app.services.jobs import Runner
 from app.services.score import Context, Score, score
@@ -59,6 +61,7 @@ def save_run(
     screenshot: bytes,
     duration: float,
     settings: Settings,
+    ai: AIResult | None = None,
 ) -> int:
     """Store a run and its items; write the phone screenshot to RUNS_DIR."""
     assert business.id is not None  # noqa: S101
@@ -73,6 +76,9 @@ def save_run(
             possible_so_far=result.possible_so_far,
             pending_points=result.pending_points,
             duration_seconds=round(duration, 1),
+            ai_status=ai.status if ai else None,
+            ai_model=ai.model if ai else None,
+            ai_cost_usd_estimate=ai.cost_usd if ai else 0.0,
         )
         session.add(run)
         session.commit()
@@ -120,12 +126,23 @@ async def run_score_job(job_id: str, engine: Engine, settings: Settings) -> int:
     started = time.monotonic()
     runs = await run_customer_tests(url, expectations(profile))
     measurements = median_measurements(runs)
-    context = Context(is_sample=business.is_sample, is_production=settings.is_production)
-    result = score(measurements, context)
-    duration = time.monotonic() - started
     screenshot = runs[len(runs) // 2].screenshot
+    ai = await asyncio.to_thread(
+        run_ai_checks,
+        engine,
+        settings,
+        business_id=business.id,
+        slug=business.slug,
+        business_type=profile.business_type,
+        is_sample=business.is_sample,
+        site_root=site_dir(business.slug, settings),
+        screenshot=screenshot,
+    )
+    context = Context(is_sample=business.is_sample, is_production=settings.is_production)
+    result = score(measurements, context, ai)
+    duration = time.monotonic() - started
     run_id = save_run(
-        engine, business, job_id, version, url, result, screenshot, duration, settings
+        engine, business, job_id, version, url, result, screenshot, duration, settings, ai
     )
     logger.info(
         "score_run_saved",
@@ -134,6 +151,8 @@ async def run_score_job(job_id: str, engine: Engine, settings: Settings) -> int:
             "run_id": run_id,
             "total": result.total,
             "seconds": round(duration, 1),
+            "ai_status": ai.status,
+            "ai_cost_usd": ai.cost_usd,
         },
     )
     return run_id

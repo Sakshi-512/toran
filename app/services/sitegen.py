@@ -270,6 +270,7 @@ def _page_context(
         "areas_overline": tr(f"site.overline_areas_{kind}"),
         "steps": _steps(profile, kind, tr),
         "howto_title": tr(f"site.howto_title_{kind}"),
+        "policy": profile.policy,
         "areas": _area_list(areas),
         "area_title": tr(f"site.area_title_{kind}"),
         "area": areas["area"],

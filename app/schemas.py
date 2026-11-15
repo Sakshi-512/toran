@@ -60,6 +60,7 @@ class BusinessProfile(_Strict):
     lead_time: str = Field(default="", max_length=120)
     phone: str = Field(default="", max_length=20)
     missing: list[str] = Field(default_factory=list, max_length=50)
+    policy: str = Field(default="", max_length=500)
 
     @field_validator("delivery_areas", "missing")
     @classmethod

@@ -17,6 +17,7 @@ from app.services.errors import AppError, render_error
 
 DEFAULT_LIMIT = "60/minute"
 FORM_LIMIT = "5/minute"
+CONTACT_HOURLY_LIMIT = "20/hour"
 EXEMPT_PREFIXES = ("/health", "/internal/", "/static/", "/assets/", "/dev/preview/")
 
 _storage = MemoryStorage()

@@ -8,6 +8,7 @@ tests
 !tests/fixtures/profiles
 evals
 docs
+!docs/checklists.md
 **/__pycache__
 .mypy_cache
 .ruff_cache

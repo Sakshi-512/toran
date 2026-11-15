@@ -1,14 +1,15 @@
 """Customer Readiness Score (docs/score.md).
 
-Pure functions: measurements in, score items out. Five parts of 20 points. When a check does not
-apply, its points are shared among the other checks in the same part, in proportion to their
-maximum (pending AI checks included). AI-assessed checks stay "pending" until Claude runs them.
-"""
+Pure functions: measurements and the AI checks result (when there is one) in, score items out.
+Five parts of 20 points. When a check does not apply, its points are shared among the other
+checks in the same part, in proportion to their maximum. AI-assessed checks stay "pending" until
+the AI checks run, and stay pending with a friendly reason if they fail."""
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from app.services.ai_checks import AIAssessment, AIResult
 from app.services.i18n import SUPPORTED, t
 
 Source = Literal["measured", "ai_assessed"]
@@ -55,6 +56,7 @@ class Outcome:
     reason_key: str = "score.reason.pending"
     reason_values: dict[str, str] = field(default_factory=dict)
     detail: dict[str, Any] = field(default_factory=dict)
+    reason_texts: dict[str, str] | None = None  # ready-made reasons (from the AI checks)
 
 
 @dataclass(frozen=True)
@@ -219,6 +221,12 @@ def _pending(_m: Measurements, _c: Context) -> Outcome:
     return Outcome("pending")
 
 
+def _photos_pending(_m: Measurements, c: Context) -> Outcome:
+    if c.is_sample:
+        return Outcome("not_applicable", reason_key="score.reason.photos_na")
+    return Outcome("pending")
+
+
 CHECKS: dict[str, Callable[[Measurements, Context], Outcome]] = {
     "content_time": _content_time,
     "page_weight": _page_weight,
@@ -229,7 +237,7 @@ CHECKS: dict[str, Callable[[Measurements, Context], Outcome]] = {
     "language_clarity": _pending,
     "phone_visible": _phone,
     "area_shown": _area,
-    "real_photos": _pending,
+    "real_photos": _photos_pending,
     "policy_shown": _pending_policy,
     "https": _https,
     "questions_answered": _pending,
@@ -254,12 +262,105 @@ def shared_maximums(statuses: dict[str, Status]) -> dict[str, float]:
 
 def reasons(outcome: Outcome) -> dict[str, str]:
     """The outcome's reason in every owner language."""
+    if outcome.reason_texts:
+        return dict(outcome.reason_texts)
     return {lang: t(outcome.reason_key, lang, **outcome.reason_values) for lang in SUPPORTED}
 
 
-def score(measurements: Measurements, context: Context) -> Score:
-    """Score one site from its median measurements."""
+VERDICT_FRACTION = {"yes": 1.0, "partly": 0.5, "no": 0.0}
+TOPICS = ("price", "delivery", "contact", "how_to_order")
+AI_KEYS = ("language_clarity", "real_photos", "policy_shown", "questions_answered")
+AI_PENDING_REASONS = {
+    "failed": "score.reason.ai_failed",
+    "spend_cap": "score.reason.ai_spend_cap",
+    "refused": "score.reason.ai_refused",
+    "invalid": "score.reason.ai_invalid",
+}
+
+
+def _joined(summary: dict[Any, str], extra: dict[str, str] | None) -> dict[str, str]:
+    return {
+        lang: f"{summary[lang]} {extra[lang]}".strip() if extra else summary[lang]
+        for lang in SUPPORTED
+    }
+
+
+def _language_outcome(ai: AIAssessment) -> Outcome:
+    """5 points per topic; each topic averages its verdicts over the three language pages."""
+    verdicts = [getattr(page, topic) for page in ai.pages for topic in TOPICS]
+    fraction = sum(VERDICT_FRACTION[v.verdict] for v in verdicts) / len(verdicts)
+    counts = {k: str(sum(v.verdict == k for v in verdicts)) for k in ("yes", "partly", "no")}
+    summary = {lang: t("score.reason.language_summary", lang, **counts) for lang in SUPPORTED}
+    issue = next((v for v in verdicts if v.verdict != "yes"), None)
+    extra = issue.reason.model_dump() if issue else None
+    detail = {"pages": [p.model_dump() for p in ai.pages]}
+    return Outcome("scored", fraction, detail=detail, reason_texts=_joined(summary, extra))
+
+
+def _photos_outcome(ai: AIAssessment, c: Context) -> Outcome:
+    if c.is_sample or ai.photos.verdict == "not_applicable":
+        return Outcome("not_applicable", reason_key="score.reason.photos_na")
+    return Outcome(
+        "scored",
+        VERDICT_FRACTION[ai.photos.verdict],
+        reason_texts=ai.photos.reason.model_dump(),
+        detail={"verdict": ai.photos.verdict},
+    )
+
+
+def _policy_outcome(ai: AIAssessment, m: Measurements) -> Outcome:
+    return Outcome(
+        "scored",
+        VERDICT_FRACTION[ai.policy.verdict],
+        reason_texts=ai.policy.reason.model_dump(),
+        detail={"verdict": ai.policy.verdict, "policy_text_found": m.policy_text_found},
+    )
+
+
+def _questions_outcome(ai: AIAssessment) -> Outcome:
+    total = len(ai.questions)
+    answered = sum(q.answered for q in ai.questions)
+    values = {"answered": str(answered), "total": str(total)}
+    summary = {lang: t("score.reason.questions", lang, **values) for lang in SUPPORTED}
+    missing = next((q for q in ai.questions if not q.answered), None)
+    extra = missing.reason.model_dump() if missing else None
+    detail = {"questions": [q.model_dump() for q in ai.questions]}
+    return Outcome(
+        "scored",
+        answered / total if total else 0.0,
+        detail=detail,
+        reason_texts=_joined(summary, extra),
+    )
+
+
+def ai_outcomes(ai: AIResult | None, m: Measurements, c: Context) -> dict[str, Outcome]:
+    """Outcomes for the four AI-assessed checks; pending (with a reason) unless the AI ran."""
+    if ai is None or ai.status != "done" or ai.assessment is None:
+        key = (
+            AI_PENDING_REASONS.get(ai.status, "score.reason.pending")
+            if ai
+            else "score.reason.pending"
+        )
+        pending = {k: Outcome("pending", reason_key=key) for k in AI_KEYS}
+        pending["policy_shown"] = Outcome(
+            "pending", reason_key=key, detail={"policy_text_found": m.policy_text_found}
+        )
+        if c.is_sample:
+            pending["real_photos"] = Outcome("not_applicable", reason_key="score.reason.photos_na")
+        return pending
+    assessment = ai.assessment
+    return {
+        "language_clarity": _language_outcome(assessment),
+        "real_photos": _photos_outcome(assessment, c),
+        "policy_shown": _policy_outcome(assessment, m),
+        "questions_answered": _questions_outcome(assessment),
+    }
+
+
+def score(measurements: Measurements, context: Context, ai: AIResult | None = None) -> Score:
+    """Score one site from its median measurements and, if available, the AI checks."""
     outcomes = {key: check(measurements, context) for key, check in CHECKS.items()}
+    outcomes.update(ai_outcomes(ai, measurements, context))
     maximums = shared_maximums({key: o.status for key, o in outcomes.items()})
     items = []
     for spec in SPECS:

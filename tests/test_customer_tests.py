@@ -111,10 +111,13 @@ def test_score_job_end_to_end(
         assert run is not None
         items = session.exec(select(ScoreItem).where(ScoreItem.run_id == run.id)).all()
     assert len(items) == 13
+    assert all(i.status != "pending" for i in items)  # AI checks filled in (mock mode)
+    assert run.pending_points == 0 and round(run.possible_so_far) == 100
+    assert run.ai_status == "done" and run.ai_model == "claude-sonnet-5-5"
+    assert run.ai_cost_usd_estimate > 0
     assert run.profile_version_id is not None
     assert len(run.site_hash) == 64
-    assert run.duration_seconds < 180
-    assert run.total == round(run.possible_so_far)  # every measured check passes on this sample
+    assert run.duration_seconds < 300
     assert (settings.runs_dir / str(run.screenshot_path)).is_file()
     assert all(i.reason_en and i.reason_hi and i.reason_mr for i in items)
 
@@ -123,7 +126,8 @@ def test_score_job_end_to_end(
     assert f"{run.total} of {round(run.possible_so_far)} possible so far" in report.text
     assert "AI-assessed" in report.text and "Measured" in report.text
     assert "Not applicable: sample businesses have no real phone number." in report.text
-    assert "0 / 0" not in report.text  # fully pending parts say "Pending"
+    assert "AI checks answered by claude-sonnet-5-5, estimated cost $" in report.text
+    assert "of 100 possible so far" in report.text
     shot = client.get(f"/dev/score/run/{run.id}/screenshot.png")
     assert shot.status_code == 200 and shot.content.startswith(b"\x89PNG")
     status = client.get(f"/api/jobs/{job_id}").json()

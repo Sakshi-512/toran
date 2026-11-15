@@ -172,8 +172,11 @@ json
   "order_methods": ["whatsapp"],
   "lead_time": "",
   "phone": "",
-  "missing": []
+  "missing": [],
+  "policy": ""
 }
+
+policy is optional: the owner's own short ordering terms (advance payment, cancellation, delivery charges). When present, the site shows an "Ordering policy" section with her text exactly as given.
 
 Service businesses (beauty, mehendi, tuition) show "Book on WhatsApp"; product businesses show "Order on WhatsApp".
 

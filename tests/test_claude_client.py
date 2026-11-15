@@ -15,6 +15,7 @@ from app.services.claude_client import (
     SONNET,
     ClaudeClient,
     ClaudeUnavailable,
+    Reply,
     Usage,
     estimate_cost,
     today_ist,
@@ -30,11 +31,11 @@ class FakeTransport:
         self.calls: list[dict[str, Any]] = []
         self.usage = usage or Usage(input_tokens=1000, output_tokens=200)
 
-    def send(self, request: dict[str, Any], fixture_key: str) -> tuple[str, Usage]:
+    def send(self, request: dict[str, Any], fixture_key: str) -> Reply:
         self.calls.append(request)
         if len(self.calls) <= self.failures:
             raise anthropic.APIConnectionError(request=httpx2.Request("POST", "https://x"))
-        return "ok", self.usage
+        return Reply("ok", self.usage)
 
 
 def _real_client(
@@ -186,3 +187,27 @@ def test_mock_calls_do_not_count_toward_cap(engine: Engine) -> None:
             fixture_key="example",
         )
     assert client.spent_today() == 0.0
+
+
+def test_output_config_passed_and_no_sampling_params(
+    engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transport = FakeTransport()
+    client = _real_client(engine, transport, monkeypatch)
+    fmt = {"format": {"type": "json_schema", "schema": {"type": "object"}}, "effort": "low"}
+    client.complete(
+        model=SONNET, system="s", messages=MESSAGES, max_tokens=10, purpose="x", output_config=fmt
+    )
+    request = transport.calls[0]
+    assert request["output_config"] == fmt
+    assert not {"temperature", "top_p", "top_k"} & set(request)
+
+
+def test_max_attempts_per_call(engine: Engine, monkeypatch: pytest.MonkeyPatch) -> None:
+    transport = FakeTransport(failures=99)
+    client = _real_client(engine, transport, monkeypatch)
+    with pytest.raises(ClaudeUnavailable):
+        client.complete(
+            model=HAIKU, system="s", messages=MESSAGES, max_tokens=10, purpose="x", max_attempts=2
+        )
+    assert len(transport.calls) == 2

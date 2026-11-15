@@ -13,9 +13,11 @@ from app.config import get_settings
 from app.db import get_engine
 from app.middleware import RequestContextMiddleware
 from app.routes import dev, enquiry, health, jobs, pages
+from app.services.alerts import install_alerts
 from app.services.errors import register_error_handlers
 from app.services.jobs import JobWorker
 from app.services.logs import setup_logging
+from app.services.mail_jobs import EMAIL_JOB, email_runner
 from app.services.ratelimit import RateLimitMiddleware
 from app.services.retention import retention_loop
 from app.services.score_runs import SCORE_JOB, score_runner
@@ -27,13 +29,16 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    """Start the retention cleanup and the background job worker; stop both on shutdown."""
+    """Start the retention cleanup and the job workers (tests, email); stop them on shutdown."""
     settings = get_settings()
     engine = get_engine()
     worker = JobWorker(engine, {SCORE_JOB: score_runner(engine, settings)})
+    # Email gets its own worker so a long score job never delays a notification.
+    mail_worker = JobWorker(engine, {EMAIL_JOB: email_runner(engine, settings)})
     tasks = [
         asyncio.create_task(retention_loop(engine, settings.log_dir)),
         asyncio.create_task(worker.run_forever()),
+        asyncio.create_task(mail_worker.run_forever()),
     ]
     try:
         yield
@@ -49,6 +54,7 @@ def create_app() -> FastAPI:
     """Build the FastAPI app. Run with: uvicorn --factory app.main:create_app."""
     settings = get_settings()
     setup_logging(settings.secret_values(), settings.log_dir)
+    install_alerts(settings)
 
     app = FastAPI(
         title=settings.app_name,

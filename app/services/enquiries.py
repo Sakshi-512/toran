@@ -15,6 +15,7 @@ from app.models import Enquiry
 from app.schemas import normalise_phone
 from app.services.errors import AppError
 from app.services.i18n import normalise_language
+from app.services.mail_jobs import queue_notification
 from app.services.security import is_spam
 from app.services.sitegen import LANG_PREFIX
 from app.services.sites import active_business, allowed_enquiry_origins
@@ -80,5 +81,7 @@ def submit_enquiry(
     )
     session.add(enquiry)
     session.commit()
+    assert enquiry.id is not None  # noqa: S101
+    queue_notification(session.get_bind(), enquiry.id)  # type: ignore[arg-type]
     logger.info("enquiry_saved", extra={"business_id": business.id, "enquiry_id": enquiry.id})
     return thanks_url

@@ -70,6 +70,16 @@ class Usage:
 
 
 @dataclass(frozen=True)
+class Reply:
+    """What a transport returns for one request."""
+
+    text: str
+    usage: Usage
+    stop_reason: str = "end_turn"
+    model: str = ""
+
+
+@dataclass(frozen=True)
 class ClaudeResult:
     """Text reply plus usage and estimated cost of one call."""
 
@@ -78,13 +88,19 @@ class ClaudeResult:
     usage: Usage
     cost_usd_estimate: float
     is_mock: bool
+    stop_reason: str = "end_turn"
+
+    @property
+    def refused(self) -> bool:
+        """True if Claude declined the request."""
+        return self.stop_reason == "refusal"
 
 
 class Transport(Protocol):
     """Sends one Messages API request. Swappable for tests and mock mode."""
 
-    def send(self, request: dict[str, Any], fixture_key: str) -> tuple[str, Usage]:
-        """Return (text, usage) for the request."""
+    def send(self, request: dict[str, Any], fixture_key: str) -> Reply:
+        """Return the reply for the request."""
         ...
 
 
@@ -94,17 +110,18 @@ class AnthropicTransport:
     def __init__(self, api_key: str, timeout_seconds: float) -> None:
         self._client = anthropic.Anthropic(api_key=api_key, timeout=timeout_seconds, max_retries=0)
 
-    def send(self, request: dict[str, Any], fixture_key: str) -> tuple[str, Usage]:
+    def send(self, request: dict[str, Any], fixture_key: str) -> Reply:
         """Call messages.create and return the joined text blocks and usage."""
         message = self._client.messages.create(**request)
         text = "".join(getattr(block, "text", "") for block in message.content)
         u = message.usage
-        return text, Usage(
+        usage = Usage(
             input_tokens=u.input_tokens or 0,
             output_tokens=u.output_tokens or 0,
             cache_creation_tokens=u.cache_creation_input_tokens or 0,
             cache_read_tokens=u.cache_read_input_tokens or 0,
         )
+        return Reply(text, usage, str(message.stop_reason or ""), str(message.model))
 
 
 class MockTransport:
@@ -113,7 +130,7 @@ class MockTransport:
     def __init__(self, fixture_dir: Path = FIXTURE_DIR) -> None:
         self._dir = fixture_dir
 
-    def send(self, request: dict[str, Any], fixture_key: str) -> tuple[str, Usage]:
+    def send(self, request: dict[str, Any], fixture_key: str) -> Reply:
         """Load the fixture; fails clearly if it is missing."""
         path = self._dir / f"{fixture_key}.json"
         if not path.resolve().is_relative_to(self._dir.resolve()):
@@ -122,11 +139,17 @@ class MockTransport:
             raise ClaudeUnavailable(f"Mock fixture not found: {path.name}")
         data = json.loads(path.read_text(encoding="utf-8"))
         usage = data.get("usage", {})
-        return str(data["text"]), Usage(
+        tokens = Usage(
             input_tokens=int(usage.get("input_tokens", 0)),
             output_tokens=int(usage.get("output_tokens", 0)),
             cache_creation_tokens=int(usage.get("cache_creation_input_tokens", 0)),
             cache_read_tokens=int(usage.get("cache_read_input_tokens", 0)),
+        )
+        return Reply(
+            text=str(data["text"]),
+            usage=tokens,
+            stop_reason=str(data.get("stop_reason", "end_turn")),
+            model=str(request.get("model", "")),
         )
 
 
@@ -192,21 +215,28 @@ class ClaudeClient:
         business_id: int | None = None,
         fixture_key: str | None = None,
         cache_system: bool = True,
-        temperature: float | None = None,
+        output_config: dict[str, Any] | None = None,
+        max_attempts: int = MAX_ATTEMPTS,
     ) -> ClaudeResult:
-        """Send one request and return the reply. Raises SpendCapReached or ClaudeUnavailable."""
+        """Send one request and return the reply. Raises SpendCapReached or ClaudeUnavailable.
+
+        Messages may contain image blocks and their own cache_control markers. output_config
+        carries structured-output formats and effort. No sampling parameters are sent: current
+        models reject them.
+        """
         if max_tokens <= 0:
             raise ValueError("max_tokens must be positive")
         is_mock = self._settings.claude_mock
         if not is_mock:
             self.check_spend_cap()
         request = self._build_request(model, system, messages, max_tokens, cache_system)
-        if temperature is not None:
-            request["temperature"] = temperature
-        text, usage = self._send_with_retry(request, fixture_key or purpose)
-        cost = estimate_cost(model, usage)
-        self._record(model, usage, cost, purpose, business_id, is_mock)
-        return ClaudeResult(text, model, usage, cost, is_mock)
+        if output_config:
+            request["output_config"] = output_config
+        reply = self._send_with_retry(request, fixture_key or purpose, max_attempts)
+        answered_by = reply.model or model
+        cost = estimate_cost(answered_by, reply.usage)
+        self._record(answered_by, reply.usage, cost, purpose, business_id, is_mock)
+        return ClaudeResult(reply.text, answered_by, reply.usage, cost, is_mock, reply.stop_reason)
 
     def spent_today(self) -> float:
         """Estimated USD spent on real (non-mock) calls today, Asia/Kolkata time."""
@@ -243,12 +273,14 @@ class ClaudeClient:
             "messages": messages,
         }
 
-    def _send_with_retry(self, request: dict[str, Any], fixture_key: str) -> tuple[str, Usage]:
-        for attempt in range(1, MAX_ATTEMPTS + 1):
+    def _send_with_retry(
+        self, request: dict[str, Any], fixture_key: str, max_attempts: int
+    ) -> Reply:
+        for attempt in range(1, max_attempts + 1):
             try:
                 return self.transport.send(request, fixture_key)
             except RETRYABLE_ERRORS as exc:
-                if attempt == MAX_ATTEMPTS:
+                if attempt == max_attempts:
                     logger.error(
                         "claude_failed", extra={"attempts": attempt, "error": type(exc).__name__}
                     )
