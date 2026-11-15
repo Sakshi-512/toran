@@ -9,6 +9,7 @@ pillow==13.0.0
 playwright==1.65.2
 pydantic==2.14.3
 pydantic-settings==2.16.3
+sarvamai==0.1.46
 python-multipart==0.0.33
 SQLAlchemy==2.1.8
 sqlmodel==0.0.50

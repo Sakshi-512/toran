@@ -57,6 +57,7 @@ APP_NAME, BASE_DOMAIN, SECRET_KEY, DATABASE_URL, ANTHROPIC_API_KEY, CLAUDE_MOCK,
 - SITES_DIR: folder where generated business sites are written (default data/sites; /app/data/sites in Docker).
 - LOG_DIR: folder for daily JSON log files (default data/logs; /app/data/logs in Docker). The retention job deletes files older than 30 days.
 - RUNS_DIR: folder for customer-test phone screenshots (default data/runs; /app/data/runs in Docker).
+- STT_PROVIDER: none (default; voice off, the owner types), mock (saved transcripts in tests/fixtures/stt/), or sarvam (Sarvam AI via the official sarvamai SDK, key in STT_API_KEY).
 
 SMTP: if login to smtp.titan.email is rejected, use smtpout.secureserver.net, with the full email address as the username.
 

@@ -1,9 +1,9 @@
-"""Development-only pages: every sample business in every theme. Returns 404 in production."""
+"""Development-only pages: themes, customer-test reports and speech-to-text. 404 in production."""
 
 from datetime import date
 from functools import lru_cache
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, RedirectResponse
 from sqlmodel import Session, col, select
 from starlette.responses import Response
@@ -11,6 +11,7 @@ from starlette.responses import Response
 from app.config import get_settings
 from app.db import get_engine
 from app.models import Business, ScoreItem, TestRun
+from app.services.errors import AppError
 from app.services.jobs import enqueue, get_job
 from app.services.samples import get_sample, load_samples
 from app.services.score import PARTS
@@ -18,6 +19,13 @@ from app.services.score_runs import SCORE_JOB
 from app.services.security import site_security_headers, verify_csrf
 from app.services.sitegen import SiteBuild, SiteInput, build_site
 from app.services.sites import main_origin, site_urls
+from app.services.stt import (
+    STT_SAMPLES,
+    MockSTT,
+    Transcript,
+    record_usage,
+    transcribe_note,
+)
 from app.services.themes import THEMES
 from app.templating import render
 
@@ -164,3 +172,57 @@ def score_screenshot(run_id: int) -> FileResponse:
     if not path.is_relative_to(get_settings().runs_dir.resolve()) or not path.is_file():
         raise HTTPException(status_code=404)
     return FileResponse(path, media_type="image/png")
+
+
+@router.get("/stt", include_in_schema=False)
+def stt_page(request: Request) -> Response:
+    """Try speech-to-text: upload a voice note, or pick a sample in mock mode."""
+    return _stt_render(request)
+
+
+@router.post("/stt", include_in_schema=False, dependencies=[Depends(verify_csrf)])
+def stt_submit(
+    request: Request,
+    language: str = Form(""),
+    sample: str = Form(""),
+    keyterms: str = Form(""),
+    audio: UploadFile | None = File(None),
+) -> Response:
+    """Transcribe the uploaded note (or sample) and show the transcript and estimated cost."""
+    settings = get_settings()
+    try:
+        if sample:
+            if settings.stt_provider != "mock" or sample not in STT_SAMPLES:
+                raise HTTPException(status_code=404)
+            transcript = MockSTT().sample(sample)
+            record_usage(get_engine(), None, transcript)
+        else:
+            data = audio.file.read() if audio is not None else b""
+            terms = [t.strip() for t in keyterms.split(",")]
+            transcript = transcribe_note(
+                get_engine(),
+                settings,
+                business_id=None,
+                audio=data,
+                language=language or None,
+                keyterms=terms,
+            )
+    except AppError as exc:
+        return _stt_render(request, error_key=exc.key)
+    return _stt_render(request, transcript=transcript)
+
+
+def _stt_render(
+    request: Request, transcript: Transcript | None = None, error_key: str | None = None
+) -> Response:
+    settings = get_settings()
+    return render(
+        request,
+        "app/dev_stt.html",
+        {
+            "provider": settings.stt_provider,
+            "samples": STT_SAMPLES if settings.stt_provider == "mock" else (),
+            "transcript": transcript,
+            "error_key": error_key,
+        },
+    )

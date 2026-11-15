@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     claude_mock: bool = False
     claude_daily_spend_cap_usd: float = Field(default=5.0, gt=0)
 
-    stt_provider: str = "none"
+    stt_provider: Literal["none", "mock", "sarvam"] = "none"
     stt_api_key: SecretStr | None = None
 
     smtp_host: str | None = None

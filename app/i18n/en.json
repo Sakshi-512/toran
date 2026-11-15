@@ -192,5 +192,9 @@
   "contact.thanks": "Thank you! Your message has been sent. We will get back to you soon.",
   "contact.bad_contact": "Please enter a valid email address or phone number.",
   "mail.failed": "We could not send the email right now. Your message is saved; please try again later.",
-  "privacy.emailed": "Contact-form messages and business enquiries are also emailed to the {app_name} team's mailbox, and are covered by the same 90-day retention there."
+  "privacy.emailed": "Contact-form messages and business enquiries are also emailed to the {app_name} team's mailbox, and are covered by the same 90-day retention there.",
+  "stt.unavailable": "Voice notes are not available right now. Please type instead.",
+  "stt.failed": "We could not understand the recording. Please try again, or type instead.",
+  "stt.empty": "We could not hear any words in this recording. Please try again, or type instead.",
+  "stt.no_mock": "There is no saved transcript for this recording in demo mode. Please use a sample voice note, or type instead."
 }

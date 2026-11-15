@@ -167,3 +167,18 @@ class ScoreItem(SQLModel, table=True):
     reason_hi: str = Field(sa_column=Column(Text, nullable=False))
     reason_mr: str = Field(sa_column=Column(Text, nullable=False))
     detail: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
+
+
+class SttUsage(SQLModel, table=True):
+    """Seconds of audio transcribed and the estimated cost (INR), per business."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    business_id: int | None = Field(default=None, foreign_key="business.id", index=True)
+    provider: str = Field(max_length=20)
+    model: str = Field(max_length=40)
+    route: str = Field(max_length=10)
+    seconds: float = 0.0
+    cost_inr_estimate: float = 0.0
+    is_mock: bool = False
+    day_ist: date = Field(index=True)
+    created_at: datetime = Field(default_factory=utcnow)

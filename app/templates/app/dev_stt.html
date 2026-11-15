@@ -1,0 +1,38 @@
+{% extends "app/base.html" %}
+{% block title %}Speech to text · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>Speech to text (development only)</h1>
+<p class="muted">Provider: <strong>{{ provider }}</strong>{% if provider == 'none' %} (set STT_PROVIDER to mock or sarvam){% endif %}</p>
+{% if error_key %}<p class="notice-error" role="alert">{{ t(error_key, lang) }}</p>{% endif %}
+{% if transcript %}
+<section class="score-item">
+  <p><strong>{{ transcript.text }}</strong></p>
+  <p class="muted">Language: {{ transcript.language or 'unknown' }}{% if transcript.confidence is not none %} ({{ '%.2f'|format(transcript.confidence) }}){% endif %} · {{ transcript.provider }} / {{ transcript.route }} · {{ '%.1f'|format(transcript.seconds) }} s · estimated cost ₹{{ '%.2f'|format(transcript.cost_inr_estimate) }}</p>
+</section>
+{% endif %}
+<form class="form" method="post" action="/dev/stt" enctype="multipart/form-data">
+  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+  <label for="stt-language">Language</label>
+  <select id="stt-language" name="language">
+    <option value="">Detect automatically</option>
+    <option value="mr">Marathi</option><option value="hi">Hindi</option><option value="en">English</option>
+  </select>
+  <label for="stt-audio">Voice note (up to 2 minutes)</label>
+  <input id="stt-audio" name="audio" type="file" accept="audio/*">
+  <label for="stt-keyterms">Key terms (comma separated, for example product names)</label>
+  <input id="stt-keyterms" name="keyterms" maxlength="2000">
+  <button class="button" type="submit">Transcribe</button>
+</form>
+{% if samples %}
+<h2>Sample voice notes</h2>
+<div class="cta-row">
+  {% for s in samples %}
+  <form method="post" action="/dev/stt">
+    <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+    <input type="hidden" name="sample" value="{{ s }}">
+    <button class="button" type="submit">{{ s }}</button>
+  </form>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
