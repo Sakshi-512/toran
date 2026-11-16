@@ -10,10 +10,10 @@ from app.config import get_settings
 from app.db import get_engine
 from app.services import intake as svc
 from app.services.errors import AppError
-from app.services.i18n import pick_language
+from app.services.i18n import normalise_language, pick_language
 from app.services.jobs import get_job
 from app.services.publish import build_draft
-from app.services.ratelimit import FORM_LIMIT, rate_limit
+from app.services.ratelimit import FORM_LIMIT, INTAKE_HOURLY_LIMIT, RateLimited, check
 from app.services.score_runs import queue_score
 from app.services.security import verify_csrf
 from app.services.sites import main_origin
@@ -21,7 +21,6 @@ from app.services.stt import STT_SAMPLES
 from app.templating import render
 
 router = APIRouter(prefix="/start")
-INTAKE_HOURLY_LIMIT = "10/hour"
 SOURCE_OF_SAMPLE = {"sample-en": "en", "sample-hi": "hi", "sample-mr": "mr"}
 
 
@@ -32,24 +31,38 @@ async def _file_bytes(value: object) -> bytes:
 @router.get("", include_in_schema=False)
 def start_page(request: Request) -> Response:
     """Choose how to tell us: record, upload a voice note or photo, or type."""
+    chosen = normalise_language(request.query_params.get("lang"))
+    if chosen:
+        request.session["lang"] = chosen
     return render(request, "app/start.html", {"samples": STT_SAMPLES})
 
 
 @router.post(
     "",
     include_in_schema=False,
-    dependencies=[
-        Depends(rate_limit(FORM_LIMIT)),
-        Depends(rate_limit(INTAKE_HOURLY_LIMIT)),
-        Depends(verify_csrf),
-    ],
+    dependencies=[Depends(verify_csrf)],
 )
 async def start_submit(request: Request) -> Response:
     """Save the input and queue processing, then show the waiting page."""
+    try:
+        check(request, FORM_LIMIT, INTAKE_HOURLY_LIMIT)
+    except RateLimited as exc:
+        return render(
+            request,
+            "app/start.html",
+            {"samples": STT_SAMPLES, "wait_seconds": exc.retry_after},
+            status_code=429,
+        )
     form = await request.form()
     settings, engine = get_settings(), get_engine()
     sample = str(form.get("sample", ""))
-    language = str(form.get("language", "")) or pick_language(request)
+    picked = str(form.get("language", ""))
+    language = picked or pick_language(request)
+    # Only a language she chose is kept for the rest of her journey. A browser guess or a
+    # sample's language (a judge may try the Marathi sample from the English page) is not.
+    chosen = normalise_language(picked)
+    if chosen:
+        request.session["lang"] = chosen
     try:
         if sample in SOURCE_OF_SAMPLE:
             started = svc.start_sample(engine, settings, sample, SOURCE_OF_SAMPLE[sample])

@@ -1,0 +1,7 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('ratelimit.title', lang) }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ t('ratelimit.title', lang) }}</h1>
+{% include "app/_wait_notice.html" %}
+<p><a class="button" href="{{ retry_url }}">{{ t('ratelimit.try_again' if is_get else 'ratelimit.go_back', lang) }}</a></p>
+{% endblock %}

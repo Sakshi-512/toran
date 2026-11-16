@@ -1,7 +1,9 @@
 """Owner access: an unguessable private link plus a 4-digit PIN, both stored only as hashes.
 
 Five wrong PINs lock the link for 15 minutes. A correct PIN signs the owner in with the session
-cookie. Changes such as payment details or deleting the site need the PIN again
+cookie and remembers her device for 30 days (a separate secure, HTTP-only cookie whose token is
+stored only as a hash, so it can be revoked). A remembered device signs her in again, but never
+counts as a recent PIN: payment details and deleting the site need the PIN again
 (require_recent_pin).
 """
 
@@ -14,14 +16,19 @@ from typing import Literal
 
 from sqlmodel import Session, select
 from starlette.requests import Request
+from starlette.responses import Response
 
-from app.models import Business, utcnow
+from app.config import Settings
+from app.db import get_engine
+from app.models import Business, OwnerDevice, utcnow
 from app.services.errors import AppError
 
 MAX_PIN_FAILURES = 5
 LOCK_MINUTES = 15
 SESSION_HOURS = 12
 RECENT_PIN_MINUTES = 5
+DEVICE_DAYS = 30
+DEVICE_COOKIE = "owner_device"
 _SCRYPT = {"n": 2**14, "r": 8, "p": 1, "dklen": 32}
 _OWNER_KEY = "owner_business_id"
 _SIGNED_IN_KEY = "owner_signed_in_at"
@@ -118,12 +125,77 @@ def check_pin(
     return result
 
 
-def sign_in(request: Request, business_id: int) -> None:
+def sign_in(request: Request, business_id: int, pin_entered: bool = True) -> None:
     """Remember the signed-in owner in the session cookie."""
     now = utcnow().timestamp()
     request.session[_OWNER_KEY] = business_id
     request.session[_SIGNED_IN_KEY] = now
-    request.session[_PIN_AT_KEY] = now
+    if pin_entered:
+        request.session[_PIN_AT_KEY] = now
+    else:
+        request.session.pop(_PIN_AT_KEY, None)
+
+
+def remember_device(response: Response, business_id: int, settings: Settings) -> None:
+    """After a correct PIN: keep this device signed in for 30 days."""
+    token = secrets.token_urlsafe(32)
+    with Session(get_engine()) as session:
+        session.add(
+            OwnerDevice(
+                business_id=business_id,
+                token_hash=hash_token(token),
+                expires_at=utcnow() + timedelta(days=DEVICE_DAYS),
+            )
+        )
+        session.commit()
+    response.set_cookie(
+        DEVICE_COOKIE,
+        token,
+        max_age=DEVICE_DAYS * 86400,
+        path="/",
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+    )
+
+
+def device_owner(request: Request) -> int | None:
+    """The business a remembered-device cookie belongs to, if it is valid and not revoked."""
+    token = request.cookies.get(DEVICE_COOKIE, "")
+    if not token or len(token) > 100:
+        return None
+    with Session(get_engine()) as session:
+        device = session.exec(
+            select(OwnerDevice).where(OwnerDevice.token_hash == hash_token(token))
+        ).first()
+        now = utcnow()
+        if device is None or device.revoked_at is not None:
+            return None
+        expires = device.expires_at
+        if (expires if expires.tzinfo else expires.replace(tzinfo=UTC)) <= now:
+            return None
+        business = session.get(Business, device.business_id)
+        if business is None or business.deleted_at is not None:
+            return None
+        device.last_used_at = now
+        session.add(device)
+        session.commit()
+        return device.business_id
+
+
+def forget_device(request: Request, response: Response) -> None:
+    """Sign-out: revoke this device and clear its cookie."""
+    token = request.cookies.get(DEVICE_COOKIE, "")
+    if token:
+        with Session(get_engine()) as session:
+            device = session.exec(
+                select(OwnerDevice).where(OwnerDevice.token_hash == hash_token(token))
+            ).first()
+            if device is not None:
+                device.revoked_at = utcnow()
+                session.add(device)
+                session.commit()
+    response.delete_cookie(DEVICE_COOKIE, path="/")
 
 
 def sign_out(request: Request) -> None:
@@ -137,10 +209,16 @@ def current_owner(request: Request) -> int | None:
     business_id = request.session.get(_OWNER_KEY)
     signed_in = request.session.get(_SIGNED_IN_KEY)
     if not isinstance(business_id, int) or not isinstance(signed_in, int | float):
-        return None
+        remembered = device_owner(request)
+        if remembered is not None:
+            sign_in(request, remembered, pin_entered=False)
+        return remembered
     if utcnow().timestamp() - signed_in > SESSION_HOURS * 3600:
         sign_out(request)
-        return None
+        remembered = device_owner(request)
+        if remembered is not None:
+            sign_in(request, remembered, pin_entered=False)
+        return remembered
     return business_id
 
 

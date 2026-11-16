@@ -1,7 +1,7 @@
 {% extends "app/base.html" %}
 {% block title %}{{ t('owner.styles', lang) }} · {{ business.display_name }}{% endblock %}
 {% block content %}
-<p><a href="/owner">{{ t('owner.back', lang) }}</a></p>
+<p><a class="text-link" href="/owner">{{ t('owner.back', lang) }}</a></p>
 <h1>{{ t('owner.styles', lang) }}</h1>
 <p>{{ t('owner.styles_intro', lang) }}</p>
 <div class="style-grid">

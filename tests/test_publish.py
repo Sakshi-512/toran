@@ -252,7 +252,9 @@ def test_reports_are_hers_only(client: TestClient, engine: Engine, owner: int) -
         session.commit()
         mine_id, theirs_id = mine.id, theirs.id
     report = client.get(f"/owner/score/{mine_id}?lang=mr")
-    assert report.status_code == 200 and "आतापर्यंत शक्य 50 पैकी 40" in report.text
+    assert report.status_code == 200 and "40/100" in report.text
+    assert "ग्राहकांनी पाहण्यापूर्वी तुमच्या साइटमध्ये काही सुधारणा हव्यात." in report.text
+    assert "शक्य" not in report.text  # the detailed "X of Y possible" stays in the dev report
     assert client.get(f"/owner/score/{theirs_id}").status_code == 404
     assert "Score history" in client.get("/owner").text
 
@@ -262,12 +264,12 @@ def test_reports_are_hers_only(client: TestClient, engine: Engine, owner: int) -
 
 def test_expired_samples_are_deleted_with_all_data(engine: Engine) -> None:
     settings = get_settings()
-    old_sample, _, _ = _business(engine, is_sample=True, created_ago=timedelta(hours=49))
+    old_sample, _, _ = _business(engine, is_sample=True, created_ago=timedelta(days=7, hours=1))
     seed, _, _ = _business(
         engine, is_sample=True, source="seed", created_ago=timedelta(days=9), slug="seeded-sample"
     )
     fresh, _, _ = _business(
-        engine, is_sample=True, created_ago=timedelta(hours=2), slug="fresh-sample"
+        engine, is_sample=True, created_ago=timedelta(days=6), slug="fresh-sample"
     )
     real, _, _ = _business(engine, created_ago=timedelta(days=9), slug="real-shop")
     pub.build_draft(engine, settings, old_sample)

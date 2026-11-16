@@ -17,6 +17,7 @@
 
 <section class="contact-section" id="contact" aria-labelledby="contact-title">
   <h2 id="contact-title">{{ t('contact.title', lang) }}</h2>
+  {% if wait_seconds %}{% include "app/_wait_notice.html" %}{% endif %}
   {% if sent %}
   <p class="notice-ok" role="status">{{ t('contact.thanks', lang) }}</p>
   {% else %}

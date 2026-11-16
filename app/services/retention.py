@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 ENQUIRY_DAYS = 90
 LOG_DAYS = 30
 INPUT_HOURS = 24
-RUN_EVERY_SECONDS = 60 * 60  # hourly, so samples go soon after 48 hours
+RUN_EVERY_SECONDS = 60 * 60  # hourly, so expired samples go promptly
 _ROTATED = re.compile(rf"^{re.escape(LOG_FILE)}\.(\d{{4}}-\d{{2}}-\d{{2}})$")
 
 

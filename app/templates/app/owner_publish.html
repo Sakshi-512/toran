@@ -4,9 +4,12 @@
 <h1>{{ t('publish.title', lang) }}</h1>
 <p>{{ t('publish.intro', lang) }}</p>
 <p class="secret-value">{{ site_url }}</p>
-{% if latest_draft_run %}<p>{{ t('publish.score', lang, total=latest_draft_run.total, possible=latest_draft_run.possible_so_far|round|int) }} <a href="/owner/score/{{ latest_draft_run.id }}">{{ t('owner.see_report', lang) }}</a></p>{% endif %}
+{% if latest_draft_run %}{% set s = summaries[latest_draft_run.id] %}
+<p class="score-total"><strong>{{ s.headline(lang) }}</strong></p>
+{% if s.sentence(lang) %}<p>{{ s.sentence(lang) }}</p>{% endif %}
+<p><a class="text-link" href="/owner/score/{{ latest_draft_run.id }}">{{ t('owner.see_report', lang) }}</a></p>{% endif %}
 {% if business.is_sample %}<p class="notice">{{ t('publish.sample_note', lang) }}</p>{% endif %}
-<p><a class="button secondary" href="/owner/preview/" target="_blank" rel="noopener">{{ t('owner.preview', lang) }}</a></p>
+<p><a class="button secondary" href="/owner/preview/{% if lang != 'en' %}{{ lang }}/{% endif %}" target="_blank" rel="noopener">{{ t('owner.preview', lang) }}</a></p>
 <div class="cta-row">
   <form method="post" action="/owner/publish"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button" type="submit">{{ t('publish.yes', lang) }}</button></form>
   <a class="button secondary" href="/owner">{{ t('publish.no', lang) }}</a>

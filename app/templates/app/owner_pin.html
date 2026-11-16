@@ -3,6 +3,7 @@
 {% block content %}
 <h1>{{ t('owner.pin_title', lang) }}</h1>
 <p>{{ t('owner.pin_intro', lang) }}</p>
+{% if wait_seconds %}{% include "app/_wait_notice.html" %}{% endif %}
 {% if error_key %}<p class="notice-error" role="alert">{{ t(error_key, lang) }}</p>{% endif %}
 <form class="form" method="post" action="/o/{{ token }}">
   <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">

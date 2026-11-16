@@ -3,6 +3,7 @@
 {% block content %}
 <h1>{{ t('start.title', lang) }}</h1>
 <p>{{ t('start.intro', lang) }}</p>
+{% if wait_seconds %}{% include "app/_wait_notice.html" %}{% endif %}
 {% if error_key %}<p class="notice-error" role="alert">{{ t(error_key, lang) }}</p>{% endif %}
 
 <form class="form intake" method="post" action="/start" enctype="multipart/form-data" id="intake-form">

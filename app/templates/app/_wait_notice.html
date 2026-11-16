@@ -1,0 +1,6 @@
+{# "Please wait" with a countdown; needs wait_seconds. Works without JavaScript too. #}
+<div class="notice-error wait-notice" role="alert">
+  <p>{{ t('error.rate_limited', lang) }}</p>
+  <p class="countdown" data-seconds="{{ wait_seconds }}" data-template="{{ t('ratelimit.countdown', lang, seconds='{seconds}') }}" data-done="{{ t('ratelimit.ready', lang) }}" aria-live="polite">{{ t('ratelimit.countdown', lang, seconds=wait_seconds) }}</p>
+</div>
+<script src="/static/countdown.js" defer></script>

@@ -27,6 +27,7 @@ from app.models import (
     Enquiry,
     IntakeSession,
     Job,
+    OwnerDevice,
     Photo,
     ProfileVersion,
     ScoreItem,
@@ -44,7 +45,7 @@ from app.services.sites import site_urls
 
 logger = logging.getLogger(__name__)
 
-SAMPLE_HOURS = 48
+SAMPLE_HOURS = 7 * 24  # judges can revisit what they made for a week
 
 
 @dataclass(frozen=True)
@@ -306,6 +307,7 @@ def delete_business_data(engine: Engine, settings: Settings, business_id: int) -
             delete(Job).where(col(Job.business_id) == business_id),
             delete(ActionLog).where(col(ActionLog.business_id) == business_id),
             delete(ProfileVersion).where(col(ProfileVersion.business_id) == business_id),
+            delete(OwnerDevice).where(col(OwnerDevice.business_id) == business_id),
         ]
         for statement in statements:
             session.exec(statement)
@@ -319,7 +321,7 @@ def delete_business_data(engine: Engine, settings: Settings, business_id: int) -
 def purge_expired_samples(
     engine: Engine, settings: Settings, now: datetime | None = None, hours: int = SAMPLE_HOURS
 ) -> int:
-    """Delete sample businesses made from the sample voice notes after 48 hours."""
+    """Delete sample businesses made from the sample voice notes after 7 days."""
     cutoff = (now or utcnow()) - timedelta(hours=hours)
     with Session(engine) as session:
         expired = session.exec(

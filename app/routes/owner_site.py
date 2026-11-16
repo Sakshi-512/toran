@@ -1,6 +1,7 @@
 """Owner site pages: preview, styles, scoring, publish (with approval), undo and offline."""
 
 import re
+from collections.abc import Sequence
 from typing import Any
 
 from fastapi import APIRouter, Depends, Request
@@ -10,13 +11,14 @@ from starlette.responses import Response
 
 from app.config import get_settings
 from app.db import get_engine
-from app.models import Business, Job, TestRun
+from app.models import Business, Job, ScoreItem, TestRun
 from app.services import publish as pub
 from app.services.auth import require_owner
 from app.services.errors import AppError
 from app.services.i18n import pick_language, t
 from app.services.jobs import queue_position
 from app.services.score_runs import SCORE_JOB, queue_score, report_parts
+from app.services.score_summary import OwnerSummary, owner_summary
 from app.services.security import site_security_headers, verify_csrf
 from app.services.sitegen import SiteBuild
 from app.services.sites import main_origin, resolve_file, site_origin
@@ -79,9 +81,19 @@ def owner_site_context(session: Session, business: Business, lang: str) -> dict[
         "has_draft": (paths.draft / "index.html").is_file(),
         "live": pub.live_version(session, business.id),
         "runs": runs,
+        "summaries": _summaries(session, runs),
         "latest_draft_run": next((r for r in runs if r.site_kind == "draft"), None),
         "scoring": scoring_status(session, business.id, lang),
     }
+
+
+def _summaries(session: Session, runs: Sequence[TestRun]) -> dict[int, OwnerSummary]:
+    ids = [r.id for r in runs if r.id is not None]
+    items = session.exec(select(ScoreItem).where(col(ScoreItem.run_id).in_(ids))).all()
+    by_run: dict[int, list[ScoreItem]] = {}
+    for item in items:
+        by_run.setdefault(item.run_id, []).append(item)
+    return {r.id: owner_summary(r, by_run.get(r.id, [])) for r in runs if r.id is not None}
 
 
 def _rebuild_and_score(business_id: int, theme: str | None = None) -> None:
@@ -198,8 +210,10 @@ def report(run_id: int, request: Request, business_id: int = Depends(require_own
     with Session(get_engine()) as session:
         run, parts = _own_run(session, run_id, business_id)
         business = _business(session, business_id)
+    items = [item for part in parts for item in part["checks"]]
+    summary = owner_summary(run, items)
     return render(
-        request, "app/owner_report.html", {"run": run, "parts": parts, "business": business}
+        request, "app/owner_report.html", {"run": run, "summary": summary, "business": business}
     )
 
 

@@ -232,3 +232,15 @@ class Photo(SQLModel, table=True):
     subject: str | None = Field(default=None, max_length=120)
     is_main: bool = False
     created_at: datetime = Field(default_factory=utcnow)
+
+
+class OwnerDevice(SQLModel, table=True):
+    """A device the owner chose to stay signed in on (30 days). Only the token's hash is kept."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    business_id: int = Field(foreign_key="business.id", index=True)
+    token_hash: str = Field(unique=True, max_length=64)
+    created_at: datetime = Field(default_factory=utcnow)
+    expires_at: datetime
+    last_used_at: datetime | None = None
+    revoked_at: datetime | None = None

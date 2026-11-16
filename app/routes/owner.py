@@ -1,4 +1,7 @@
-"""Owner pages: PIN entry for the private link, her business page and her photos."""
+"""Owner pages: PIN entry for the private link, her business page, enquiries and photos."""
+
+from datetime import UTC
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import FileResponse, RedirectResponse
@@ -8,17 +11,27 @@ from starlette.responses import Response
 
 from app.config import get_settings
 from app.db import get_engine
-from app.models import Business, Photo, ProfileVersion
+from app.models import Business, Enquiry, Photo, ProfileVersion
 from app.routes.owner_site import owner_site_context
 from app.services import photos as photo_svc
-from app.services.auth import business_for_link, check_pin, require_owner, sign_in, sign_out
+from app.services.auth import (
+    business_for_link,
+    check_pin,
+    forget_device,
+    remember_device,
+    require_owner,
+    sign_in,
+    sign_out,
+)
 from app.services.errors import AppError
 from app.services.i18n import pick_language
-from app.services.ratelimit import FORM_LIMIT, rate_limit
+from app.services.ratelimit import FORM_LIMIT, RateLimited, check
 from app.services.security import verify_csrf
 from app.templating import render
 
 router = APIRouter()
+IST = ZoneInfo("Asia/Kolkata")
+INBOX_SIZE = 30
 
 
 @router.get("/o/{token}", include_in_schema=False)
@@ -33,10 +46,19 @@ def pin_page(token: str, request: Request) -> Response:
 @router.post(
     "/o/{token}",
     include_in_schema=False,
-    dependencies=[Depends(rate_limit(FORM_LIMIT)), Depends(verify_csrf)],
+    dependencies=[Depends(verify_csrf)],
 )
 async def pin_submit(token: str, request: Request) -> Response:
     """Check the PIN; five wrong tries lock the link for 15 minutes."""
+    try:
+        check(request, FORM_LIMIT)
+    except RateLimited as exc:
+        return render(
+            request,
+            "app/owner_pin.html",
+            {"token": token, "wait_seconds": exc.retry_after},
+            status_code=429,
+        )
     form = await request.form()
     with Session(get_engine()) as session:
         business = business_for_link(session, token)
@@ -46,7 +68,9 @@ async def pin_submit(token: str, request: Request) -> Response:
         business_id = business.id
     if result == "ok":
         sign_in(request, business_id)
-        return RedirectResponse("/owner", status_code=303)
+        response = RedirectResponse("/owner", status_code=303)
+        remember_device(response, business_id, get_settings())
+        return response
     key = "owner.pin_locked" if result == "locked" else "owner.pin_wrong"
     return render(
         request,
@@ -80,7 +104,32 @@ def owner_home(request: Request, business_id: int = Depends(require_owner)) -> R
     """The signed-in owner's page."""
     with Session(get_engine()) as session:
         context = _owner_context(session, business_id, pick_language(request))
+        show_all = request.query_params.get("enquiries") == "all"
+        inbox = enquiries_for(session, business_id, 200 if show_all else INBOX_SIZE)
+        context["enquiries"] = inbox
+        context["more_enquiries"] = not show_all and len(inbox) == INBOX_SIZE
         return render(request, "app/owner_home.html", context)
+
+
+def enquiries_for(session: Session, business_id: int, limit: int) -> list[dict[str, object]]:
+    """Her customers' enquiries, newest first, with times in IST (only her own)."""
+    rows = session.exec(
+        select(Enquiry)
+        .where(Enquiry.business_id == business_id)
+        .order_by(col(Enquiry.created_at).desc(), col(Enquiry.id).desc())
+        .limit(limit)
+    ).all()
+    return [
+        {
+            "name": e.name,
+            "phone": e.phone,
+            "message": e.message,
+            "when": (e.created_at if e.created_at.tzinfo else e.created_at.replace(tzinfo=UTC))
+            .astimezone(IST)
+            .strftime("%d/%m/%Y %H:%M"),
+        }
+        for e in rows
+    ]
 
 
 @router.post("/owner/photos", include_in_schema=False, dependencies=[Depends(verify_csrf)])
@@ -146,4 +195,6 @@ def owner_photo_file(photo_id: int, business_id: int = Depends(require_owner)) -
 def owner_logout(request: Request) -> RedirectResponse:
     """Sign out."""
     sign_out(request)
-    return RedirectResponse("/", status_code=303)
+    response = RedirectResponse("/", status_code=303)
+    forget_device(request, response)
+    return response

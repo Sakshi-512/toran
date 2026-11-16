@@ -8,7 +8,7 @@ from app.config import get_settings
 from app.db import get_engine
 from app.services.contact import submit_contact
 from app.services.i18n import normalise_language
-from app.services.ratelimit import CONTACT_HOURLY_LIMIT, FORM_LIMIT, rate_limit
+from app.services.ratelimit import CONTACT_HOURLY_LIMIT, FORM_LIMIT, RateLimited, check
 from app.services.security import verify_csrf
 from app.templating import render
 
@@ -36,14 +36,14 @@ def privacy(request: Request) -> Response:
 @router.post(
     "/contact",
     include_in_schema=False,
-    dependencies=[
-        Depends(rate_limit(FORM_LIMIT)),
-        Depends(rate_limit(CONTACT_HOURLY_LIMIT)),
-        Depends(verify_csrf),
-    ],
+    dependencies=[Depends(verify_csrf)],
 )
-async def contact(request: Request) -> RedirectResponse:
+async def contact(request: Request) -> Response:
     """Contact form: save the message, queue the email, show the thank-you message."""
+    try:
+        check(request, FORM_LIMIT, CONTACT_HOURLY_LIMIT)
+    except RateLimited as exc:
+        return render(request, "app/home.html", {"wait_seconds": exc.retry_after}, status_code=429)
     form = await request.form()
     submit_contact(get_engine(), {k: v for k, v in form.items() if isinstance(v, str)})
     return RedirectResponse("/?sent=1#contact", status_code=303)

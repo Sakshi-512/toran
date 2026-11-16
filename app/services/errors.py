@@ -1,6 +1,7 @@
 """Friendly error pages in the owner's language. Stack traces go to the logs, never to users."""
 
 import logging
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -47,8 +48,31 @@ def render_error(request: Request, key: str, status_code: int) -> Response:
     return render(request, "app/error.html", {"message_key": key}, status_code=status_code)
 
 
+def render_rate_limited(request: Request, retry_after: int) -> Response:
+    """The friendly "please wait" page with a countdown, and a way back to this same page."""
+    from app.templating import render
+
+    retry_url = str(request.url.path) + (f"?{request.url.query}" if request.url.query else "")
+    if request.method != "GET":  # a form: go back to the page it was sent from (same site only)
+        referer = urlsplit(request.headers.get("referer", ""))
+        same_site = referer.netloc == request.url.netloc and referer.path.startswith("/")
+        query = f"?{referer.query}" if referer.query else ""
+        retry_url = referer.path + query if same_site else "/"
+    response = render(
+        request,
+        "app/rate_limited.html",
+        {"wait_seconds": retry_after, "retry_url": retry_url, "is_get": request.method == "GET"},
+        status_code=429,
+    )
+    response.headers["Retry-After"] = str(retry_after)
+    return response
+
+
 async def _app_error(request: Request, exc: Exception) -> Response:
     assert isinstance(exc, AppError)  # noqa: S101 - registered only for AppError
+    retry_after = getattr(exc, "retry_after", None)
+    if exc.status_code == 429 and isinstance(retry_after, int):
+        return render_rate_limited(request, retry_after)
     logger.info("app_error", extra={"key": exc.key, "status": exc.status_code})
     return render_error(request, exc.key, exc.status_code)
 
