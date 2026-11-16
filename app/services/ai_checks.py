@@ -273,10 +273,12 @@ def parse_assessment(text: str, questions: tuple[str, ...]) -> AIAssessment:
     return assessment
 
 
-def fixture_key(slug: str) -> str:
-    """Saved response used in mock mode: one per sample, else a default."""
-    key = f"ai_checks_{slug}"
-    return key if (FIXTURE_DIR / f"{key}.json").is_file() else "ai_checks_default"
+def fixture_key(slug: str, business_type: str = "bakery") -> str:
+    """Saved response used in mock mode: per sample, else per business type, else a default."""
+    for key in (f"ai_checks_{slug}", f"ai_checks_default_{business_type}"):
+        if (FIXTURE_DIR / f"{key}.json").is_file():
+            return key
+    return "ai_checks_default"
 
 
 def run_ai_checks(
@@ -303,7 +305,7 @@ def run_ai_checks(
             max_tokens=MAX_TOKENS,
             purpose="ai_checks",
             business_id=business_id,
-            fixture_key=fixture_key(slug),
+            fixture_key=fixture_key(slug, business_type),
             output_config=OUTPUT_CONFIG,
             max_attempts=MAX_ATTEMPTS,
         )

@@ -8,10 +8,17 @@ TLS "ask" call goes straight to the app container without that header.
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import text
 from sqlmodel import Session, select
+from starlette.responses import Response
 
 from app.config import get_settings
 from app.db import get_session
-from app.services.sites import active_business, subdomain_label
+from app.services.sites import (
+    SERVED_STATUSES,
+    active_business,
+    file_response,
+    resolve_file,
+    subdomain_label,
+)
 
 router = APIRouter()
 
@@ -37,12 +44,28 @@ def require_direct_internal_call(request: Request) -> None:
 def tls_check(
     request: Request, domain: str = "", session: Session = Depends(get_session)
 ) -> dict[str, str]:
-    """Allow a certificate only for the main domain, www, or a real, non-deleted business."""
+    """Allow a certificate only for the main domain, www, or a live or offline business."""
     base = get_settings().base_domain
     host = domain.strip().lower().rstrip(".")
     if host in (base, "www." + base):
         return {"allowed": host}
     label = subdomain_label(host, base)
-    if label and label != "www" and active_business(session, label) is not None:
+    business = active_business(session, label) if label and label != "www" else None
+    if business is not None and business.status in SERVED_STATUSES:
         return {"allowed": host}
     raise HTTPException(status_code=404)
+
+
+@router.get(
+    "/internal/draft/{slug}/{path:path}",
+    include_in_schema=False,
+    dependencies=[Depends(require_direct_internal_call)],
+)
+def internal_draft(slug: str, path: str) -> Response:
+    """A business's draft, for the app's own customer tests. Never reachable through Caddy."""
+    from app.services.publish import folders
+
+    file = resolve_file(folders(get_settings(), slug).draft, path)
+    if file is None:
+        raise HTTPException(status_code=404)
+    return file_response(file, get_settings())

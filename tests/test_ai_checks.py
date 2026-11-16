@@ -104,7 +104,9 @@ def test_every_sample_fixture_validates() -> None:
         )
         assert {p.lang for p in assessment.pages} == {"en", "hi", "mr"}
         assert fixture_key(sample.slug) == f"ai_checks_{sample.slug}"
-    assert fixture_key("some-real-shop") == "ai_checks_default"
+    assert fixture_key("some-real-shop") == "ai_checks_default_bakery"
+    assert fixture_key("some-real-shop", "tuition") == "ai_checks_default_tuition"
+    assert fixture_key("some-real-shop", "unknown") == "ai_checks_default"
 
 
 @pytest.mark.parametrize(

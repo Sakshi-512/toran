@@ -12,7 +12,9 @@ from app.services import intake as svc
 from app.services.errors import AppError
 from app.services.i18n import pick_language
 from app.services.jobs import get_job
+from app.services.publish import build_draft
 from app.services.ratelimit import FORM_LIMIT, rate_limit
+from app.services.score_runs import queue_score
 from app.services.security import verify_csrf
 from app.services.sites import main_origin
 from app.services.stt import STT_SAMPLES
@@ -164,6 +166,9 @@ async def confirm_submit(token: str, request: Request) -> Response:
         intake_id = intake.id
     assert intake_id is not None  # noqa: S101
     confirmed = svc.confirm_intake(engine, settings, intake_id, profile, address, photos[:8])
+    assert confirmed.business.id is not None  # noqa: S101
+    build_draft(engine, settings, confirmed.business.id)  # warm style by default
+    queue_score(engine, confirmed.business.id, "draft")
     link = f"{main_origin(settings)}/o/{confirmed.access.link_token}"
     response = render(
         request,

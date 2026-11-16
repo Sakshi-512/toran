@@ -25,6 +25,7 @@ def upsert_sample(session: Session, sample: Sample) -> Business:
     business.business_type = sample.profile.business_type
     business.theme = sample.theme
     business.is_sample = True
+    business.source = "seed"
     business.status = "live"
     business.updated_at = utcnow()
     session.add(business)

@@ -9,9 +9,11 @@ from starlette.responses import Response
 from app.config import get_settings
 from app.db import get_engine
 from app.models import Business, Photo, ProfileVersion
+from app.routes.owner_site import owner_site_context
 from app.services import photos as photo_svc
 from app.services.auth import business_for_link, check_pin, require_owner, sign_in, sign_out
 from app.services.errors import AppError
+from app.services.i18n import pick_language
 from app.services.ratelimit import FORM_LIMIT, rate_limit
 from app.services.security import verify_csrf
 from app.templating import render
@@ -54,7 +56,7 @@ async def pin_submit(token: str, request: Request) -> Response:
     )
 
 
-def _owner_context(session: Session, business_id: int) -> dict[str, object]:
+def _owner_context(session: Session, business_id: int, lang: str = "en") -> dict[str, object]:
     business = session.get(Business, business_id)
     if business is None or business.deleted_at is not None:
         raise AppError("error.not_found", status_code=404)
@@ -65,6 +67,7 @@ def _owner_context(session: Session, business_id: int) -> dict[str, object]:
     ).first()
     profile = version.profile if version else {}
     return {
+        **owner_site_context(session, business, lang),
         "business": business,
         "profile": profile,
         "photos": photo_svc.list_photos(session, business_id),
@@ -76,7 +79,8 @@ def _owner_context(session: Session, business_id: int) -> dict[str, object]:
 def owner_home(request: Request, business_id: int = Depends(require_owner)) -> Response:
     """The signed-in owner's page."""
     with Session(get_engine()) as session:
-        return render(request, "app/owner_home.html", _owner_context(session, business_id))
+        context = _owner_context(session, business_id, pick_language(request))
+        return render(request, "app/owner_home.html", context)
 
 
 @router.post("/owner/photos", include_in_schema=False, dependencies=[Depends(verify_csrf)])
@@ -89,7 +93,7 @@ async def owner_add_photos(request: Request, business_id: int = Depends(require_
             for data in [d for d in files if d]:
                 photo_svc.add_photo(session, get_settings(), business_id, data)
         except AppError as exc:
-            context = _owner_context(session, business_id)
+            context = _owner_context(session, business_id, pick_language(request))
             return render(
                 request,
                 "app/owner_home.html",

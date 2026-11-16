@@ -1,8 +1,44 @@
 {% extends "app/base.html" %}
+{% block head %}{% if scoring and scoring.state != "failed" %}<meta http-equiv="refresh" content="5">{% endif %}{% endblock %}
 {% block title %}{{ business.display_name }} · {{ app_name }}{% endblock %}
 {% block content %}
-<h1>{{ business.display_name }}</h1>
-<p class="notice-ok">{{ t('owner.status_draft', lang) }}</p>
+<h1>{{ business.display_name }} <span class="status status-{{ business.status }}">{{ t('owner.status.' ~ business.status, lang) }}</span></h1>
+{% if business.is_sample %}<p class="notice">{{ t('publish.sample_note', lang) }}</p>{% endif %}
+
+<section class="card" id="site">
+  <h2>{{ t('owner.your_site', lang) }}</h2>
+  {% if business.status == 'live' %}<p class="notice-ok">{{ t('owner.status_live_note', lang) }} <a href="{{ site_url }}">{{ site_url }}</a></p>
+  {% elif business.status == 'offline' %}<p class="notice-error">{{ t('owner.status_offline_note', lang) }}</p>
+  {% else %}<p class="notice-ok">{{ t('owner.status_draft', lang) }}</p>{% endif %}
+
+  {% if scoring %}
+  <p class="progress" role="status" aria-live="polite">{% if scoring.state == 'failed' %}{{ t('owner.score_failed', lang) }}{% else %}{{ scoring.text }}{% endif %}</p>
+  {% elif latest_draft_run %}
+  <p class="score-total"><strong>{{ t('score.so_far', lang, total=latest_draft_run.total, possible=latest_draft_run.possible_so_far|round|int) }}</strong></p>
+  <p><a href="/owner/score/{{ latest_draft_run.id }}">{{ t('owner.see_report', lang) }}</a></p>
+  {% endif %}
+
+  <div class="cta-row">
+    {% if has_draft %}<a class="button secondary" href="/owner/preview/" target="_blank" rel="noopener">{{ t('owner.preview', lang) }}</a>{% endif %}
+    <a class="button secondary" href="/owner/styles">{{ t('owner.styles', lang) }}</a>
+    <form method="post" action="/owner/draft"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.rebuild', lang) }}</button></form>
+  </div>
+  <div class="cta-row">
+    {% if has_draft %}<a class="button" href="/owner/publish">{{ t('owner.publish', lang) }}</a>{% endif %}
+    {% if live %}
+    <form method="post" action="/owner/undo"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.undo', lang) }}</button></form>
+    {% if business.status == 'live' %}
+    <form method="post" action="/owner/offline"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.offline', lang) }}</button></form>
+    {% else %}
+    <form method="post" action="/owner/online"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.online', lang) }}</button></form>
+    {% endif %}{% endif %}
+  </div>
+
+  {% if runs %}
+  <h3>{{ t('owner.history', lang) }}</h3>
+  <ul class="history">{% for r in runs %}<li><a href="/owner/score/{{ r.id }}">{{ r.created_at.strftime('%d/%m %H:%M') }} · {{ t('owner.kind.' ~ r.site_kind, lang) }} · {{ r.total }}/{{ r.possible_so_far|round|int }}</a></li>{% endfor %}</ul>
+  {% endif %}
+</section>
 {% if error_key %}<p class="notice-error" role="alert">{{ t(error_key, lang) }}</p>{% endif %}
 <section class="card">
   <h2>{{ t('owner.details', lang) }}</h2>

@@ -1,4 +1,4 @@
-"""Data retention, as promised on the privacy page.
+"""Data retention, as promised on the privacy page, plus removal of expired sample businesses.
 
 - Customer enquiries are deleted 90 days after they arrive.
 - Log files are deleted 30 days after the day they cover.
@@ -16,15 +16,17 @@ from sqlalchemy import delete
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, col, select
 
+from app.config import Settings
 from app.models import Enquiry, IntakeSession
 from app.services.logs import LOG_FILE
+from app.services.publish import purge_expired_samples
 
 logger = logging.getLogger(__name__)
 
 ENQUIRY_DAYS = 90
 LOG_DAYS = 30
 INPUT_HOURS = 24
-RUN_EVERY_SECONDS = 24 * 60 * 60
+RUN_EVERY_SECONDS = 60 * 60  # hourly, so samples go soon after 48 hours
 _ROTATED = re.compile(rf"^{re.escape(LOG_FILE)}\.(\d{{4}}-\d{{2}}-\d{{2}})$")
 
 
@@ -35,6 +37,7 @@ class RetentionResult:
     enquiries_deleted: int
     log_files_deleted: int
     inputs_deleted: int = 0
+    samples_deleted: int = 0
 
 
 def purge_enquiries(engine: Engine, now: datetime, days: int = ENQUIRY_DAYS) -> int:
@@ -86,29 +89,40 @@ def purge_stale_inputs(engine: Engine, now: datetime, hours: int = INPUT_HOURS) 
     return deleted
 
 
-def run_retention(engine: Engine, log_dir: Path, now: datetime | None = None) -> RetentionResult:
+def run_retention(
+    engine: Engine, log_dir: Path, now: datetime | None = None, settings: Settings | None = None
+) -> RetentionResult:
     """Run every cleanup once."""
     moment = now or datetime.now(UTC)
+    samples = purge_expired_samples(engine, settings, moment) if settings else 0
     result = RetentionResult(
         purge_enquiries(engine, moment),
         purge_logs(log_dir, moment),
         purge_stale_inputs(engine, moment),
+        samples,
     )
     logger.info(
         "retention_run",
         extra={
             "enquiries_deleted": result.enquiries_deleted,
             "log_files_deleted": result.log_files_deleted,
+            "inputs_deleted": result.inputs_deleted,
+            "samples_deleted": result.samples_deleted,
         },
     )
     return result
 
 
-async def retention_loop(engine: Engine, log_dir: Path, every: float = RUN_EVERY_SECONDS) -> None:
-    """Run the cleanup now and then once a day until cancelled. Failures are logged, not raised."""
+async def retention_loop(
+    engine: Engine,
+    log_dir: Path,
+    every: float = RUN_EVERY_SECONDS,
+    settings: Settings | None = None,
+) -> None:
+    """Run the cleanup now and then every hour until cancelled. Failures are logged, not raised."""
     while True:
         try:
-            await asyncio.to_thread(run_retention, engine, log_dir)
+            await asyncio.to_thread(run_retention, engine, log_dir, None, settings)
         except Exception:
             logger.exception("retention_failed")
         await asyncio.sleep(every)

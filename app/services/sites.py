@@ -63,6 +63,11 @@ def main_origin(settings: Settings) -> str:
     return f"http://localhost:{DEV_PORT}"
 
 
+def internal_origin(settings: Settings) -> str:
+    """How the app reaches itself (for testing drafts on /internal/draft/, never public)."""
+    return f"http://127.0.0.1:{DEV_PORT}"
+
+
 def site_origin(slug: str, settings: Settings) -> str:
     """Origin of a business site in the current environment."""
     if settings.is_production:
@@ -156,11 +161,19 @@ def file_response(path: Path, settings: Settings, framable: bool = False) -> Res
     return FileResponse(path, media_type=media_type, headers=headers)
 
 
-def _lookup_file(slug: str, url_path: str, settings: Settings) -> Path | None:
+SERVED_STATUSES = frozenset({"live", "offline"})
+
+
+def _lookup_file(slug: str, url_path: str, settings: Settings) -> tuple[str, Path | None]:
+    """("live", file), ("offline", None) or ("missing", None). Drafts are never public."""
     with Session(get_engine()) as session:
-        if active_business(session, slug) is None:
-            return None
-    return resolve_file(site_dir(slug, settings), url_path)
+        business = active_business(session, slug)
+        status = business.status if business else "missing"
+    if status == "offline":
+        return "offline", None
+    if status != "live":
+        return "missing", None
+    return "live", resolve_file(site_dir(slug, settings), url_path)
 
 
 class SiteHostMiddleware:
@@ -188,7 +201,9 @@ class SiteHostMiddleware:
     async def _site_response(request: Request, slug: str, settings: Settings) -> Response:
         if request.method not in ("GET", "HEAD"):
             return render_error(request, "error.not_found", 405)
-        path = await run_in_threadpool(_lookup_file, slug, request.url.path, settings)
+        state, path = await run_in_threadpool(_lookup_file, slug, request.url.path, settings)
+        if state == "offline":
+            return render_error(request, "site.offline", 503)
         if path is None:
             return render_error(request, "error.not_found", 404)
         return file_response(path, settings)

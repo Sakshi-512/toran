@@ -23,6 +23,8 @@ class Business(SQLModel, table=True):
     owner_language: str = Field(default="en", max_length=5)
     status: str = Field(default="draft", max_length=20)
     is_sample: bool = Field(default=False, index=True)
+    source: str = Field(default="intake", max_length=10)  # seed (demo samples) or intake
+    first_live_at: datetime | None = None
     consent_given_at: datetime | None = None
     consent_method: str | None = Field(default=None, max_length=20)
     consent_text: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
@@ -71,6 +73,8 @@ class IntakeSession(SQLModel, table=True):
     consent_text: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
     transcript: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
     stt_route: str | None = Field(default=None, max_length=10)
+    seconds_to_draft_scored: int | None = None  # system time: submit -> first draft scored
+    seconds_to_live: int | None = None  # submit -> first publish (includes her decision time)
     first_guess: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
     draft: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
     web_address: str | None = Field(default=None, max_length=63)
@@ -148,6 +152,20 @@ class Job(SQLModel, table=True):
     finished_at: datetime | None = None
 
 
+class SiteVersion(SQLModel, table=True):
+    """One published version of a business site. Every publish is kept, which powers undo."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    business_id: int = Field(foreign_key="business.id", index=True)
+    number: int
+    profile_version_id: int | None = Field(default=None, foreign_key="profileversion.id")
+    theme: str = Field(max_length=20)
+    site_hash: str = Field(max_length=64)
+    status: str = Field(default="live", max_length=12)  # live, superseded or undone
+    approved_at: datetime = Field(default_factory=utcnow)
+    published_at: datetime = Field(default_factory=utcnow)
+
+
 class TestRun(SQLModel, table=True):
     """One customer-test run of one version of a site, with its Readiness Score."""
 
@@ -159,6 +177,7 @@ class TestRun(SQLModel, table=True):
     profile_version_id: int | None = Field(default=None, foreign_key="profileversion.id")
     site_hash: str = Field(max_length=64)
     site_kind: str = Field(default="live", max_length=10)
+    site_version_id: int | None = Field(default=None, foreign_key="siteversion.id", index=True)
     url: str = Field(max_length=300)
     total: int = 0
     possible_so_far: float = 0.0

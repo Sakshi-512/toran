@@ -69,3 +69,12 @@ main:has(.score-layout) { max-width: 1100px; }
 .pin-input { font-size: 28px; letter-spacing: .3em; max-width: 200px; }
 .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
 .photo-grid img { width: 100%; height: auto; border-radius: 10px; }
+.status { font-size: 16px; vertical-align: middle; border-radius: 999px; padding: 4px 12px; font-family: inherit; }
+.status-draft { background: #f1e3d3; }
+.status-live { background: #e7f3ec; color: #1f5c38; }
+.status-offline { background: #fbeaea; color: #8a2a24; }
+.progress { background: #fff7ea; border-left: 4px solid #e2a24a; padding: 12px 16px; border-radius: 8px; }
+.history { list-style: none; padding: 0; }
+.history li { min-height: 44px; display: flex; align-items: center; }
+.style-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+.style-grid iframe { border: 1px solid #eadfd2; border-radius: 10px; max-width: 100%; background: #fff; }

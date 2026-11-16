@@ -10,12 +10,11 @@ from starlette.responses import Response
 
 from app.config import get_settings
 from app.db import get_engine
-from app.models import Business, ScoreItem, TestRun
+from app.models import Business, TestRun
 from app.services.errors import AppError
 from app.services.jobs import enqueue, get_job
 from app.services.samples import get_sample, load_samples
-from app.services.score import PARTS
-from app.services.score_runs import SCORE_JOB
+from app.services.score_runs import SCORE_JOB, report_parts
 from app.services.security import site_security_headers, verify_csrf
 from app.services.sitegen import SiteBuild, SiteInput, build_site
 from app.services.sites import main_origin, site_urls
@@ -137,25 +136,11 @@ def score_job(job_id: str, request: Request) -> Response:
 def score_run(run_id: int, request: Request) -> Response:
     """The score report: total, five parts, every item with its reason and label."""
     with Session(get_engine()) as session:
-        run = session.get(TestRun, run_id)
-        if run is None:
-            raise HTTPException(status_code=404)
+        try:
+            run, parts = report_parts(session, run_id)
+        except LookupError as exc:
+            raise HTTPException(status_code=404) from exc
         business = session.get(Business, run.business_id)
-        items = session.exec(
-            select(ScoreItem).where(ScoreItem.run_id == run_id).order_by(col(ScoreItem.id))
-        ).all()
-    parts = []
-    for part in PARTS:
-        part_items = [i for i in items if i.part == part]
-        scored = [i for i in part_items if i.status == "scored"]
-        parts.append(
-            {
-                "key": part,
-                "checks": part_items,
-                "points": sum(i.points for i in scored),
-                "possible": sum(i.max_points for i in scored),
-            }
-        )
     return render(
         request, "app/dev_score_run.html", {"run": run, "business": business, "parts": parts}
     )

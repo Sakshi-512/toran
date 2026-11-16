@@ -1,0 +1,20 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('owner.styles', lang) }} · {{ business.display_name }}{% endblock %}
+{% block content %}
+<p><a href="/owner">{{ t('owner.back', lang) }}</a></p>
+<h1>{{ t('owner.styles', lang) }}</h1>
+<p>{{ t('owner.styles_intro', lang) }}</p>
+<div class="style-grid">
+  {% for theme in themes %}
+  <figure class="card">
+    <figcaption><strong>{{ t('owner.style.' ~ theme, lang) }}</strong>{% if business.theme == theme %} · {{ t('owner.current_style', lang) }}{% endif %}</figcaption>
+    <iframe src="/owner/style-preview/{{ theme }}/{% if lang != 'en' %}{{ lang }}/{% endif %}" title="{{ t('owner.style.' ~ theme, lang) }}" width="360" height="560" loading="lazy"></iframe>
+    <form method="post" action="/owner/styles">
+      <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+      <input type="hidden" name="theme" value="{{ theme }}">
+      <button class="button{% if business.theme == theme %} secondary{% endif %}" type="submit">{{ t('owner.use_style', lang) }}</button>
+    </form>
+  </figure>
+  {% endfor %}
+</div>
+{% endblock %}

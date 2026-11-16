@@ -175,3 +175,24 @@ class JobWorker:
             logger.info("job_done", extra={"job_id": job.id, "run_id": run_id})
         finally:
             self._slots.release()
+
+
+TYPICAL_SECONDS = {"score": 45, "intake": 60, "email": 5}
+
+
+def queue_position(engine: Engine, job_id: str) -> tuple[int, int]:
+    """(place in line, rough wait in seconds) for a queued job; (0, 0) once it is running."""
+    with Session(engine) as session:
+        job = session.get(Job, job_id)
+        if job is None or job.status != "queued":
+            return 0, 0
+        ahead = session.exec(
+            select(Job).where(
+                col(Job.kind) == job.kind,
+                col(Job.status).in_(("queued", "running")),
+                col(Job.created_at) < job.created_at,
+            )
+        ).all()
+    place = len(ahead) + 1
+    rounds = len(ahead) // DEFAULT_CONCURRENCY + 1
+    return place, rounds * TYPICAL_SECONDS.get(job.kind, 30)

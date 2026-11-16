@@ -30,10 +30,15 @@ def test_home_from_accept_language(client: TestClient) -> None:
     assert 'lang="mr"' in response.text
 
 
-def _add_business(engine: Engine, slug: str, deleted: bool = False) -> None:
+def _add_business(engine: Engine, slug: str, deleted: bool = False, status: str = "live") -> None:
     with Session(engine) as session:
         session.add(
-            Business(slug=slug, display_name=slug, deleted_at=utcnow() if deleted else None)
+            Business(
+                slug=slug,
+                display_name=slug,
+                status=status,
+                deleted_at=utcnow() if deleted else None,
+            )
         )
         session.commit()
 
@@ -43,10 +48,14 @@ def test_tls_check_allows_main_domain_and_real_businesses(
 ) -> None:
     _add_business(engine, "sunita-cakes")
     _add_business(engine, "gone", deleted=True)
+    _add_business(engine, "paused", status="offline")
+    _add_business(engine, "unpublished", status="draft")
     assert client.get("/internal/tls-check?domain=example.test").status_code == 200
     assert client.get("/internal/tls-check?domain=www.example.test").status_code == 200
     assert client.get("/internal/tls-check?domain=sunita-cakes.example.test").status_code == 200
     assert client.get("/internal/tls-check?domain=gone.example.test").status_code == 404
+    assert client.get("/internal/tls-check?domain=paused.example.test").status_code == 200
+    assert client.get("/internal/tls-check?domain=unpublished.example.test").status_code == 404
     assert client.get("/internal/tls-check?domain=nobody.example.test").status_code == 404
     assert client.get("/internal/tls-check?domain=a.b.example.test").status_code == 404
     assert client.get("/internal/tls-check?domain=evil.com").status_code == 404

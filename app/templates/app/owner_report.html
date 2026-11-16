@@ -1,0 +1,8 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('owner.score_title', lang) }} · {{ business.display_name }}{% endblock %}
+{% block content %}
+<p><a href="/owner">{{ t('owner.back', lang) }}</a></p>
+<h1>{{ t('owner.score_title', lang) }}</h1>
+<p class="muted">{{ t('owner.kind.' ~ run.site_kind, lang) }} · {{ run.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+{% with screenshot_url='/owner/score/' ~ run.id ~ '/screenshot.png', show_cost=False %}{% include "app/_score_report.html" %}{% endwith %}
+{% endblock %}

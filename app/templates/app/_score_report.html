@@ -1,0 +1,29 @@
+{# Shared Readiness Score report. Needs: run, parts, business, screenshot_url, show_cost. #}
+<p class="score-total"><strong>{{ t('score.so_far', lang, total=run.total, possible=run.possible_so_far|round|int) }}</strong></p>
+{% if run.pending_points %}<p class="muted">{{ t('score.pending_note', lang, points=run.pending_points|round|int) }}</p>{% endif %}
+{% if show_cost and run.ai_model %}<p class="muted">{{ t('score.ai_model', lang, model=run.ai_model, cost='%.4f'|format(run.ai_cost_usd_estimate)) }}</p>{% endif %}
+{% if run.ai_status and run.ai_status != 'done' %}<p class="muted">{{ t('score.ai_status', lang, status=run.ai_status) }}</p>{% endif %}
+<div class="score-layout">
+  <div>
+    {% for part in parts %}
+    <section class="score-part">
+      <h2>{{ t('score.part.' ~ part.key, lang) }} <span class="muted">{% if part.possible %}{{ part.points|round(1) }} / {{ part.possible|round(1) }}{% else %}{{ t('score.status.pending', lang) }}{% endif %}</span></h2>
+      <ul class="score-items">
+        {% for item in part.checks %}
+        <li class="score-item status-{{ item.status }}">
+          <div class="score-item-head">
+            <strong>{{ t('score.check.' ~ item.key, lang) }}</strong>
+            <span>{% if item.status == 'scored' %}{{ item.points|round(1) }} / {{ item.max_points|round(1) }}{% else %}{{ t('score.status.' ~ item.status, lang) }}{% endif %}</span>
+          </div>
+          <p>{{ item['reason_' ~ lang] }}</p>
+          <span class="tag">{{ t('score.' ~ item.source, lang) }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
+  </div>
+  <figure class="score-shot">
+    <img src="{{ screenshot_url }}" width="360" height="740" alt="{{ business.display_name }}, phone screenshot">
+  </figure>
+</div>

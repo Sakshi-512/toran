@@ -98,6 +98,7 @@
 <section class="enquiry" aria-labelledby="enquiry-title">
   <div class="wrap">
     {{ section_head(t('site.overline_enquiry'), t('site.enquiry_title'), "enquiry-title") }}
+    <!--enquiry-form-->
     <form method="post" action="{{ enquiry_url }}">
       <input type="hidden" name="lang" value="{{ lang }}">
       <label for="enq-name">{{ t('site.enquiry_name') }}</label>
@@ -112,6 +113,7 @@
       </div>
       <button class="btn btn-main" type="submit">{{ t('site.enquiry_send') }}</button>
     </form>
+    <!--/enquiry-form-->
   </div>
 </section>
 {% endblock %}

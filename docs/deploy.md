@@ -40,7 +40,7 @@ IMAGE_TAG=<previous tag> docker compose up -d app
 ## Logs and retention
 
 - The app writes JSON logs to `/app/data/logs/app.log`, one file per day (`app.log.YYYY-MM-DD`). Follow them with `make logs`.
-- A cleanup runs when the app starts and then every 24 hours. It deletes enquiries older than 90 days and log files older than 30 days. Run it by hand with `docker compose exec app python -m scripts.purge`.
+- A cleanup runs when the app starts and then every hour. It deletes enquiries older than 90 days, log files older than 30 days, leftover voice notes and price-list photos older than a day, and sample businesses made from the sample voice notes after 48 hours (with all their data). Run it by hand with `docker compose exec app python -m scripts.purge`.
 - Docker keeps only a small rolling buffer (2 x 1 MB) of each container's console output for crash diagnosis.
 
 ## Security notes
