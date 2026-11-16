@@ -22,15 +22,18 @@ from sqlmodel import Session, col, select
 from app.config import Settings
 from app.models import (
     ActionLog,
+    AgentRun,
     Business,
     ClaudeUsage,
     Enquiry,
     IntakeSession,
     Job,
     OwnerDevice,
+    OwnerQuestion,
     Photo,
     ProfileVersion,
     ScoreItem,
+    SiteExtras,
     SiteVersion,
     SttUsage,
     TestRun,
@@ -39,6 +42,7 @@ from app.models import (
 from app.schemas import BusinessProfile
 from app.services.errors import AppError
 from app.services.photos import list_photos, photo_dir, photo_path
+from app.services.site_extras import approve_current, current_extras
 from app.services.site_images import SitePhoto
 from app.services.sitegen import SiteBuild, SiteInput, build_site, write_site
 from app.services.sites import site_urls
@@ -100,7 +104,8 @@ def site_photos(session: Session, settings: Settings, business_id: int) -> tuple
 def build_for(
     session: Session, settings: Settings, business: Business, theme: str | None = None
 ) -> SiteBuild:
-    """Build (in memory) the site for a business from its latest profile and photos."""
+    """Build (in memory) the site from her latest profile and photos, plus the agent's current
+    translations and layout (never facts)."""
     assert business.id is not None  # noqa: S101
     version = latest_profile(session, business.id)
     if version is None:
@@ -119,6 +124,7 @@ def build_for(
             enquiry_url=urls.enquiry,
             app_name=settings.app_name,
             photos=site_photos(session, settings, business.id),
+            extras=current_extras(session, business.id),
         )
     )
 
@@ -199,6 +205,7 @@ def publish(engine: Engine, settings: Settings, business_id: int) -> SiteVersion
             published_at=now,
         )
         session.add(version)
+        _approve_agent_changes(session, business_id, now)
         business.status = "live"
         if business.first_live_at is None:
             business.first_live_at = now
@@ -208,6 +215,22 @@ def publish(engine: Engine, settings: Settings, business_id: int) -> SiteVersion
         session.refresh(version)
         logger.info("site_published", extra={"business_id": business_id, "version": number})
         return version
+
+
+def _approve_agent_changes(session: Session, business_id: int, now: datetime) -> None:
+    """Publishing the draft is her approval of the agent's changes in it (rule 2)."""
+    pending = session.exec(
+        select(AgentRun).where(
+            AgentRun.business_id == business_id,
+            AgentRun.status == "done",
+            col(AgentRun.approved_at).is_(None),
+            col(AgentRun.discarded_at).is_(None),
+        )
+    ).all()
+    for run in pending:
+        run.approved_at = now
+        session.add(run)
+    approve_current(session, business_id)
 
 
 def _record_time_to_live(session: Session, business_id: int, now: datetime) -> None:
@@ -308,6 +331,9 @@ def delete_business_data(engine: Engine, settings: Settings, business_id: int) -
             delete(ActionLog).where(col(ActionLog.business_id) == business_id),
             delete(ProfileVersion).where(col(ProfileVersion.business_id) == business_id),
             delete(OwnerDevice).where(col(OwnerDevice.business_id) == business_id),
+            delete(OwnerQuestion).where(col(OwnerQuestion.business_id) == business_id),
+            delete(SiteExtras).where(col(SiteExtras.business_id) == business_id),
+            delete(AgentRun).where(col(AgentRun.business_id) == business_id),
         ]
         for statement in statements:
             session.exec(statement)

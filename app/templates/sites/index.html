@@ -8,26 +8,39 @@
 <p class="overline">{{ overline }}</p>
 <h2 id="{{ id }}">{{ heading }}</h2>
 {%- endmacro %}
-{% block content %}
-<section class="hero">
-  <div class="wrap hero-grid{% if hero %} has-photo{% else %} no-photo{% endif %}">
-    {% if hero %}<div class="hero-media">{{ picture(hero, "hero-img") }}</div>{% endif %}
-    <div class="hero-text">
-      <p class="overline">{{ tagline }}</p>
-      <h1>{{ name }}</h1>
+{% macro badge_block() -%}
       {% if badges %}
       <ul class="badges">{% for b in badges %}<li class="chip">{{ icon(b.icon, 16) }}<span>{{ b.text }}</span></li>{% endfor %}</ul>
       {% endif %}
+{%- endmacro %}
+{% macro cta_block() -%}
       {% if cta %}
       <div class="cta">
         {% if cta.wa_href %}<a class="btn btn-main" href="{{ cta.wa_href }}"{% if not is_sample %} rel="noopener"{% endif %}>{{ icon("chat", 20) }}{{ cta.wa_label }}</a>{% endif %}
         <a class="btn btn-call" href="{{ cta.call_href }}">{{ icon("phone", 20) }}{{ cta.call_label }}</a>
       </div>
       {% endif %}
+{%- endmacro %}
+{% block content %}
+<section class="hero">
+  <div class="wrap hero-grid{% if hero %} has-photo{% else %} no-photo{% endif %}{% if layout.photo_after_text %} photo-after{% endif %}">
+    {% if hero %}<div class="hero-media">{{ picture(hero, "hero-img") }}</div>{% endif %}
+    <div class="hero-text">
+      <p class="overline">{{ tagline }}</p>
+      <h1>{{ name }}</h1>
+      {% if layout.main_button_first %}
+{{ cta_block() }}
+{{ badge_block() }}
+      {% else %}
+{{ badge_block() }}
+{{ cta_block() }}
+      {% endif %}
     </div>
   </div>
 </section>
 
+{% for section in layout.section_order %}
+{% if section == 'menu' %}
 {% if products %}
 <section class="menu" aria-labelledby="menu-title">
   <div class="wrap">
@@ -38,10 +51,11 @@
         {% if p.image %}{{ picture(p.image, "item-img") }}{% endif %}
         <div class="item-body">
           {% if p.single_price %}
-          <div class="item-title"><h3>{{ p.name }}</h3><p class="single"><span class="price">{{ p.single_price }}</span>{% if p.unit_suffix %} <span class="unit">{{ p.unit_suffix }}</span>{% endif %}</p></div>
+          <div class="item-title"><h3{% if p.original %} data-translated{% endif %}>{{ p.name }}</h3><p class="single"><span class="price">{{ p.single_price }}</span>{% if p.unit_suffix %} <span class="unit">{{ p.unit_suffix }}</span>{% endif %}</p></div>
           {% else %}
-          <h3>{{ p.name }}</h3>
+          <h3{% if p.original %} data-translated{% endif %}>{{ p.name }}</h3>
           {% endif %}
+          {% if p.original %}<p class="original">{{ p.original }}</p>{% endif %}
           {% if p.notes %}<p class="notes">{{ p.notes }}</p>{% endif %}
           {% if p.options %}
           <dl class="prices">
@@ -55,7 +69,7 @@
   </div>
 </section>
 {% endif %}
-
+{% elif section == 'howto' %}
 {% if steps %}
 <section class="howto" aria-labelledby="howto-title">
   <div class="wrap">
@@ -64,7 +78,7 @@
   </div>
 </section>
 {% endif %}
-
+{% elif section == 'policy' %}
 {% if policy %}
 <section class="policy" aria-labelledby="policy-title">
   <div class="wrap">
@@ -73,7 +87,7 @@
   </div>
 </section>
 {% endif %}
-
+{% elif section == 'areas' %}
 {% if areas %}
 <section class="areas" aria-labelledby="areas-title">
   <div class="wrap">
@@ -82,7 +96,7 @@
   </div>
 </section>
 {% endif %}
-
+{% elif section == 'contact' %}
 {% if phone_text or area %}
 <section class="contact" aria-labelledby="contact-title">
   <div class="wrap">
@@ -94,6 +108,8 @@
   </div>
 </section>
 {% endif %}
+{% endif %}
+{% endfor %}
 
 <section class="enquiry" aria-labelledby="enquiry-title">
   <div class="wrap">

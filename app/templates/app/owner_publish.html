@@ -9,6 +9,13 @@
 {% if s.sentence(lang) %}<p>{{ s.sentence(lang) }}</p>{% endif %}
 <p><a class="text-link" href="/owner/score/{{ latest_draft_run.id }}">{{ t('owner.see_report', lang) }}</a></p>{% endif %}
 {% if business.is_sample %}<p class="notice">{{ t('publish.sample_note', lang) }}</p>{% endif %}
+{% if agent_changes %}
+<section class="card">
+  <h2>{{ t('agent.changes_title', lang) }}</h2>
+  <ul class="good-list">{% for c in agent_changes %}<li>{{ c }}</li>{% endfor %}</ul>
+  <p class="muted">{{ t('agent.changes_note', lang) }}</p>
+</section>
+{% endif %}
 <p><a class="button secondary" href="/owner/preview/{% if lang != 'en' %}{{ lang }}/{% endif %}" target="_blank" rel="noopener">{{ t('owner.preview', lang) }}</a></p>
 <div class="cta-row">
   <form method="post" action="/owner/publish"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button" type="submit">{{ t('publish.yes', lang) }}</button></form>

@@ -14,6 +14,7 @@ from app.db import get_engine
 from app.models import Business, Enquiry, Photo, ProfileVersion
 from app.routes.owner_site import owner_site_context
 from app.services import photos as photo_svc
+from app.services.agent_report import agent_context
 from app.services.auth import (
     business_for_link,
     check_pin,
@@ -25,6 +26,7 @@ from app.services.auth import (
 )
 from app.services.errors import AppError
 from app.services.i18n import pick_language
+from app.services.owner_questions import dismiss_topic
 from app.services.ratelimit import FORM_LIMIT, RateLimited, check
 from app.services.security import verify_csrf
 from app.templating import render
@@ -32,6 +34,7 @@ from app.templating import render
 router = APIRouter()
 IST = ZoneInfo("Asia/Kolkata")
 INBOX_SIZE = 30
+AGENT_ERRORS = {"busy": "agent.busy", "limit": "agent.daily_limit", "draft": "publish.no_draft"}
 
 
 @router.get("/o/{token}", include_in_schema=False)
@@ -108,6 +111,11 @@ def owner_home(request: Request, business_id: int = Depends(require_owner)) -> R
         inbox = enquiries_for(session, business_id, 200 if show_all else INBOX_SIZE)
         context["enquiries"] = inbox
         context["more_enquiries"] = not show_all and len(inbox) == INBOX_SIZE
+        lang = pick_language(request)
+        context.update(agent_context(session, business_id, lang, bool(context["has_draft"])))
+        problem = AGENT_ERRORS.get(request.query_params.get("agent_error", ""))
+        if problem:
+            context["agent_error"] = problem
         return render(request, "app/owner_home.html", context)
 
 
@@ -149,6 +157,8 @@ async def owner_add_photos(request: Request, business_id: int = Depends(require_
                 {**context, "error_key": exc.key},
                 status_code=exc.status_code,
             )
+    if any(files):
+        dismiss_topic(get_engine(), business_id, "photos")  # the agent's photo question is done
     return RedirectResponse("/owner#photos", status_code=303)
 
 

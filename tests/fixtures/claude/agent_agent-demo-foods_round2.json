@@ -1,0 +1,23 @@
+{
+ "stop_reason": "tool_use",
+ "usage": {
+  "input_tokens": 3300,
+  "output_tokens": 160,
+  "cache_read_input_tokens": 2400
+ },
+ "content": [
+  {
+   "type": "text",
+   "text": "Language is now full marks. The remaining points need her ordering policy, which only she knows."
+  },
+  {
+   "type": "tool_use",
+   "id": "toolu_mock_8",
+   "name": "ask_owner",
+   "input": {
+    "topic": "policy",
+    "why": "Customers want to know about advance payment and delivery charges before ordering."
+   }
+  }
+ ]
+}

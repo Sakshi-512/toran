@@ -1,0 +1,45 @@
+{% extends "app/base.html" %}
+{% block head %}{% if agent.state in ('queued', 'running') %}<meta http-equiv="refresh" content="5">{% endif %}{% endblock %}
+{% block title %}{{ t('agent.panel_title', lang) }} · {{ business.display_name }}{% endblock %}
+{% block content %}
+<p><a class="text-link" href="/owner">{{ t('owner.back', lang) }}</a></p>
+<h1>{{ t('agent.panel_title', lang) }}</h1>
+{% if business.is_sample %}<p class="notice">{{ t('publish.sample_note', lang) }}</p>{% endif %}
+
+<section class="card agent-summary">
+  {% if agent.progress %}<p class="progress" role="status" aria-live="polite">{{ agent.progress }}</p>{% endif %}
+  {% include "app/_agent_summary.html" %}
+</section>
+
+{% if agent.rounds %}
+<h2>{{ t('agent.rounds', lang) }}</h2>
+{% for r in agent.rounds %}
+<section class="card round">
+  <h3>{{ t('agent.round', lang, n=r.number) }}{% if r.score_to is not none %} · {{ r.score_from }} → {{ r.score_to }}{% endif %}</h3>
+  {% if r.kept == false %}<p class="notice-error">{{ t('agent.rolled_back', lang) }}</p>{% endif %}
+  {% if r.wrong %}
+  <p class="label">{{ t('agent.what_wrong', lang) }}</p>
+  <ul>{% for w in r.wrong %}<li>{{ w }}</li>{% endfor %}</ul>
+  {% endif %}
+  <p class="label">{{ t('agent.what_did', lang) }}</p>
+  {% if r.accepted %}
+  <ul class="did-list">{% for v in r.accepted %}<li><strong>{{ v.did }}</strong><br>{{ v.why }} <span class="tool-chip">{{ v.tool }}</span></li>{% endfor %}</ul>
+  {% else %}<p>{{ t('agent.no_changes', lang) }}</p>{% endif %}
+  <details class="judge">
+    <summary>{{ t('agent.details', lang) }}</summary>
+    {% for v in r.tools %}
+    <div class="tool-call{% if not v.ok %} rejected{% endif %}">
+      <p><code>{{ v.tool }}</code> · {{ t('agent.accepted', lang) if v.ok else t('agent.rejected', lang) }}</p>
+      {% if v.claude_why %}<p>{{ t('agent.claude_said', lang) }}: “{{ v.claude_why }}”</p>{% endif %}
+      <pre>{{ v.input_text }}</pre>
+      <p class="muted">{{ v.result }}</p>
+    </div>
+    {% endfor %}
+    {% for note in r.thinking %}<p class="muted">{{ note }}</p>{% endfor %}
+    <p class="muted">{{ t('agent.tokens', lang, input=r.tokens_in, output=r.tokens_out, cost='%.4f'|format(r.cost_usd)) }}</p>
+  </details>
+</section>
+{% endfor %}
+{% endif %}
+{% if agent.state == 'done' %}<p class="muted">{{ t('agent.total_cost', lang, cost='%.3f'|format(agent.cost_usd)) }}</p>{% endif %}
+{% endblock %}

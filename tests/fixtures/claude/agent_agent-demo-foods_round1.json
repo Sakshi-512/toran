@@ -1,0 +1,97 @@
+{
+ "stop_reason": "tool_use",
+ "usage": {
+  "input_tokens": 3100,
+  "output_tokens": 420,
+  "cache_read_input_tokens": 2400
+ },
+ "content": [
+  {
+   "type": "text",
+   "text": "The English page loses Language points because product names and sizes are in Marathi or Hindi script. Translating them should fix price and how-to-order clarity."
+  },
+  {
+   "type": "tool_use",
+   "id": "toolu_mock_1",
+   "name": "add_translation",
+   "input": {
+    "target": "product_name",
+    "product": 1,
+    "lang": "en",
+    "text": "Homemade urad papad, hand-rolled and sun-dried",
+    "why": "English readers cannot read the Marathi name."
+   }
+  },
+  {
+   "type": "tool_use",
+   "id": "toolu_mock_2",
+   "name": "add_translation",
+   "input": {
+    "target": "option_label",
+    "product": 1,
+    "option": 1,
+    "lang": "en",
+    "text": "250 g packet",
+    "why": "The size label is in Marathi on the English page."
+   }
+  },
+  {
+   "type": "tool_use",
+   "id": "toolu_mock_3",
+   "name": "add_translation",
+   "input": {
+    "target": "option_label",
+    "product": 1,
+    "option": 2,
+    "lang": "en",
+    "text": "1 kg large family pack",
+    "why": "The size label is in Marathi on the English page."
+   }
+  },
+  {
+   "type": "tool_use",
+   "id": "toolu_mock_4",
+   "name": "add_translation",
+   "input": {
+    "target": "product_name",
+    "product": 2,
+    "lang": "en",
+    "text": "Green chilli and lemon pickle, homemade in mustard oil",
+    "why": "English readers cannot read the Hindi name."
+   }
+  },
+  {
+   "type": "tool_use",
+   "id": "toolu_mock_5",
+   "name": "add_translation",
+   "input": {
+    "target": "option_label",
+    "product": 2,
+    "option": 1,
+    "lang": "en",
+    "text": "500 g glass jar",
+    "why": "The size label is in Hindi on the English page."
+   }
+  },
+  {
+   "type": "tool_use",
+   "id": "toolu_mock_6",
+   "name": "add_translation",
+   "input": {
+    "target": "product_name",
+    "product": 2,
+    "lang": "mr",
+    "text": "मोहरीच्या तेलातले हिरव्या मिरचीचे आणि लिंबाचे घरगुती लोणचे",
+    "why": "Marathi readers see a Hindi name on the Marathi page."
+   }
+  },
+  {
+   "type": "tool_use",
+   "id": "toolu_mock_7",
+   "name": "run_tests",
+   "input": {
+    "why": "Check the new score."
+   }
+  }
+ ]
+}

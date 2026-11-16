@@ -1,0 +1,19 @@
+{# Before and after: the first thing anyone sees about an agent run. #}
+{% if agent.before is not none %}
+<div class="before-after">
+  <p class="ba"><span class="ba-label">{{ t('agent.before', lang) }}</span><span class="ba-score">{{ agent.before }}/100</span></p>
+  <p class="ba ba-after"><span class="ba-label">{{ t('agent.after', lang) }}</span><span class="ba-score">{{ agent.after if agent.after is not none else agent.before }}/100</span></p>
+</div>
+{% endif %}
+{% if agent.stop_text %}<p>{{ agent.stop_text }}</p>{% endif %}
+{% if agent.fixes %}
+<h3>{{ t('agent.main_fixes', lang) }}</h3>
+<ul class="good-list">{% for f in agent.fixes %}<li>{{ f }}</li>{% endfor %}</ul>
+{% endif %}
+{% if agent.awaiting_approval %}
+<p class="muted">{{ t('agent.approve_note', lang) }}</p>
+<div class="cta-row">
+  <a class="button" href="/owner/publish">{{ t('agent.approve', lang) }}</a>
+  <form method="post" action="/owner/agent/{{ agent.run.id }}/undo"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('agent.undo', lang) }}</button></form>
+</div>
+{% endif %}

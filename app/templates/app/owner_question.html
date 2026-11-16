@@ -1,0 +1,24 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('agent.confirm_title', lang) }} · {{ business.display_name }}{% endblock %}
+{% block content %}
+<p><a class="text-link" href="/owner#questions">{{ t('owner.back', lang) }}</a></p>
+<h1>{{ t('agent.confirm_title', lang) }}</h1>
+<p>{{ t('agent.question.' ~ question.topic, lang) }}</p>
+{% if error_key %}
+<p class="notice-error" role="alert">{{ t(error_key, lang) }}</p>
+{% else %}
+<p>{{ t('agent.confirm_intro', lang) }}</p>
+<blockquote class="answer-preview">{{ cleaned }}</blockquote>
+<form method="post" action="/owner/questions/{{ question.id }}/confirm">
+  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+  <input type="hidden" name="answer" value="{{ answer }}">
+  <button class="button" type="submit">{{ t('agent.confirm_yes', lang) }}</button>
+</form>
+{% endif %}
+<form class="form" method="post" action="/owner/questions/{{ question.id }}">
+  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+  <label for="answer">{{ t('agent.edit', lang) }}</label>
+  <textarea id="answer" name="answer" rows="4" maxlength="600" required>{{ answer }}</textarea>
+  <button class="button secondary" type="submit">{{ t('agent.answer_next', lang) }}</button>
+</form>
+{% endblock %}

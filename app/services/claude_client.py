@@ -77,6 +77,7 @@ class Reply:
     usage: Usage
     stop_reason: str = "end_turn"
     model: str = ""
+    content: tuple[dict[str, Any], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -89,11 +90,17 @@ class ClaudeResult:
     cost_usd_estimate: float
     is_mock: bool
     stop_reason: str = "end_turn"
+    content: tuple[dict[str, Any], ...] = ()
 
     @property
     def refused(self) -> bool:
         """True if Claude declined the request."""
         return self.stop_reason == "refusal"
+
+    @property
+    def tool_calls(self) -> list[dict[str, Any]]:
+        """The tool_use blocks of the reply (id, name, input), in order."""
+        return [block for block in self.content if block.get("type") == "tool_use"]
 
 
 class Transport(Protocol):
@@ -114,6 +121,9 @@ class AnthropicTransport:
         """Call messages.create and return the joined text blocks and usage."""
         message = self._client.messages.create(**request)
         text = "".join(getattr(block, "text", "") for block in message.content)
+        blocks = tuple(
+            block.model_dump(mode="json", exclude_none=True) for block in message.content
+        )
         u = message.usage
         usage = Usage(
             input_tokens=u.input_tokens or 0,
@@ -121,7 +131,7 @@ class AnthropicTransport:
             cache_creation_tokens=u.cache_creation_input_tokens or 0,
             cache_read_tokens=u.cache_read_input_tokens or 0,
         )
-        return Reply(text, usage, str(message.stop_reason or ""), str(message.model))
+        return Reply(text, usage, str(message.stop_reason or ""), str(message.model), blocks)
 
 
 class MockTransport:
@@ -145,11 +155,16 @@ class MockTransport:
             cache_creation_tokens=int(usage.get("cache_creation_input_tokens", 0)),
             cache_read_tokens=int(usage.get("cache_read_input_tokens", 0)),
         )
+        content = tuple(data.get("content") or [{"type": "text", "text": data.get("text", "")}])
+        text = data.get("text")
+        if text is None:
+            text = "".join(str(b.get("text", "")) for b in content if b.get("type") == "text")
         return Reply(
-            text=str(data["text"]),
+            text=str(text),
             usage=tokens,
             stop_reason=str(data.get("stop_reason", "end_turn")),
             model=str(request.get("model", "")),
+            content=content,
         )
 
 
@@ -218,12 +233,14 @@ class ClaudeClient:
         output_config: dict[str, Any] | None = None,
         max_attempts: int = MAX_ATTEMPTS,
         intake_id: int | None = None,
+        tools: list[dict[str, Any]] | None = None,
     ) -> ClaudeResult:
         """Send one request and return the reply. Raises SpendCapReached or ClaudeUnavailable.
 
         Messages may contain image blocks and their own cache_control markers. output_config
-        carries structured-output formats and effort. No sampling parameters are sent: current
-        models reject them.
+        carries structured-output formats and effort. tools are tool definitions for tool use;
+        the cached system prompt also caches them, since tools come first in the prompt. No
+        sampling parameters are sent: current models reject them.
         """
         if max_tokens <= 0:
             raise ValueError("max_tokens must be positive")
@@ -233,11 +250,15 @@ class ClaudeClient:
         request = self._build_request(model, system, messages, max_tokens, cache_system)
         if output_config:
             request["output_config"] = output_config
+        if tools:
+            request["tools"] = tools
         reply = self._send_with_retry(request, fixture_key or purpose, max_attempts)
         answered_by = reply.model or model
         cost = estimate_cost(answered_by, reply.usage)
         self._record(answered_by, reply.usage, cost, purpose, business_id, is_mock, intake_id)
-        return ClaudeResult(reply.text, answered_by, reply.usage, cost, is_mock, reply.stop_reason)
+        return ClaudeResult(
+            reply.text, answered_by, reply.usage, cost, is_mock, reply.stop_reason, reply.content
+        )
 
     def spent_today(self) -> float:
         """Estimated USD spent on real (non-mock) calls today, Asia/Kolkata time."""

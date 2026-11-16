@@ -12,7 +12,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.config import get_settings
 from app.db import get_engine
 from app.middleware import RequestContextMiddleware
-from app.routes import dev, enquiry, health, intake, jobs, owner, owner_site, pages
+from app.routes import dev, enquiry, health, intake, jobs, owner, owner_agent, owner_site, pages
+from app.services.agent import AGENT_JOB, agent_runner
 from app.services.alerts import install_alerts
 from app.services.errors import register_error_handlers
 from app.services.intake import INTAKE_JOB, intake_runner
@@ -37,12 +38,15 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     # Email gets its own worker so a long score job never delays a notification.
     mail_worker = JobWorker(engine, {EMAIL_JOB: email_runner(engine, settings)})
     intake_worker = JobWorker(engine, {INTAKE_JOB: intake_runner(engine, settings)})
+    # One agent loop at a time: it runs its own customer tests and Claude calls.
+    agent_worker = JobWorker(engine, {AGENT_JOB: agent_runner(engine, settings)}, concurrency=1)
     tasks = [asyncio.create_task(retention_loop(engine, settings.log_dir, settings=settings))]
     if settings.app_env != "test":  # tests run jobs themselves, step by step
         tasks += [
             asyncio.create_task(worker.run_forever()),
             asyncio.create_task(mail_worker.run_forever()),
             asyncio.create_task(intake_worker.run_forever()),
+            asyncio.create_task(agent_worker.run_forever()),
         ]
     try:
         yield
@@ -82,6 +86,7 @@ def create_app() -> FastAPI:
     app.include_router(intake.router)
     app.include_router(owner.router)
     app.include_router(owner_site.router)
+    app.include_router(owner_agent.router)
     if not settings.is_production:
         app.include_router(dev.router)
     return app

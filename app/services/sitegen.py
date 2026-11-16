@@ -23,6 +23,7 @@ from jinja2 import Environment, FileSystemLoader
 from app.schemas import BusinessProfile, Product
 from app.services.address_guard import address_reason
 from app.services.i18n import t
+from app.services.site_extras import EMPTY, Extras
 from app.services.site_images import ImageRef, SitePhoto, prepare_photo
 from app.services.themes import DISPLAY_FONT, Theme, get_theme
 
@@ -94,6 +95,7 @@ class SiteInput:
     enquiry_url: str
     app_name: str
     photos: tuple[SitePhoto, ...] = ()
+    extras: Extras = EMPTY  # agent translations and layout, never facts
 
 
 @dataclass(frozen=True)
@@ -219,12 +221,13 @@ def _build_photos(
     hero: ImageRef | None = None
     products: dict[str, ImageRef] = {}
     product_names = {p.name for p in site.profile.products}
+    small = site.extras.layout.small_images
     for index, photo in enumerate(site.photos):
         if photo.subject is None and hero is None:
-            ref, new_files = prepare_photo(photo, "hero")
+            ref, new_files = prepare_photo(photo, "hero", small)
             hero = ref
         elif photo.subject in product_names and photo.subject not in products:
-            ref, new_files = prepare_photo(photo, f"item-{index}")
+            ref, new_files = prepare_photo(photo, f"item-{index}", small)
             products[photo.subject] = ref
         else:
             continue
@@ -263,7 +266,11 @@ def _page_context(
         "badges": _badges(profile, areas, kind, tr),
         "hero": _image(assets.hero, root, tr, name, site.is_sample, lazy=False),
         "cta": _cta(site, name, kind, tr),
-        "products": [_product(p, assets, root, tr, site.is_sample) for p in profile.products],
+        "products": [
+            _product(p, assets, root, tr, site.is_sample, site.extras, lang)
+            for p in profile.products
+        ],
+        "layout": site.extras.layout,
         "monogram": monogram(name),
         "menu_overline": tr(f"site.overline_menu_{kind}"),
         "menu_title": tr(f"site.menu_title_{kind}"),
@@ -393,23 +400,40 @@ def _cta(site: SiteInput, name: str, kind: str, tr: Callable[..., str]) -> dict[
 
 
 def _product(
-    product: Product, assets: _Assets, root: str, tr: Callable[..., str], sample: bool
+    product: Product,
+    assets: _Assets,
+    root: str,
+    tr: Callable[..., str],
+    sample: bool,
+    extras: Extras = EMPTY,
+    lang: str = "en",
 ) -> dict[str, Any]:
+    """One menu item. Names, notes and labels may use an agent translation for this page's
+    language (her original name is shown under it); prices always come from the profile."""
     unit = tr(f"site.unit.{product.unit}")
+    options = product.options
+    name = extras.translate(product.name, lang)
+    notes = extras.translate(product.notes, lang) if product.notes else None
     single = len(product.options) == 1 and not product.options[0].label
     suffix = tr(f"site.per_unit.{product.unit}") if product.unit in UNIT_SUFFIX_UNITS else ""
     return {
-        "name": product.name,
-        "notes": product.notes,
+        "name": name or product.name,
+        "original": product.name if name and name != product.name else "",
+        "notes": notes or product.notes,
         "single_price": format_inr(product.options[0].price) if single else "",
         "unit_suffix": suffix if single else "",
         "options": []
         if single
-        else [(o.label or unit, format_inr(o.price)) for o in product.options],
+        else [(_label(o.label, extras, lang) or unit, format_inr(o.price)) for o in options],
         "image": _image(
             assets.product_images.get(product.name), root, tr, product.name, sample, lazy=True
         ),
     }
+
+
+def _label(label: str, extras: Extras, lang: str) -> str:
+    """A price option's label, translated for this page when the agent added one."""
+    return (extras.translate(label, lang) if label else None) or label
 
 
 def _steps(profile: BusinessProfile, kind: str, tr: Callable[..., str]) -> list[str]:

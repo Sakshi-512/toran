@@ -13,6 +13,7 @@ from app.config import get_settings
 from app.db import get_engine
 from app.models import Business, Job, ScoreItem, TestRun
 from app.services import publish as pub
+from app.services.agent_report import pending_changes
 from app.services.auth import require_owner
 from app.services.errors import AppError
 from app.services.i18n import pick_language, t
@@ -252,7 +253,9 @@ def publish_page(request: Request, business_id: int = Depends(require_owner)) ->
     """The confirmation screen: nothing goes live without her saying yes here (rule 2)."""
     with Session(get_engine()) as session:
         business = _business(session, business_id)
-        context = owner_site_context(session, business, pick_language(request))
+        lang = pick_language(request)
+        context = owner_site_context(session, business, lang)
+        context["agent_changes"] = pending_changes(session, business_id, lang)
     if not context["has_draft"]:
         raise AppError("publish.no_draft", status_code=409)
     return render(request, "app/owner_publish.html", {"business": business, **context})

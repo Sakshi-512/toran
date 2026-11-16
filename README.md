@@ -2,7 +2,7 @@
 
 Toran is a voice-first agent that takes a small business owner from idea to launch. She describes her business by voice (Marathi, Hindi or English) or sends a photo of her price list. Claude builds a confirmed business profile and publishes a mobile-first website. A real browser then tests the site the way her customers would.
 
-> Status: foundation only (Block 2). Intake, site builder, customer tests and the agent loop come next.
+> Status: intake, site builder, customer tests, Readiness Score, publishing with undo and the agent fix loop work. GoDaddy domain suggestions come next.
 
 ## Who it's for
 
@@ -22,6 +22,7 @@ See `CLAUDE.md` for the full flow. Built so far:
 - **Speech-to-text** (`app/services/stt.py`): Sarvam AI through its official `sarvamai` SDK, using Saaras v4 in codemix mode (native script, English words kept in English, numbers as digits), with optional key terms such as product names. Short notes use the REST endpoint; notes it turns away as too long (voice notes are usually 1 to 2 minutes) go to Sarvam's batch API. Audio is never logged, and is only written to a temporary folder for the batch upload, then deleted. Duration and an **estimated** cost (₹0.49 per minute) are stored per business. `STT_PROVIDER=mock` uses saved transcripts; `none` turns voice off and owners type. Try it at `/dev/stt` (development only).
 - **Email** (`app/services/mailer.py`): our GoDaddy mailbox over SMTP (SSL on port 465). The home page contact form (CSRF, spam trap, 5 per minute and 20 per hour) and every business enquiry are saved first, then emailed to `CONTACT_TO_EMAIL` by a background job. A contact form message with an email address sets it as Reply-To. Errors send at most one alert email per error type per hour. Without SMTP settings, mail goes to an in-memory outbox, so tests never send real email.
 - **Customer tests and Readiness Score** (`app/services/customer_tests.py`, `app/services/score.py`): real Chromium visits a site as a customer would: a phone at 360 px, a laptop at 1280 px, and a slow network (1.5 Mbps, 300 ms latency). Each check runs three times and the middle result counts. The score follows `docs/score.md`. Every item records whether it was measured or AI-assessed, and AI-assessed items show as pending until the AI checks exist, so the report reads "X of Y possible so far". Runs happen as background jobs (at most 2 Chromium instances, a 180 s timeout, one retry), and each run is stored with the profile version and a hash of the exact site files tested.
+- **Agent fix loop and "how it thinks"** (`app/services/agent.py`, `agent_tools.py`, `site_extras.py`; details in `docs/agent.md`): her "Let Toran improve my draft" button starts a background job. Each round, Claude Sonnet reads the latest score items and calls tools: `add_translation` (her confirmed product names, notes and size labels into English, Hindi or Marathi; numbers must match exactly, no prices, currency, phone numbers or links), `edit_layout` (main button first, photo after text, larger buttons, section order), `compress_images`, `ask_owner` (policy, notice needed, delivery areas, photos), `rebuild_draft` and `run_tests`. Every call is checked in code, and anything that would change a fact is rejected. Translations and layout are stored apart from her profile. The draft is rebuilt and re-tested after each round. The loop stops at 90, when a round brings no improvement (that round is rolled back), when only she can help, or after 5 rounds. Her page shows the score before and after and the main fixes, with "Approve these changes" leading to the publish confirmation and "Undo these changes". The panel (`/owner/agent/<id>`) shows each round in her language, with a detailed view for judges (Claude's reason, exact tool input, rejected calls, tokens, cost). Her answers to its questions are shown back to her and saved to her profile only after she confirms, then the draft is re-tested.
 - **Sample businesses** use free Unsplash stock photos, always labelled "Sample photo" (credits in `docs/photo-credits.md`). Screenshots of each theme are in `docs/screenshots/`.
 
 ## Dependencies
@@ -59,6 +60,8 @@ make dev
 
 Start an intake at `http://localhost:8000/start` (the sample voice notes in English, Hindi and Marathi work without a microphone or credits), or open `http://asha-home-bakery.localhost:8000/` (also `/hi/` and `/mr/`), the theme gallery at `http://localhost:8000/dev/themes`, or run the customer tests at `http://localhost:8000/dev/score` (development only; `make score slug=asha-home-bakery` does the same from the command line).
 
+To see the agent fix loop: finish an intake (or sign in to a business), then press "Let Toran improve my draft" on the owner page and open "See how Toran thinks". From the command line, `make agent slug=<slug>` runs one loop and prints each round. In mock mode (`CLAUDE_MOCK=1`) the tool calls are saved fixtures; the `agent-demo-foods` fixtures take the home-foods sample from about 72 to about 87, then ask for her ordering policy.
+
 ## Measured vs AI-assessed
 
 Measured today (median of three Chromium runs): time to main content on a slow network, page weight, order button visible on a phone, tap targets of at least 44 px, no sideways scrolling, nothing overflowing on a laptop, phone number shown, delivery area shown with no address, HTTPS (live site only). AI-assessed by one Claude call per test run (claude-sonnet-5-5 with the phone screenshot): language clarity on each language page, real photos (not applicable for samples), ordering or refund policy, and customer questions answered from `docs/checklists.md`. The report shows which model answered and the estimated cost. If the AI check cannot run, those items stay pending with a friendly reason. Checks that do not apply (the phone number on sample sites, HTTPS locally) give their points to the other checks in the same part.
@@ -69,6 +72,8 @@ Every score item records whether it is `measured` (by the browser) or `ai_assess
 
 Each Claude call is logged with input, output and cache tokens and an **estimated** USD cost per business (table `claudeusage`). Prices per million tokens, from the hackathon deck: Haiku $0.10 in / $0.50 out, Sonnet $2 / $10, Opus $4 / $20. Reports come later.
 
+Each agent fix loop stores its total estimated cost (Claude decisions plus the AI checks of every re-test) on the run, logs it as `agent_run_done`, and shows it in the panel's detailed view. Its system prompt and tools are cached. One business can start at most 3 loops a day, and the daily spend cap stops a loop early while keeping the best draft so far.
+
 Each speech-to-text call is logged with its audio duration and an **estimated** cost of ₹0.49 per minute (Sarvam's published pay-as-you-go rate), per business (table `sttusage`).
 
 ## Privacy of real data
@@ -78,7 +83,8 @@ The repository is public. Real voice notes, transcripts, photos and answer keys 
 ## Known limitations
 
 - Rate limits are kept in memory, which suits a single app process.
-- Not built yet: intake, customer tests, agent loop, mail, GoDaddy integration, draft and live versions, the owner's one-click delete.
-- Business text (product names, notes) appears exactly as the owner gave it on every language page; only interface labels are translated.
+- Not built yet: GoDaddy domain suggestions and DNS through the agent, the owner's one-click delete.
+- Business text appears exactly as the owner gave it, unless the agent added a translation for a page's language; then her original is shown under it. Translation checks catch changed numbers, prices, currency, phone numbers, links, the wrong script and addresses, but not a reworded claim (for example a translation that adds "eggless"). She sees every translation in the change list before approving.
+- In mock mode the AI checks after an agent round come from saved variants (`ai_checks_<slug>+translated+policy`), so mock scores follow the agent's changes only for fixtures that have them.
 - Business sites are served by the app (Caddy compresses them); serving them straight from Caddy is a later step.
 - Retention cleanup (enquiries 90 days, log files 30 days) runs inside the app once a day; Docker's own console buffer is size-capped (2 x 1 MB), not time-capped.

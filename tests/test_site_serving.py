@@ -139,7 +139,7 @@ def test_error_pages_on_subdomain_are_styled(client: TestClient, seeded: Busines
     response = client.get("/no-such-page", headers={"Host": HOST, "Accept-Language": "mr"})
     assert response.status_code == 404
     assert "हे पान सापडलं नाही" in response.text
-    assert 'href="/static/app.css"' in response.text
+    assert 'href="/static/app.css?v=' in response.text
     css = client.get("/static/app.css", headers={"Host": HOST})
     assert css.status_code == 200
     assert css.headers["content-type"].startswith("text/css")

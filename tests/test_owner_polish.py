@@ -102,7 +102,7 @@ def test_start_form_shows_countdown_on_same_page(client: TestClient) -> None:
     assert "कृपया एक मिनिट थांबून पुन्हा प्रयत्न करा." in page.text
     seconds = re.search(r'data-seconds="(\d+)"', page.text)
     assert seconds and 1 <= int(seconds.group(1)) <= 60
-    assert 'src="/static/countdown.js"' in page.text
+    assert 'src="/static/countdown.js?v=' in page.text
 
 
 def test_pin_and_contact_forms_show_countdown(client: TestClient, engine: Engine) -> None:

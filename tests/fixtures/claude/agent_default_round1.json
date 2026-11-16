@@ -1,0 +1,19 @@
+{
+ "stop_reason": "tool_use",
+ "usage": {
+  "input_tokens": 3000,
+  "output_tokens": 120,
+  "cache_read_input_tokens": 2400
+ },
+ "content": [
+  {
+   "type": "tool_use",
+   "id": "toolu_mock_9",
+   "name": "ask_owner",
+   "input": {
+    "topic": "policy",
+    "why": "Customers ask about advance payment and cancellation; only she knows her terms."
+   }
+  }
+ ]
+}

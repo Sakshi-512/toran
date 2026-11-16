@@ -13,7 +13,7 @@
   <link rel="preload" href="{{ preload_href }}" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ css_href }}">
 </head>
-<body class="theme-{{ theme.name }}">
+<body class="theme-{{ theme.name }}{% if layout and layout.large_buttons %} big-buttons{% endif %}">
   <a class="skip" href="#main">{{ t('site.skip') }}</a>
   {% if is_sample %}
   <p class="notice" id="sample-note"><span class="sample-badge">{{ t('label.sample') }}</span> {{ t('site.sample_note') }}</p>

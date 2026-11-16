@@ -1,5 +1,7 @@
 """Jinja2 templates with autoescape on, plus the i18n and CSRF helpers as globals."""
 
+import hashlib
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +15,16 @@ from app.services.i18n import SUPPORTED, pick_language, t
 from app.services.security import CSRF_FIELD, SPAM_TRAP_FIELD, csrf_token
 
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+
+
+@lru_cache(maxsize=16)
+def static_url(name: str) -> str:
+    """/static/<name>?v=<content hash>, so phones get new styles right after a deploy."""
+    path = (STATIC_DIR / name).resolve()
+    if not path.is_relative_to(STATIC_DIR) or not path.is_file():
+        return f"/static/{name}"
+    return f"/static/{name}?v={hashlib.sha256(path.read_bytes()).hexdigest()[:10]}"
 
 
 def _build() -> Jinja2Templates:
@@ -23,6 +35,7 @@ def _build() -> Jinja2Templates:
         CSRF_FIELD=CSRF_FIELD,
         SPAM_TRAP_FIELD=SPAM_TRAP_FIELD,
         LANGUAGES=SUPPORTED,
+        static_url=static_url,
     )
     return Jinja2Templates(env=env)
 

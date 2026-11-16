@@ -244,3 +244,59 @@ class OwnerDevice(SQLModel, table=True):
     expires_at: datetime
     last_used_at: datetime | None = None
     revoked_at: datetime | None = None
+
+
+class AgentRun(SQLModel, table=True):
+    """One run of the agent fix loop on a business's draft (its id is the action log run_id)."""
+
+    id: str = Field(primary_key=True, max_length=40)
+    business_id: int = Field(foreign_key="business.id", index=True)
+    job_id: str | None = Field(default=None, max_length=40)
+    status: str = Field(default="queued", max_length=12)  # queued, running, done or failed
+    stop_reason: str | None = Field(default=None, max_length=30)
+    rounds: int = 0
+    score_before: int | None = None
+    score_after: int | None = None
+    before_run_id: int | None = None
+    after_run_id: int | None = None
+    best_extras_version: int | None = None
+    cost_usd_estimate: float = 0.0
+    approved_at: datetime | None = None
+    discarded_at: datetime | None = None
+    created_at: datetime = Field(default_factory=utcnow)
+    finished_at: datetime | None = None
+
+
+class SiteExtras(SQLModel, table=True):
+    """Agent improvements kept apart from her confirmed profile: translations and layout.
+
+    Every version is kept. status is proposed (made by the agent, not yet approved), approved
+    (she published it) or discarded (rolled back by the agent or undone by her).
+    """
+
+    __table_args__ = (UniqueConstraint("business_id", "version"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    business_id: int = Field(foreign_key="business.id", index=True)
+    version: int
+    agent_run_id: str | None = Field(default=None, max_length=40, index=True)
+    round: int = 0
+    translations: list[dict[str, Any]] = Field(
+        default_factory=list, sa_column=Column(JSON, nullable=False)
+    )
+    layout: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
+    status: str = Field(default="proposed", max_length=12)
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+class OwnerQuestion(SQLModel, table=True):
+    """A question the agent saved for the owner (ask_owner). Topics are fixed profile fields."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    business_id: int = Field(foreign_key="business.id", index=True)
+    agent_run_id: str | None = Field(default=None, max_length=40)
+    topic: str = Field(max_length=30)
+    status: str = Field(default="open", max_length=12)  # open, answered, confirmed or dismissed
+    answer: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
+    created_at: datetime = Field(default_factory=utcnow)
+    answered_at: datetime | None = None

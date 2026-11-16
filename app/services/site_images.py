@@ -16,6 +16,8 @@ WIDTHS = (480, 960)
 WEBP_QUALITIES = (78, 65, 50, 35, 20)
 # Byte budget per image width, so photos cannot push a page past the 500 KB limit.
 BYTE_BUDGET = {480: 40 * 1024, 960: 90 * 1024}
+# compress_images (agent tool): lighter photos for slow connections.
+SMALL_BUDGET_SHARE = 0.6
 
 
 @dataclass(frozen=True)
@@ -49,15 +51,17 @@ def _short_hash(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()[:10]
 
 
-def prepare_photo(photo: SitePhoto, stem: str) -> tuple[ImageRef, dict[str, bytes]]:
-    """Return the image reference and the files to write for one photo."""
+def prepare_photo(
+    photo: SitePhoto, stem: str, small: bool = False
+) -> tuple[ImageRef, dict[str, bytes]]:
+    """Return the image reference and the files to write for one photo (small: lighter files)."""
     if photo.sample_photo is not None:
         data = sample_photo_bytes(photo.sample_photo)
     elif photo.data is not None:
         data = photo.data
     else:
         raise ValueError("SitePhoto needs data or sample_photo")
-    ref, files = _prepare_raster(data, stem)
+    ref, files = _prepare_raster(data, stem, small)
     return ref, dict(files)
 
 
@@ -70,7 +74,9 @@ def sample_photo_bytes(name: str) -> bytes:
 
 
 @lru_cache(maxsize=32)
-def _prepare_raster(data: bytes, stem: str) -> tuple[ImageRef, tuple[tuple[str, bytes], ...]]:
+def _prepare_raster(
+    data: bytes, stem: str, small: bool = False
+) -> tuple[ImageRef, tuple[tuple[str, bytes], ...]]:
     """Check, strip and encode one image (cached: sample sites are rebuilt often)."""
     checked = check_image(data)
     files: dict[str, bytes] = {}
@@ -79,7 +85,7 @@ def _prepare_raster(data: bytes, stem: str) -> tuple[ImageRef, tuple[tuple[str, 
         for width in WIDTHS:
             if srcset and srcset[-1][1] >= img.width:
                 break  # already have the image at its full width; never upscale
-            encoded = _to_webp(img, width)
+            encoded = _to_webp(img, width, small)
             target = f"assets/img/{stem}-{width}.{_short_hash(encoded)}.webp"
             files[target] = encoded
             srcset.append((target, min(width, img.width)))
@@ -87,8 +93,9 @@ def _prepare_raster(data: bytes, stem: str) -> tuple[ImageRef, tuple[tuple[str, 
     return ImageRef(srcset[0][0], tuple(srcset), srcset[0][1], height), tuple(files.items())
 
 
-def _to_webp(img: Image.Image, width: int) -> bytes:
+def _to_webp(img: Image.Image, width: int, small: bool = False) -> bytes:
     """Encode at the highest quality that fits the byte budget for this width."""
+    budget = BYTE_BUDGET[width] * (SMALL_BUDGET_SHARE if small else 1.0)
     copy = img.copy()
     copy.thumbnail((width, width * 4))
     encoded = b""
@@ -96,6 +103,6 @@ def _to_webp(img: Image.Image, width: int) -> bytes:
         out = io.BytesIO()
         copy.save(out, format="WEBP", quality=quality, method=4)
         encoded = out.getvalue()
-        if len(encoded) <= BYTE_BUDGET[width]:
+        if len(encoded) <= budget:
             break
     return encoded

@@ -273,9 +273,28 @@ def parse_assessment(text: str, questions: tuple[str, ...]) -> AIAssessment:
     return assessment
 
 
-def fixture_key(slug: str, business_type: str = "bakery") -> str:
-    """Saved response used in mock mode: per sample, else per business type, else a default."""
-    for key in (f"ai_checks_{slug}", f"ai_checks_default_{business_type}"):
+def mock_features(site_root: Path | None) -> tuple[str, ...]:
+    """What the site now contains, so mock mode can pick a matching saved answer after the
+    agent changes the draft: translated names, and an ordering policy section."""
+    if site_root is None:
+        return ()
+    index = site_root / "index.html"
+    html = index.read_text(encoding="utf-8") if index.is_file() else ""
+    features = []
+    if "data-translated" in html:
+        features.append("translated")
+    if '<section class="policy"' in html:
+        features.append("policy")
+    return tuple(features)
+
+
+def fixture_key(slug: str, business_type: str = "bakery", site_root: Path | None = None) -> str:
+    """Saved response used in mock mode: per sample (and per agent change, when a matching
+    variant such as ai_checks_<slug>+translated+policy exists), else per business type, else
+    a default."""
+    features = mock_features(site_root)
+    variant = [f"ai_checks_{slug}+{'+'.join(features)}"] if features else []
+    for key in (*variant, f"ai_checks_{slug}", f"ai_checks_default_{business_type}"):
         if (FIXTURE_DIR / f"{key}.json").is_file():
             return key
     return "ai_checks_default"
@@ -305,7 +324,7 @@ def run_ai_checks(
             max_tokens=MAX_TOKENS,
             purpose="ai_checks",
             business_id=business_id,
-            fixture_key=fixture_key(slug, business_type),
+            fixture_key=fixture_key(slug, business_type, site_root),
             output_config=OUTPUT_CONFIG,
             max_attempts=MAX_ATTEMPTS,
         )

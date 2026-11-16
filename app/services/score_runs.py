@@ -147,11 +147,28 @@ async def run_score_job(job_id: str, engine: Engine, settings: Settings) -> int:
         job = session.get(Job, job_id)
         if job is None or job.business_id is None:
             raise LookupError("job or business missing")
-        business = session.get(Business, job.business_id)
-        version = _latest_profile(session, job.business_id)
+        business_id, payload = job.business_id, dict(job.payload or {})
+    return await score_business(engine, settings, business_id, payload, job_id)
+
+
+async def score_business(
+    engine: Engine,
+    settings: Settings,
+    business_id: int,
+    payload: dict[str, Any],
+    job_id: str | None = None,
+) -> int:
+    """Test and score one business's draft or live site now; returns the stored run id.
+
+    payload: {"kind": "draft" | "live", "url": optional address to test instead}.
+    Used by score jobs and, for the draft, by the agent fix loop's run_tests tool.
+    """
+    with Session(engine) as session:
+        business = session.get(Business, business_id)
+        version = _latest_profile(session, business_id)
         if business is None or version is None:
             raise LookupError("business has no profile yet")
-        target = _target(session, business, job.payload or {}, settings)
+        target = _target(session, business, payload, settings)
         session.expunge(business)
         session.expunge(version)
     profile = BusinessProfile.model_validate(version.profile)
