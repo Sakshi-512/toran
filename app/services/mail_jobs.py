@@ -7,13 +7,14 @@ the message text never sits in the job queue and nothing is lost if the app rest
 import asyncio
 import logging
 from datetime import UTC
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from sqlalchemy.engine import Engine
 from sqlmodel import Session
 
 from app.config import Settings
-from app.models import Business, Enquiry, Job, utcnow
+from app.models import Business, DomainRequest, Enquiry, Job, utcnow
 from app.services.jobs import Runner, enqueue
 from app.services.mailer import send_mail, valid_email
 from app.services.sites import site_origin
@@ -34,6 +35,64 @@ def queue_notification(engine: Engine, enquiry_id: int) -> str:
         timeout_seconds=EMAIL_TIMEOUT_SECONDS,
         max_attempts=1,
     )
+
+
+def queue_team_email(engine: Engine, payload: dict[str, Any]) -> str:
+    """Queue a note to the team mailbox: {"team": "domain_request", "request_id": n} or
+    {"team": "deletion", "at": iso time}. The text is built when the job runs."""
+    return enqueue(
+        engine, EMAIL_JOB, payload=payload, timeout_seconds=EMAIL_TIMEOUT_SECONDS, max_attempts=2
+    )
+
+
+def team_email(
+    engine: Engine, settings: Settings, payload: dict[str, Any]
+) -> tuple[str, str] | None:
+    """(subject, body) for a team note, or None if there is nothing to send."""
+    kind = payload.get("team")
+    if kind == "deletion":
+        when = str(payload.get("at", ""))
+        return (
+            f"{settings.app_name}: a business deleted its site and data",
+            "A business owner deleted her website and all her data from the owner page.\n"
+            f"Time (UTC): {when}\n"
+            "No personal details are included in this message.\n",
+        )
+    if kind == "domain_request":
+        with Session(engine) as session:
+            request = session.get(DomainRequest, int(payload.get("request_id", 0)))
+            business = session.get(Business, request.business_id) if request else None
+            if request is None or business is None or request.notified_at is not None:
+                return None
+            approved = request.approved_at
+            approved = approved if approved.tzinfo else approved.replace(tzinfo=UTC)
+            body = (
+                f"{business.display_name} asked for a web address in the owner app.\n\n"
+                f"Domain: {request.domain}\n"
+                f"First-year price shown (before tax): {request.price_usd:.2f} {request.currency}\n"
+                f"She approved it: {approved.astimezone(IST):%d/%m/%Y %H:%M} IST\n"
+                f"Her site: {site_origin(business.slug, settings)}/\n\n"
+                "To do: buy it on godaddy.com with the hackathon credit, point its DNS at the "
+                "server (gddy CLI), then tell her it is ready. Nothing was bought by the app.\n"
+            )
+            domain = request.domain
+            request.notified_at = utcnow()
+            session.add(request)
+            session.commit()
+        return f"{settings.app_name}: web address request {domain}", body
+    return None
+
+
+def send_team_email(engine: Engine, settings: Settings, payload: dict[str, Any]) -> None:
+    """Send one team note to CONTACT_TO_EMAIL."""
+    if not settings.contact_to_email:
+        logger.warning("mail_skipped_no_recipient", extra={"team": payload.get("team")})
+        return
+    message = team_email(engine, settings, payload)
+    if message is None:
+        return
+    subject, body = message
+    send_mail(settings, to=settings.contact_to_email, subject=subject, body=body, kind="team")
 
 
 def _received(enquiry: Enquiry) -> str:
@@ -111,7 +170,11 @@ def email_runner(engine: Engine, settings: Settings) -> Runner:
     async def runner(job_id: str) -> None:
         with Session(engine) as session:
             job = session.get(Job, job_id)
-            enquiry_id = int((job.payload or {}).get("enquiry_id", 0)) if job else 0
+            payload = dict(job.payload or {}) if job else {}
+        if "team" in payload:
+            await asyncio.to_thread(send_team_email, engine, settings, payload)
+            return
+        enquiry_id = int(payload.get("enquiry_id", 0))
         await asyncio.to_thread(send_notification, engine, settings, enquiry_id)
 
     return runner

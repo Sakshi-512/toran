@@ -1,0 +1,24 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('delete.title', lang) }} · {{ business.display_name }}{% endblock %}
+{% block content %}
+<p><a class="text-link" href="/owner">{{ t('owner.back', lang) }}</a></p>
+<h1>{{ t('delete.title', lang) }}</h1>
+<div class="delete-warning" role="alert">
+  <p><strong>{{ t('delete.warning_title', lang) }}</strong></p>
+  <p>{{ t('delete.warning', lang) }}</p>
+</div>
+<h2>{{ t('delete.list_title', lang, name=business.display_name) }}</h2>
+<ul class="delete-list">
+  {% for key in ['site', 'versions', 'details', 'photos', 'inputs', 'enquiries', 'tests', 'agent', 'domains', 'devices'] %}
+  <li>{{ t('delete.item.' ~ key, lang) }}</li>
+  {% endfor %}
+</ul>
+<p class="muted">{{ t('delete.kept', lang) }}</p>
+<form method="post" action="/owner/delete">
+  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+  <div class="cta-row">
+    <button class="button danger" type="submit">{{ t('delete.yes', lang) }}</button>
+    <a class="button secondary" href="/owner">{{ t('delete.no', lang) }}</a>
+  </div>
+</form>
+{% endblock %}

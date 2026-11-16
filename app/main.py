@@ -12,10 +12,23 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.config import get_settings
 from app.db import get_engine
 from app.middleware import RequestContextMiddleware
-from app.routes import dev, enquiry, health, intake, jobs, owner, owner_agent, owner_site, pages
+from app.routes import (
+    dev,
+    enquiry,
+    health,
+    intake,
+    jobs,
+    owner,
+    owner_account,
+    owner_agent,
+    owner_domains,
+    owner_site,
+    pages,
+)
 from app.services.agent import AGENT_JOB, agent_runner
 from app.services.alerts import install_alerts
 from app.services.errors import register_error_handlers
+from app.services.godaddy import DOMAINS_JOB, domains_runner
 from app.services.intake import INTAKE_JOB, intake_runner
 from app.services.jobs import JobWorker
 from app.services.logs import setup_logging
@@ -41,6 +54,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     intake_worker = JobWorker(engine, {INTAKE_JOB: intake_runner(engine, settings)})
     # One agent loop at a time: it runs its own customer tests and Claude calls.
     agent_worker = JobWorker(engine, {AGENT_JOB: agent_runner(engine, settings)}, concurrency=1)
+    domains_worker = JobWorker(engine, {DOMAINS_JOB: domains_runner(engine, settings)})
     tasks = [asyncio.create_task(retention_loop(engine, settings.log_dir, settings=settings))]
     if settings.app_env != "test":  # tests run jobs themselves, step by step
         tasks += [
@@ -48,6 +62,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
             asyncio.create_task(mail_worker.run_forever()),
             asyncio.create_task(intake_worker.run_forever()),
             asyncio.create_task(agent_worker.run_forever()),
+            asyncio.create_task(domains_worker.run_forever()),
         ]
     try:
         yield
@@ -90,6 +105,8 @@ def create_app() -> FastAPI:
     app.include_router(owner.router)
     app.include_router(owner_site.router)
     app.include_router(owner_agent.router)
+    app.include_router(owner_domains.router)
+    app.include_router(owner_account.router)
     if not settings.is_production:
         app.include_router(dev.router)
     return app

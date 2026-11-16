@@ -25,6 +25,8 @@ from app.models import (
     AgentRun,
     Business,
     ClaudeUsage,
+    DomainLookup,
+    DomainRequest,
     Enquiry,
     IntakeSession,
     Job,
@@ -334,6 +336,8 @@ def delete_business_data(engine: Engine, settings: Settings, business_id: int) -
             delete(OwnerQuestion).where(col(OwnerQuestion.business_id) == business_id),
             delete(SiteExtras).where(col(SiteExtras.business_id) == business_id),
             delete(AgentRun).where(col(AgentRun.business_id) == business_id),
+            delete(DomainLookup).where(col(DomainLookup.business_id) == business_id),
+            delete(DomainRequest).where(col(DomainRequest.business_id) == business_id),
         ]
         for statement in statements:
             session.exec(statement)

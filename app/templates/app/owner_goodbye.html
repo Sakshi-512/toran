@@ -1,0 +1,8 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('delete.goodbye_title', lang) }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ t('delete.goodbye_title', lang) }}</h1>
+<p class="notice-ok" role="status">{{ t('delete.goodbye', lang) }}</p>
+<p>{{ t('delete.goodbye_again', lang) }}</p>
+<p><a class="button" href="/">{{ t('home.back', lang) }}</a></p>
+{% endblock %}

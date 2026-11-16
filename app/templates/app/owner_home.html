@@ -1,5 +1,5 @@
 {% extends "app/base.html" %}
-{% block head %}{% if (scoring and scoring.state != "failed") or (agent and agent.state in ('queued', 'running')) %}<meta http-equiv="refresh" content="5">{% endif %}{% endblock %}
+{% block head %}{% if (scoring and scoring.state != "failed") or (agent and agent.state in ('queued', 'running')) or (domains_lookup and domains_lookup.status == 'running') %}<meta http-equiv="refresh" content="5">{% endif %}{% endblock %}
 {% block title %}{{ business.display_name }} · {{ app_name }}{% endblock %}
 {% block content %}
 <h1>{{ business.display_name }} <span class="status status-{{ business.status }}">{{ t('owner.status.' ~ business.status, lang) }}</span></h1>
@@ -127,6 +127,53 @@
     <button class="button" type="submit">{{ t('owner.add_photos', lang) }}</button>
   </form>
 </section>
+<section class="card" id="domains">
+  <h2>{{ t('domains.title', lang) }}</h2>
+  {% if domains_error %}<p class="notice-error" role="alert">{{ t(domains_error, lang) }}</p>{% endif %}
+  {% if domains_request %}
+  <p class="notice-ok" role="status">{{ t('domains.requested', lang, domain=domains_request.domain) }}</p>
+  <p>{{ t('domains.we_set_up', lang) }}</p>
+  {% elif not domains_available %}
+  <p class="muted">{{ t('domains.unavailable', lang) }}</p>
+  {% elif domains_lookup and domains_lookup.status == 'running' %}
+  <p class="progress" role="status" aria-live="polite">{{ t('domains.checking', lang) }}</p>
+  {% elif domains_lookup and domains_lookup.status == 'unavailable' %}
+  <p class="muted">{{ t('domains.unavailable', lang) }}</p>
+  {% elif domains_lookup %}
+  {% if domains_offers %}
+  <p>{{ t('domains.intro_found', lang) }}</p>
+  <ul class="domain-list">
+    {% for o in domains_offers %}
+    <li class="domain-item">
+      <p class="domain-name">{{ o.domain }}</p>
+      <p>{{ t('domains.price', lang, usd='%.2f'|format(o.price_usd), inr=o.inr) }} <span class="muted">· {{ t('domains.before_tax', lang) }}</span></p>
+      <form method="post" action="/owner/domains/request"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><input type="hidden" name="domain" value="{{ o.domain }}"><button class="button secondary">{{ t('domains.want', lang) }}</button></form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="muted">{{ t('domains.none_free', lang) }}</p>{% endif %}
+  <p class="muted">{{ t('domains.how_it_works', lang) }}</p>
+  {% else %}
+  <p>{{ t('domains.intro', lang) }}</p>
+  <form method="post" action="/owner/domains"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button">{{ t('domains.find', lang) }}</button></form>
+  <p class="muted">{{ t('domains.how_it_works', lang) }}</p>
+  {% endif %}
+  {% if domains_calls %}
+  <details class="judge">
+    <summary>{{ t('domains.thinking', lang) }}</summary>
+    {% for c in domains_calls %}
+    <div class="tool-call{% if not c.ok %} rejected{% endif %}">
+      {% if c.step == 'claude_suggest' %}
+      <p><code>{{ c.tool }}</code> · {{ t('domains.claude_names', lang) }}: {{ c.detail.names|join(', ') }}</p>
+      {% else %}
+      <p><code>{{ c.tool }}</code> · {{ c.detail.domain }} · {% if c.detail.error %}{{ t('domains.call_failed', lang) }}{% elif c.detail.available %}{{ t('domains.free', lang) }}{% if c.detail.price_usd is not none %}, ${{ '%.2f'|format(c.detail.price_usd) }}{% endif %}{% else %}{{ t('domains.taken', lang) }}{% endif %}</p>
+      <pre>{{ c.detail.command }}</pre>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </details>
+  {% endif %}
+</section>
 {% if not business.is_sample %}
 <section class="card" id="gallery">
   <h2>{{ t('gallery.owner_title', lang) }}</h2>
@@ -142,5 +189,10 @@
   </form>
 </section>
 {% endif %}
+<section class="card danger-zone" id="delete">
+  <h2>{{ t('delete.title', lang) }}</h2>
+  <p>{{ t('delete.intro', lang) }}</p>
+  <p><a class="button danger" href="/owner/delete">{{ t('delete.start', lang) }}</a></p>
+</section>
 <form method="post" action="/owner/logout"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.logout', lang) }}</button></form>
 {% endblock %}

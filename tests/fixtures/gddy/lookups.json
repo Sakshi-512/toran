@@ -1,0 +1,98 @@
+{
+ "apnihomeshop.com": {
+  "available": true,
+  "price": 11.99
+ },
+ "apnihomeshop.in": {
+  "available": true,
+  "price": 12.99
+ },
+ "ashabakery.com": {
+  "available": false,
+  "price": 11.99
+ },
+ "ashabakery.in": {
+  "available": false,
+  "price": 12.99
+ },
+ "ashahomebakery.com": {
+  "available": true,
+  "price": 11.99
+ },
+ "ashahomebakery.in": {
+  "available": true,
+  "price": 12.99
+ },
+ "ashakitchen.com": {
+  "available": false,
+  "price": 11.99
+ },
+ "ashakitchen.in": {
+  "available": false,
+  "price": 12.99
+ },
+ "ashascakes.com": {
+  "available": false,
+  "price": 11.99
+ },
+ "ashascakes.in": {
+  "available": true,
+  "price": 12.99
+ },
+ "gharkashop.com": {
+  "available": true,
+  "price": 11.99
+ },
+ "gharkashop.in": {
+  "available": true,
+  "price": 12.99
+ },
+ "homemadegoods.com": {
+  "available": true,
+  "price": 11.99
+ },
+ "homemadegoods.in": {
+  "available": true,
+  "price": 12.99
+ },
+ "kothrudcakes.com": {
+  "available": true,
+  "price": 11.99
+ },
+ "kothrudcakes.in": {
+  "available": true,
+  "price": 12.99
+ },
+ "localhomeshop.com": {
+  "available": true,
+  "price": 11.99
+ },
+ "localhomeshop.in": {
+  "available": true,
+  "price": 12.99
+ },
+ "myhomeshop.com": {
+  "available": false,
+  "price": 11.99
+ },
+ "myhomeshop.in": {
+  "available": false,
+  "price": 12.99
+ },
+ "punehomebakery.com": {
+  "available": true,
+  "price": 11.99
+ },
+ "punehomebakery.in": {
+  "available": true,
+  "price": 12.99
+ },
+ "shopathome.com": {
+  "available": false,
+  "price": 11.99
+ },
+ "shopathome.in": {
+  "available": false,
+  "price": 12.99
+ }
+}

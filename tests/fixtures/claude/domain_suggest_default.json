@@ -1,0 +1,7 @@
+{
+ "text": "{\"names\": [\"myhomeshop\", \"homemadegoods\", \"localhomeshop\", \"shopathome\", \"gharkashop\", \"apnihomeshop\"]}",
+ "usage": {
+  "input_tokens": 180,
+  "output_tokens": 60
+ }
+}

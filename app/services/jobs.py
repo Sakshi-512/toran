@@ -177,7 +177,7 @@ class JobWorker:
             self._slots.release()
 
 
-TYPICAL_SECONDS = {"score": 45, "intake": 60, "email": 5, "agent": 300}
+TYPICAL_SECONDS = {"score": 45, "intake": 60, "email": 5, "agent": 300, "domains": 30}
 
 
 def queue_position(engine: Engine, job_id: str) -> tuple[int, int]:

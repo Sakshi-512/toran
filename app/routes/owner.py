@@ -25,6 +25,7 @@ from app.services.auth import (
     sign_out,
 )
 from app.services.errors import AppError
+from app.services.godaddy import domains_context
 from app.services.i18n import pick_language
 from app.services.owner_questions import dismiss_topic
 from app.services.ratelimit import FORM_LIMIT, RateLimited, check
@@ -34,6 +35,7 @@ from app.templating import render
 router = APIRouter()
 IST = ZoneInfo("Asia/Kolkata")
 INBOX_SIZE = 30
+DOMAIN_ERRORS = ("too_many", "not_offered", "already")
 AGENT_ERRORS = {"busy": "agent.busy", "limit": "agent.daily_limit", "draft": "publish.no_draft"}
 
 
@@ -116,6 +118,10 @@ def owner_home(request: Request, business_id: int = Depends(require_owner)) -> R
         problem = AGENT_ERRORS.get(request.query_params.get("agent_error", ""))
         if problem:
             context["agent_error"] = problem
+        context.update(domains_context(session, get_settings(), business_id))
+        domain_problem = request.query_params.get("domains_error", "")
+        if domain_problem in DOMAIN_ERRORS:
+            context["domains_error"] = f"domains.error_{domain_problem}"
         return render(request, "app/owner_home.html", context)
 
 

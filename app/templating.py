@@ -11,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 from starlette.responses import Response
 
 from app.config import get_settings
-from app.services.i18n import SUPPORTED, pick_language, t
+from app.services.i18n import SUPPORTED, normalise_language, pick_language, t
 from app.services.security import CSRF_FIELD, SPAM_TRAP_FIELD, csrf_token
 
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
@@ -52,6 +52,9 @@ def render(
 ) -> Response:
     """Render a template with the owner's language and public settings in the context."""
     settings = get_settings()
+    chosen = normalise_language(request.query_params.get("lang"))
+    if chosen and "session" in request.scope:
+        request.session["lang"] = chosen  # her choice from the language links stays on every page
     base = {
         "lang": pick_language(request),
         "app_name": settings.app_name,

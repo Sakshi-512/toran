@@ -301,3 +301,32 @@ class OwnerQuestion(SQLModel, table=True):
     answer: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
     created_at: datetime = Field(default_factory=utcnow)
     answered_at: datetime | None = None
+
+
+class DomainLookup(SQLModel, table=True):
+    """One GoDaddy lookup for a business: the suggested names and what GoDaddy said.
+
+    results is a list of {domain, available, price_usd, currency}. Kept for an hour as a cache.
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    business_id: int = Field(foreign_key="business.id", index=True)
+    results: list[dict[str, Any]] = Field(
+        default_factory=list, sa_column=Column(JSON, nullable=False)
+    )
+    status: str = Field(default="ok", max_length=16)  # ok or unavailable
+    is_mock: bool = False
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+class DomainRequest(SQLModel, table=True):
+    """Her "I want this one": the team buys it on godaddy.com and points DNS at her site."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    business_id: int = Field(foreign_key="business.id", index=True)
+    domain: str = Field(max_length=80)
+    price_usd: float
+    currency: str = Field(default="USD", max_length=3)
+    status: str = Field(default="requested", max_length=16)  # requested, done or cancelled
+    approved_at: datetime = Field(default_factory=utcnow)
+    notified_at: datetime | None = None
