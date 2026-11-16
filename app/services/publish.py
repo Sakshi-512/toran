@@ -176,6 +176,13 @@ def _copy(source: Path, target: Path) -> None:
     shutil.rmtree(old, ignore_errors=True)
 
 
+def needs_phone(business: Business, profile: BusinessProfile | None) -> bool:
+    """A real business needs a phone number (or her choice of no order button) to go live."""
+    if business.is_sample or profile is None:
+        return False
+    return not profile.phone and bool(profile.order_methods)
+
+
 def publish(engine: Engine, settings: Settings, business_id: int) -> SiteVersion:
     """Make the current draft the live site (after her approval) and save it as a version."""
     from app.services.score_runs import site_hash
@@ -186,6 +193,9 @@ def publish(engine: Engine, settings: Settings, business_id: int) -> SiteVersion
         if not (paths.draft / "index.html").is_file():
             raise AppError("publish.no_draft", status_code=409)
         profile = latest_profile(session, business_id)
+        confirmed = BusinessProfile.model_validate(profile.profile) if profile else None
+        if needs_phone(business, confirmed):
+            raise AppError("phone.required", status_code=409)
         numbers = session.exec(
             select(SiteVersion.number).where(SiteVersion.business_id == business_id)
         ).all()

@@ -21,6 +21,7 @@ from app.routes import (
     owner,
     owner_account,
     owner_agent,
+    owner_details,
     owner_domains,
     owner_site,
     pages,
@@ -107,6 +108,7 @@ def create_app() -> FastAPI:
     app.include_router(owner_agent.router)
     app.include_router(owner_domains.router)
     app.include_router(owner_account.router)
+    app.include_router(owner_details.router)
     if not settings.is_production:
         app.include_router(dev.router)
     return app

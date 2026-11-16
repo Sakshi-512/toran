@@ -17,8 +17,16 @@
 </section>
 {% endif %}
 <p><a class="button secondary" href="/owner/preview/{% if lang != 'en' %}{{ lang }}/{% endif %}" target="_blank" rel="noopener">{{ t('owner.preview', lang) }}</a></p>
+{% if needs_phone %}
+<p class="notice-error" role="alert">{{ t('phone.missing_owner', lang) }}</p>
+<div class="cta-row">
+  <a class="button" href="/owner/details#phone">{{ t('phone.add_now', lang) }}</a>
+  <a class="button secondary" href="/owner">{{ t('publish.no', lang) }}</a>
+</div>
+{% else %}
 <div class="cta-row">
   <form method="post" action="/owner/publish"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button" type="submit">{{ t('publish.yes', lang) }}</button></form>
   <a class="button secondary" href="/owner">{{ t('publish.no', lang) }}</a>
 </div>
+{% endif %}
 {% endblock %}

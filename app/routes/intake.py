@@ -131,6 +131,7 @@ def _cards(
     source: str,
     errors: dict[str, str] | None = None,
     status_code: int = 200,
+    sample: bool = False,
 ) -> Response:
     return render(
         request,
@@ -142,6 +143,7 @@ def _cards(
             "from_photo": source == "photo",
             "errors": errors or {},
             "photo_error": (errors or {}).get("photos"),
+            "sample": sample,
         },
         status_code=status_code,
     )
@@ -154,7 +156,14 @@ def confirm_page(token: str, request: Request) -> Response:
         intake = svc.intake_for_token(session, token)
         if intake.status != "ready" or intake.draft is None:
             return RedirectResponse(f"/start/{token}/wait", status_code=303)
-        return _cards(request, token, intake.draft, intake.web_address or "", intake.source)
+        return _cards(
+            request,
+            token,
+            intake.draft,
+            intake.web_address or "",
+            intake.source,
+            sample=svc.is_sample_intake(intake),
+        )
 
 
 @router.post("/{token}/confirm", include_in_schema=False, dependencies=[Depends(verify_csrf)])
@@ -175,6 +184,7 @@ async def confirm_submit(token: str, request: Request) -> Response:
         if intake.status != "ready":
             raise AppError("error.not_found", status_code=404)
         source = intake.source
+        sample = svc.is_sample_intake(intake)
         if action == "add_product":
             draft["products"].append(
                 {"name": "", "unit": "piece", "options": [{"label": "", "price": ""}], "notes": ""}
@@ -187,7 +197,7 @@ async def confirm_submit(token: str, request: Request) -> Response:
         session.add(intake)
         session.commit()
         if action != "confirm":
-            return _cards(request, token, draft, address, source)
+            return _cards(request, token, draft, address, source, sample=sample)
         profile = svc.validate_draft(session, dict(draft), address, errors)
         photos = [await _file_bytes(f) for f in form.getlist("photos")]
         photos = [p for p in photos if p]
@@ -195,7 +205,7 @@ async def confirm_submit(token: str, request: Request) -> Response:
         if photo_error:
             errors.add("photos", photo_error)
         if profile is None or errors.errors:
-            return _cards(request, token, draft, address, source, errors.errors, 422)
+            return _cards(request, token, draft, address, source, errors.errors, 422, sample)
         intake_id = intake.id
     assert intake_id is not None  # noqa: S101
     confirmed = svc.confirm_intake(engine, settings, intake_id, profile, address, photos[:8])

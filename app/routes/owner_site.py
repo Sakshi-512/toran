@@ -12,6 +12,7 @@ from starlette.responses import Response
 from app.config import get_settings
 from app.db import get_engine
 from app.models import Business, Job, ScoreItem, TestRun
+from app.schemas import BusinessProfile
 from app.services import publish as pub
 from app.services.agent_report import pending_changes
 from app.services.auth import require_owner
@@ -19,7 +20,7 @@ from app.services.errors import AppError
 from app.services.i18n import pick_language, t
 from app.services.jobs import queue_position
 from app.services.score_runs import SCORE_JOB, queue_score, report_parts
-from app.services.score_summary import OwnerSummary, owner_summary
+from app.services.score_summary import FIX_LINKS, OwnerSummary, owner_summary
 from app.services.security import site_security_headers, verify_csrf
 from app.services.sitegen import SiteBuild
 from app.services.sites import main_origin, resolve_file, site_origin
@@ -77,7 +78,10 @@ def owner_site_context(session: Session, business: Business, lang: str) -> dict[
         select(TestRun).where(TestRun.business_id == business.id).order_by(col(TestRun.id).desc())
     ).all()
     paths = pub.folders(settings, business.slug)
+    version = pub.latest_profile(session, business.id)
+    profile = BusinessProfile.model_validate(version.profile) if version else None
     return {
+        "needs_phone": pub.needs_phone(business, profile),
         "site_url": f"{site_origin(business.slug, settings)}/",
         "has_draft": (paths.draft / "index.html").is_file(),
         "live": pub.live_version(session, business.id),
@@ -214,7 +218,9 @@ def report(run_id: int, request: Request, business_id: int = Depends(require_own
     items = [item for part in parts for item in part["checks"]]
     summary = owner_summary(run, items)
     return render(
-        request, "app/owner_report.html", {"run": run, "summary": summary, "business": business}
+        request,
+        "app/owner_report.html",
+        {"run": run, "summary": summary, "business": business, "fix_links": FIX_LINKS},
     )
 
 

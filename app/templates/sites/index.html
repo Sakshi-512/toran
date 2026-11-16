@@ -17,7 +17,7 @@
       {% if cta %}
       <div class="cta">
         {% if cta.wa_href %}<a class="btn btn-main" href="{{ cta.wa_href }}"{% if not is_sample %} rel="noopener"{% endif %}>{{ icon("chat", 20) }}{{ cta.wa_label }}</a>{% endif %}
-        <a class="btn btn-call" href="{{ cta.call_href }}">{{ icon("phone", 20) }}{{ cta.call_label }}</a>
+        {% if cta.call_href %}<a class="btn btn-call" href="{{ cta.call_href }}">{{ icon("phone", 20) }}{{ cta.call_label }}</a>{% endif %}
       </div>
       {% endif %}
 {%- endmacro %}

@@ -275,7 +275,7 @@ def _page_context(
         "menu_overline": tr(f"site.overline_menu_{kind}"),
         "menu_title": tr(f"site.menu_title_{kind}"),
         "areas_overline": tr(f"site.overline_areas_{kind}"),
-        "steps": _steps(profile, kind, tr),
+        "steps": _steps(profile, kind, tr, site.is_sample),
         "howto_title": tr(f"site.howto_title_{kind}"),
         "policy": profile.policy,
         "areas": _area_list(areas),
@@ -382,9 +382,18 @@ def _image(
 
 
 def _cta(site: SiteInput, name: str, kind: str, tr: Callable[..., str]) -> dict[str, str] | None:
+    """The Order or Book button. Sample sites always show it, pointing to the on-page sample
+    note (never a dialable number), so demos look complete even without a phone."""
     phone = site.profile.phone
     if not phone:
-        return None
+        if not site.is_sample:
+            return None
+        return {
+            "wa_label": tr(f"cta.{kind}_whatsapp"),
+            "wa_href": "#sample-note",
+            "call_label": "",
+            "call_href": "",
+        }
     if site.is_sample:
         wa_href = call_href = "#sample-note"
     else:
@@ -436,8 +445,10 @@ def _label(label: str, extras: Extras, lang: str) -> str:
     return (extras.translate(label, lang) if label else None) or label
 
 
-def _steps(profile: BusinessProfile, kind: str, tr: Callable[..., str]) -> list[str]:
-    if not profile.phone:
+def _steps(
+    profile: BusinessProfile, kind: str, tr: Callable[..., str], sample: bool = False
+) -> list[str]:
+    if not profile.phone and not sample:
         return []
     last = (
         tr(f"site.step_lead_time_{kind}", lead_time=profile.lead_time)

@@ -9,7 +9,9 @@
   <h2>{{ t('owner.your_site', lang) }}</h2>
   {% if business.status == 'live' %}<p class="notice-ok">{{ t('owner.status_live_note', lang) }} <a href="{{ site_url }}">{{ site_url }}</a></p>
   {% elif business.status == 'offline' %}<p class="notice-error">{{ t('owner.status_offline_note', lang) }}</p>
+  {% elif has_draft and latest_draft_run and not scoring %}<p class="notice-ok">{{ t('owner.status_draft_ready', lang) }}</p>
   {% else %}<p class="notice-ok">{{ t('owner.status_draft', lang) }}</p>{% endif %}
+  {% if needs_phone %}<div class="notice-error" role="alert"><p>{{ t('phone.missing_owner', lang) }}</p><a class="text-link" href="/owner/details#phone">{{ t('phone.add_now', lang) }}</a></div>{% endif %}
 
   {% if scoring %}
   <p class="progress" role="status" aria-live="polite">{% if scoring.state == 'failed' %}{{ t('owner.score_failed', lang) }}{% else %}{{ scoring.text }}{% endif %}</p>
@@ -19,21 +21,23 @@
   <p><a class="text-link" href="/owner/score/{{ latest_draft_run.id }}">{{ t('owner.see_report', lang) }}</a></p>
   {% endif %}
 
-  <div class="cta-row">
+  {% if has_draft %}<p class="primary-action"><a class="button big-cta" href="/owner/publish">{{ t('owner.publish', lang) }}</a></p>{% endif %}
+  <div class="action-grid">
     {% if has_draft %}<a class="button secondary" href="/owner/preview/{% if lang != 'en' %}{{ lang }}/{% endif %}" target="_blank" rel="noopener">{{ t('owner.preview', lang) }}</a>{% endif %}
     <a class="button secondary" href="/owner/styles">{{ t('owner.styles', lang) }}</a>
+    <a class="button secondary" href="/owner/details">{{ t('details.title', lang) }}</a>
     <form method="post" action="/owner/draft"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.rebuild', lang) }}</button></form>
   </div>
-  <div class="cta-row">
-    {% if has_draft %}<a class="button" href="/owner/publish">{{ t('owner.publish', lang) }}</a>{% endif %}
-    {% if live %}
+  {% if live %}
+  <div class="action-grid live-actions">
     <form method="post" action="/owner/undo"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.undo', lang) }}</button></form>
     {% if business.status == 'live' %}
     <form method="post" action="/owner/offline"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.offline', lang) }}</button></form>
     {% else %}
     <form method="post" action="/owner/online"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.online', lang) }}</button></form>
-    {% endif %}{% endif %}
+    {% endif %}
   </div>
+  {% endif %}
 
   {% if runs %}
   <h3>{{ t('owner.history', lang) }}</h3>

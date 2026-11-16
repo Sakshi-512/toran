@@ -166,6 +166,11 @@ def start_intake(
         return Started(intake.id, token)
 
 
+def is_sample_intake(intake: IntakeSession) -> bool:
+    """Intakes from the built-in sample voice notes are demos, never real businesses."""
+    return bool(intake.stt_route and intake.stt_route.startswith("sample:"))
+
+
 def start_sample(
     engine: Engine, settings: Settings, sample_id: str, language: str | None
 ) -> Started:
@@ -321,7 +326,10 @@ def draft_from_form(
         "area": str(form.get("area", "")).strip(),
         "delivery_areas": _list(str(form.get("delivery_areas", ""))),
         "languages": [v for v in multi.get("languages", []) if v in ("en", "hi", "mr")],
-        "order_methods": list(multi.get("order_methods", [])),
+        # "I don't want an order button" (only without a phone): no order methods at all.
+        "order_methods": []
+        if form.get("no_order_button") == "yes" and not str(form.get("phone", "")).strip()
+        else list(multi.get("order_methods", [])),
         "lead_time": str(form.get("lead_time", "")).strip(),
         "phone": ascii_digits(str(form.get("phone", ""))).strip(),
         "policy": str(form.get("policy", "")).strip(),

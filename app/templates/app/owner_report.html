@@ -12,7 +12,13 @@
     <h2>{{ t('owner.things_to_improve', lang) }}</h2>
     <ul class="score-items">
       {% for item in summary.to_improve %}
-      <li class="score-item"><strong>{{ t('score.check.' ~ item.key, lang) }}</strong><p>{{ item['reason_' ~ lang] }}</p></li>
+      <li class="score-item">
+        <strong>{{ t('score.check.' ~ item.key, lang) }}</strong>
+        <p>{{ item['reason_' ~ lang] }}</p>
+        <p class="how-to-fix"><span class="fix-label">{{ t('fix.how', lang) }}</span> {{ t('fix.' ~ item.key, lang) }}</p>
+        {% set link = fix_links.get(item.key) %}
+        {% if link %}<p><a class="text-link" href="{{ link[0] }}">{{ t(link[1], lang) }}</a></p>{% endif %}
+      </li>
       {% endfor %}
     </ul>
     {% endif %}

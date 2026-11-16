@@ -1,0 +1,36 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('details.title', lang) }} · {{ business.display_name }}{% endblock %}
+{% macro err(name) %}{% if errors.get(name) %}<p class="field-error" role="alert">{{ t(errors[name], lang) }}</p>{% endif %}{% endmacro %}
+{% block content %}
+<p><a class="text-link" href="/owner">{{ t('owner.back', lang) }}</a></p>
+<h1>{{ t('details.title', lang) }}</h1>
+<p>{{ t('details.intro', lang) }}</p>
+{% if saved %}<p class="notice-ok" role="status">{{ t('details.saved', lang) }}</p>{% endif %}
+{% set v = sent if sent else profile %}
+<form class="form" method="post" action="/owner/details">
+  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+  <section class="card" id="phone">
+    <label for="d-phone">{{ t('confirm.phone', lang) }}</label>
+    <input id="d-phone" name="phone" value="{{ v.phone }}" inputmode="tel" maxlength="20" autocomplete="tel">
+    {{ err('phone') }}
+    {% if not business.is_sample and not v.phone %}
+    <p class="notice-error">{{ t('phone.missing', lang) }}</p>
+    <label class="check"><input type="checkbox" name="no_order_button" value="yes"{% if not sent and profile.order_methods == [] %} checked{% endif %}{% if sent and sent.no_order_button %} checked{% endif %}> <span>{{ t('phone.no_button', lang) }}</span></label>
+    {% endif %}
+  </section>
+  <section class="card" id="area">
+    <label for="d-area">{{ t('details.area', lang) }}</label>
+    <p class="muted">{{ t('details.area_hint', lang) }}</p>
+    <input id="d-area" name="area" value="{{ v.area }}" maxlength="120">
+    {{ err('area') }}
+  </section>
+  <section class="card" id="policy">
+    <label for="d-policy">{{ t('details.policy', lang) }}</label>
+    <p class="muted">{{ t('agent.hint.policy', lang) }}</p>
+    <textarea id="d-policy" name="policy" rows="4" maxlength="500">{{ v.policy }}</textarea>
+    {{ err('policy') }}
+  </section>
+  <p class="muted">{{ t('details.products_note', lang) }}</p>
+  <button class="button" type="submit">{{ t('details.save', lang) }}</button>
+</form>
+{% endblock %}
