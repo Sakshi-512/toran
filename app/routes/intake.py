@@ -1,5 +1,7 @@
 """Owner intake pages: start, wait, confirmation cards, done. Logic lives in services.intake."""
 
+from collections.abc import Sequence
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
@@ -24,8 +26,21 @@ router = APIRouter(prefix="/start")
 SOURCE_OF_SAMPLE = {"sample-en": "en", "sample-hi": "hi", "sample-mr": "mr"}
 
 
+START_OPTIONS = ("record", "voice", "photo", "type")
+
+
 async def _file_bytes(value: object) -> bytes:
     return await value.read() if isinstance(value, UploadFile) else b""
+
+
+async def _first_file(values: Sequence[object]) -> bytes:
+    """The first non-empty upload (the voice and photo cards each have a file field)."""
+    for value in values:
+        if isinstance(value, UploadFile):
+            data = await value.read()
+            if data:
+                return data
+    return b""
 
 
 @router.get("", include_in_schema=False)
@@ -34,7 +49,12 @@ def start_page(request: Request) -> Response:
     chosen = normalise_language(request.query_params.get("lang"))
     if chosen:
         request.session["lang"] = chosen
-    return render(request, "app/start.html", {"samples": STT_SAMPLES})
+    option = request.query_params.get("option", "")
+    return render(
+        request,
+        "app/start.html",
+        {"samples": STT_SAMPLES, "option": option if option in START_OPTIONS else ""},
+    )
 
 
 @router.post(
@@ -75,7 +95,7 @@ async def start_submit(request: Request) -> Response:
                 consent=form.get("consent") == "yes",
                 keep_input=form.get("keep_input") == "yes",
                 text=str(form.get("text", "")),
-                data=await _file_bytes(form.get("upload")),
+                data=await _first_file(form.getlist("upload")),
             )
     except AppError as exc:
         return render(

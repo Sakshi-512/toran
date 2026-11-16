@@ -11,6 +11,7 @@ from app.models import ActionLog, AgentRun, Business
 from app.services.agent import AGENT_JOB, agent_runner, start_agent
 from app.services.agent_report import agent_view
 from app.services.jobs import JobWorker
+from app.services.publish import build_draft, folders
 
 
 def main(argv: list[str]) -> int:
@@ -24,6 +25,8 @@ def main(argv: list[str]) -> int:
     if business is None or business.id is None:
         print(f"No business with slug {argv[0]}")
         return 1
+    if not (folders(settings, business.slug).draft / "index.html").is_file():
+        build_draft(engine, settings, business.id)  # seeded samples have only a live site
     run_id = start_agent(engine, settings, business.id, argv[1] if len(argv) > 1 else None)
     asyncio.run(JobWorker(engine, {AGENT_JOB: agent_runner(engine, settings)}).run_until_idle())
     with Session(engine) as session:

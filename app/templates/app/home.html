@@ -1,18 +1,109 @@
 {% extends "app/base.html" %}
+{% from "app/_icons.html" import icon %}
+{% block title %}{{ app_name }} · {{ t('home.headline', lang) }}{% endblock %}
+{% block head %}<link rel="preload" href="{{ static_url(hero_shot) }}" as="image">{% endblock %}
 {% block content %}
-<section class="hero">
-  <h1>{{ t('home.title', lang, app_name=app_name) }}</h1>
-  <p class="tagline">{{ t('app.tagline', lang) }}</p>
-  <p>{{ t('home.intro', lang) }}</p>
-  <ol class="steps">
-    <li>{{ t('home.step_1', lang) }}</li>
-    <li>{{ t('home.step_2', lang) }}</li>
-    <li>{{ t('home.step_3', lang) }}</li>
+<div class="home">
+
+<section class="home-hero">
+  <div class="hero-copy">
+    <h1>{{ t('home.headline', lang) }}</h1>
+    <p class="lead">{{ t('home.lead', lang) }}</p>
+    <div class="cta-row">
+      <a class="button big-cta" href="/start">{{ t('home.try_now', lang) }}</a>
+    </div>
+    <p class="muted">{{ t('home.no_signup', lang) }}</p>
+  </div>
+  <figure class="phone-figure">
+    <div class="phone-frame">
+      {% if hero_url %}<a href="{{ hero_url }}" aria-label="{{ t('home.hero_open', lang) }}">{% endif %}
+      <img src="{{ static_url(hero_shot) }}" width="270" height="540" alt="{{ t('home.hero_alt', lang) }}">
+      {% if hero_url %}</a>{% endif %}
+    </div>
+    <figcaption><span class="sample-badge">{{ t('label.sample', lang) }}</span> {{ t('home.hero_caption', lang) }}</figcaption>
+  </figure>
+</section>
+
+<section class="home-section" aria-labelledby="how-title">
+  <h2 id="how-title">{{ t('home.how_title', lang) }}</h2>
+  <ol class="how">
+    {% for key, ic in [('speak', 'mic'), ('check', 'check'), ('test', 'phone'), ('live', 'live')] %}
+    <li class="how-step">
+      <span class="how-icon">{{ icon(ic) }}</span>
+      <h3>{{ t('home.how_' ~ key, lang) }}</h3>
+      <p>{{ t('home.how_' ~ key ~ '_text', lang) }}</p>
+    </li>
+    {% endfor %}
   </ol>
-  <p>
-    <a class="button" href="/start">{{ t('home.try_now', lang) }}</a>
-  </p>
-  <p class="muted">{{ t('home.no_signup', lang) }}</p>
+  {% if stats.any %}
+  <dl class="stats">
+    {% if stats.check_cost_usd is not none %}
+    <div class="stat"><dt>{{ t('home.stat_cost', lang) }}</dt><dd><strong>${{ '%.2f'|format(stats.check_cost_usd) }}</strong> <span class="muted">{{ t('home.stat_cost_note', lang, n=stats.check_count) }}</span></dd></div>
+    {% endif %}
+    {% if stats.minutes_to_tested_draft is not none %}
+    <div class="stat"><dt>{{ t('home.stat_time', lang) }}</dt><dd><strong>{{ t('home.minutes', lang, n=('%.1f'|format(stats.minutes_to_tested_draft))) }}</strong> <span class="muted">{{ t('home.stat_time_note', lang, n=stats.draft_count) }}</span></dd></div>
+    {% endif %}
+    {% if stats.field_accuracy is not none %}
+    <div class="stat"><dt>{{ t('home.stat_accuracy', lang) }}</dt><dd><strong>{{ '%.0f'|format(stats.field_accuracy * 100) }}%</strong> <span class="muted">{{ t('home.stat_accuracy_note', lang, prices=('%.0f'|format(stats.price_accuracy * 100)), n=stats.accuracy_count) }}</span></dd></div>
+    {% endif %}
+  </dl>
+  {% endif %}
+</section>
+
+<section class="home-section" id="try" aria-labelledby="try-title">
+  <h2 id="try-title">{{ t('home.try_title', lang) }}</h2>
+  <p>{{ t('home.try_intro', lang) }}</p>
+  <div class="try-grid">
+    {% for s in samples %}{% set code = s.split('-')[1] %}
+    <form class="try-card" method="post" action="/start">
+      <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+      <input type="hidden" name="sample" value="{{ s }}">
+      <p class="try-lang" lang="{{ code }}">{{ t('lang.' ~ code, code) }}</p>
+      <p>{{ t('home.try_' ~ code, lang) }}</p>
+      <button class="button" type="submit">{{ icon('play', 22) }}<span>{{ t('home.try_button', lang) }}</span></button>
+    </form>
+    {% endfor %}
+  </div>
+  <p><a class="text-link" href="/start?option=record#options">{{ icon('mic', 22) }}<span>{{ t('home.record_own', lang) }}</span></a></p>
+</section>
+
+{% if before_after %}
+<section class="home-section" aria-labelledby="ba-title">
+  <h2 id="ba-title">{{ t('home.ba_title', lang) }}</h2>
+  <div class="card ba-card">
+    <p><span class="sample-badge">{{ t('label.sample', lang) }}</span> {{ t('home.ba_intro', lang, name=demo_name) }}</p>
+    {% with agent=before_after, public=True %}{% include "app/_agent_summary.html" %}{% endwith %}
+    <p><a class="text-link" href="/demo/agent/{{ before_after.run.id }}">{{ t('agent.see_thinking', lang) }}</a></p>
+  </div>
+</section>
+{% endif %}
+
+{% if real_businesses or demo_businesses %}
+<section class="home-section" aria-labelledby="gallery-title">
+  <h2 id="gallery-title">{{ t('home.gallery_title', lang) }}</h2>
+  {% if real_businesses %}
+  <ul class="gallery">{% for b in real_businesses %}{% include "app/_gallery_card.html" %}{% endfor %}</ul>
+  {% endif %}
+  {% if demo_businesses %}
+  <h3 class="demo-title">{{ t('home.demo_title', lang) }}</h3>
+  <p class="muted">{{ t('home.demo_intro', lang) }}</p>
+  <ul class="gallery">{% for b in demo_businesses %}{% set demo = True %}{% include "app/_gallery_card.html" %}{% endfor %}</ul>
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="home-section" aria-labelledby="inclusive-title">
+  <h2 id="inclusive-title">{{ t('home.inclusive_title', lang) }}</h2>
+  <div class="two-col">
+    <div class="card">
+      <h3>{{ icon('heart', 24) }}<span>{{ t('home.inclusive_owner', lang) }}</span></h3>
+      <ul><li>{{ t('home.inclusive_owner_1', lang) }}</li><li>{{ t('home.inclusive_owner_2', lang) }}</li><li>{{ t('home.inclusive_owner_3', lang) }}</li></ul>
+    </div>
+    <div class="card">
+      <h3>{{ icon('people', 24) }}<span>{{ t('home.inclusive_customers', lang) }}</span></h3>
+      <ul><li>{{ t('home.inclusive_customers_1', lang) }}</li><li>{{ t('home.inclusive_customers_2', lang) }}</li><li>{{ t('home.inclusive_customers_3', lang) }}</li></ul>
+    </div>
+  </div>
 </section>
 
 <section class="contact-section" id="contact" aria-labelledby="contact-title">
@@ -38,4 +129,10 @@
   </form>
   {% endif %}
 </section>
+
+<footer class="home-footer">
+  <p><a class="text-link" href="/privacy">{{ t('home.privacy', lang) }}</a></p>
+  <p>{{ t('home.built_for', lang) }}</p>
+</footer>
+</div>
 {% endblock %}

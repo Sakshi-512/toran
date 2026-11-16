@@ -28,6 +28,7 @@ class Business(SQLModel, table=True):
     consent_given_at: datetime | None = None
     consent_method: str | None = Field(default=None, max_length=20)
     consent_text: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
+    gallery_opt_in: bool = False  # her separate yes to appear in the public gallery
     owner_link_hash: str | None = Field(default=None, unique=True, max_length=128)
     pin_hash: str | None = Field(default=None, max_length=256)
     pin_failures: int = 0

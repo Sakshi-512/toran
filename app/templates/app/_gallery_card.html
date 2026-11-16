@@ -1,0 +1,12 @@
+<li class="gallery-card">
+  <a href="{{ site_url(b.slug) }}">
+    {% if b.has_thumb %}<img src="/gallery/{{ b.slug }}.webp" width="120" height="200" loading="lazy" decoding="async" alt="{{ t('home.thumb_alt', lang, name=b.name) }}">
+    {% else %}<span class="gallery-mono" aria-hidden="true">{{ b.name[:1] }}</span>{% endif %}
+    <span class="gallery-text">
+      <strong>{{ b.name }}</strong>
+      {% if b.area %}<span class="muted">{{ b.area }}</span>{% endif %}
+      {% if b.score is not none %}<span>{{ t('home.score', lang, n=b.score) }}</span>{% endif %}
+      {% if demo %}<span class="sample-badge">{{ t('label.sample', lang) }}</span>{% endif %}
+    </span>
+  </a>
+</li>

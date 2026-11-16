@@ -2,9 +2,10 @@
 {% block head %}{% if agent.state in ('queued', 'running') %}<meta http-equiv="refresh" content="5">{% endif %}{% endblock %}
 {% block title %}{{ t('agent.panel_title', lang) }} · {{ business.display_name }}{% endblock %}
 {% block content %}
-<p><a class="text-link" href="/owner">{{ t('owner.back', lang) }}</a></p>
+<p><a class="text-link" href="{{ '/' if public else '/owner' }}">{{ t('home.back' if public else 'owner.back', lang) }}</a></p>
 <h1>{{ t('agent.panel_title', lang) }}</h1>
-{% if business.is_sample %}<p class="notice">{{ t('publish.sample_note', lang) }}</p>{% endif %}
+{% if public %}<p class="notice"><span class="sample-badge">{{ t('label.sample', lang) }}</span> {{ t('home.demo_panel_note', lang, name=business.display_name) }}</p>
+{% elif business.is_sample %}<p class="notice">{{ t('publish.sample_note', lang) }}</p>{% endif %}
 
 <section class="card agent-summary">
   {% if agent.progress %}<p class="progress" role="status" aria-live="polite">{{ agent.progress }}</p>{% endif %}

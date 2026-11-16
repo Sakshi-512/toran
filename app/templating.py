@@ -18,13 +18,17 @@ TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
-@lru_cache(maxsize=16)
 def static_url(name: str) -> str:
-    """/static/<name>?v=<content hash>, so phones get new styles right after a deploy."""
+    """/static/<name>?v=<content hash>, so phones get new styles right after a change."""
     path = (STATIC_DIR / name).resolve()
     if not path.is_relative_to(STATIC_DIR) or not path.is_file():
         return f"/static/{name}"
-    return f"/static/{name}?v={hashlib.sha256(path.read_bytes()).hexdigest()[:10]}"
+    return f"/static/{name}?v={_content_hash(path, path.stat().st_mtime_ns)}"
+
+
+@lru_cache(maxsize=32)
+def _content_hash(path: Path, _mtime_ns: int) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:10]
 
 
 def _build() -> Jinja2Templates:

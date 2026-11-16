@@ -24,6 +24,7 @@ from app.services.ratelimit import RateLimitMiddleware
 from app.services.retention import retention_loop
 from app.services.score_runs import SCORE_JOB, score_runner
 from app.services.security import session_options
+from app.services.sitegen import FONT_DIR
 from app.services.sites import SiteHostMiddleware
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -78,6 +79,8 @@ def create_app() -> FastAPI:
     app.add_middleware(SessionMiddleware, **session_options(settings))
 
     register_error_handlers(app)
+    # The business sites' self-hosted fonts, so the main site looks the same.
+    app.mount("/static/fonts", StaticFiles(directory=FONT_DIR), name="fonts")
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     app.include_router(health.router)
     app.include_router(pages.router)

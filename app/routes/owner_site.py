@@ -288,3 +288,17 @@ def online(business_id: int = Depends(require_owner)) -> RedirectResponse:
     """Bring the site back online."""
     pub.set_offline(get_engine(), business_id, offline=False)
     return RedirectResponse("/owner#site", status_code=303)
+
+
+@router.post("/gallery", include_in_schema=False, dependencies=[Depends(verify_csrf)])
+async def gallery_choice(request: Request, business_id: int = Depends(require_owner)) -> Response:
+    """Her separate yes (or no) to showing her live site in the public gallery."""
+    form = await request.form()
+    with Session(get_engine()) as session:
+        business = _business(session, business_id)
+        if business.is_sample:
+            raise AppError("error.not_found", status_code=404)
+        business.gallery_opt_in = form.get("show") == "yes"
+        session.add(business)
+        session.commit()
+    return RedirectResponse("/owner#gallery", status_code=303)

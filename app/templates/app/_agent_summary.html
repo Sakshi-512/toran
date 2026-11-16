@@ -10,7 +10,7 @@
 <h3>{{ t('agent.main_fixes', lang) }}</h3>
 <ul class="good-list">{% for f in agent.fixes %}<li>{{ f }}</li>{% endfor %}</ul>
 {% endif %}
-{% if agent.awaiting_approval %}
+{% if agent.awaiting_approval and not public %}
 <p class="muted">{{ t('agent.approve_note', lang) }}</p>
 <div class="cta-row">
   <a class="button" href="/owner/publish">{{ t('agent.approve', lang) }}</a>

@@ -80,7 +80,7 @@ def test_start_page_in_three_languages(client: TestClient) -> None:
         ("mr", "व्हॉइस नोट रेकॉर्ड करा"),
     ):
         page = client.get(f"/start?lang={lang}").text
-        assert text in page and 'src="/static/record.js"' in page
+        assert text in page and 'src="/static/record.js?v=' in page
         assert 'name="consent"' in page and 'name="keep_input"' in page
 
 

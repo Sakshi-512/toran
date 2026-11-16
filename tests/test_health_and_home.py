@@ -15,7 +15,7 @@ def test_home_uses_settings(client: TestClient) -> None:
     response = client.get("/")
     assert response.status_code == 200
     assert "Test App" in response.text
-    assert "Get a live website with a readiness score." in response.text
+    assert "Speak your business. Get your website." in response.text
 
 
 def test_home_in_marathi_and_hindi(client: TestClient) -> None:

@@ -127,5 +127,20 @@
     <button class="button" type="submit">{{ t('owner.add_photos', lang) }}</button>
   </form>
 </section>
+{% if not business.is_sample %}
+<section class="card" id="gallery">
+  <h2>{{ t('gallery.owner_title', lang) }}</h2>
+  <p>{{ t('gallery.owner_intro', lang) }}</p>
+  <form method="post" action="/owner/gallery">
+    <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+    {% if business.gallery_opt_in %}
+    <p class="notice-ok">{{ t('gallery.owner_on', lang) }}</p>
+    <button class="button secondary" name="show" value="no">{{ t('gallery.owner_stop', lang) }}</button>
+    {% else %}
+    <button class="button secondary" name="show" value="yes">{{ t('gallery.owner_start', lang) }}</button>
+    {% endif %}
+  </form>
+</section>
+{% endif %}
 <form method="post" action="/owner/logout"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.logout', lang) }}</button></form>
 {% endblock %}

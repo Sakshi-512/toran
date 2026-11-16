@@ -1,52 +1,78 @@
 {% extends "app/base.html" %}
+{% from "app/_icons.html" import icon %}
 {% block title %}{{ t('start.title', lang) }} · {{ app_name }}{% endblock %}
 {% block content %}
+<div class="start">
 <h1>{{ t('start.title', lang) }}</h1>
 <p>{{ t('start.intro', lang) }}</p>
 {% if wait_seconds %}{% include "app/_wait_notice.html" %}{% endif %}
 {% if error_key %}<p class="notice-error" role="alert">{{ t(error_key, lang) }}</p>{% endif %}
 
-<form class="form intake" method="post" action="/start" enctype="multipart/form-data" id="intake-form">
-  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
-  <label for="language">{{ t('start.language', lang) }}</label>
-  <select id="language" name="language">
-    {% for code in LANGUAGES %}<option value="{{ code }}"{% if code == lang %} selected{% endif %}>{{ t('lang.' ~ code, lang) }}</option>{% endfor %}
-  </select>
+<section aria-labelledby="samples-title">
+  <h2 id="samples-title">{{ t('start.samples_title', lang) }}</h2>
+  <p class="muted">{{ t('start.samples_intro', lang) }}</p>
+  <div class="try-grid">
+    {% for s in samples %}{% set code = s.split('-')[1] %}
+    <form class="try-card" method="post" action="/start">
+      <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+      <input type="hidden" name="sample" value="{{ s }}">
+      <p class="try-lang" lang="{{ code }}">{{ t('lang.' ~ code, code) }}</p>
+      <p>{{ t('home.try_' ~ code, lang) }}</p>
+      <button class="button" type="submit">{{ icon('play', 22) }}<span>{{ t('home.try_button', lang) }}</span></button>
+    </form>
+    {% endfor %}
+  </div>
+</section>
 
-  <fieldset class="choice">
-    <legend>{{ t('start.record', lang) }}</legend>
-    <button type="button" class="button big" id="record-button" data-idle="{{ t('start.record', lang) }}" data-recording="{{ t('start.recording', lang) }}" hidden>{{ t('start.record', lang) }}</button>
-    <p class="muted" id="record-status" aria-live="polite">{{ t('start.record_hint', lang) }}</p>
-    <p class="muted" id="record-unsupported" hidden>{{ t('start.no_mic', lang) }}</p>
-  </fieldset>
-
-  <fieldset class="choice">
-    <legend>{{ t('start.upload_voice', lang) }} / {{ t('start.upload_photo', lang) }}</legend>
-    <label class="radio"><input type="radio" name="source" value="voice" checked> {{ t('start.upload_voice', lang) }}</label>
-    <label class="radio"><input type="radio" name="source" value="photo"> {{ t('start.upload_photo', lang) }}</label>
-    <input type="file" name="upload" accept="audio/*,image/*" aria-label="{{ t('start.upload_voice', lang) }}">
-  </fieldset>
-
-  <fieldset class="choice">
-    <legend>{{ t('start.type', lang) }}</legend>
-    <label class="radio"><input type="radio" name="source" value="text"> {{ t('start.type', lang) }}</label>
-    <textarea name="text" rows="5" maxlength="5000" placeholder="{{ t('start.type_hint', lang) }}" aria-label="{{ t('start.type_hint', lang) }}"></textarea>
-  </fieldset>
-
-  <label class="check"><input type="checkbox" name="consent" value="yes" required> {{ t('intake.consent', lang) }}</label>
-  <label class="check"><input type="checkbox" name="keep_input" value="yes"> {{ t('intake.keep_input', lang) }}</label>
-  <button class="button" type="submit">{{ t('start.send', lang) }}</button>
-</form>
-
-<h2>{{ t('start.samples', lang) }}</h2>
-<div class="cta-row">
-  {% for s in samples %}
-  <form method="post" action="/start">
+<section aria-labelledby="own-title" id="options">
+  <h2 id="own-title">{{ t('start.own_title', lang) }}</h2>
+  <form class="intake" method="post" action="/start" enctype="multipart/form-data" id="intake-form">
     <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
-    <input type="hidden" name="sample" value="{{ s }}">
-    <button class="button secondary" type="submit">{{ t('start.' ~ s|replace('-', '_'), lang) }}</button>
+    <div class="options">
+      <div class="option" id="record">
+        <input type="radio" name="source" value="voice" id="opt-record"{% if option == 'record' %} checked{% endif %}>
+        <label for="opt-record" class="option-head">{{ icon('mic') }}<span><strong>{{ t('start.opt_record', lang) }}</strong><span class="muted">{{ t('start.opt_record_hint', lang) }}</span></span></label>
+        <div class="option-panel">
+          <button type="button" class="button big" id="record-button" data-idle="{{ t('start.record', lang) }}" data-recording="{{ t('start.recording', lang) }}" hidden>{{ t('start.record', lang) }}</button>
+          <p class="muted" id="record-status" aria-live="polite">{{ t('start.record_hint', lang) }}</p>
+          <p class="muted" id="record-unsupported" hidden>{{ t('start.no_mic', lang) }}</p>
+        </div>
+      </div>
+      <div class="option">
+        <input type="radio" name="source" value="voice" id="opt-voice"{% if option == 'voice' %} checked{% endif %}>
+        <label for="opt-voice" class="option-head">{{ icon('upload') }}<span><strong>{{ t('start.opt_voice', lang) }}</strong><span class="muted">{{ t('start.opt_voice_hint', lang) }}</span></span></label>
+        <div class="option-panel">
+          <input type="file" name="upload" accept="audio/*" aria-label="{{ t('start.opt_voice', lang) }}">
+        </div>
+      </div>
+      <div class="option">
+        <input type="radio" name="source" value="photo" id="opt-photo"{% if option == 'photo' %} checked{% endif %}>
+        <label for="opt-photo" class="option-head">{{ icon('camera') }}<span><strong>{{ t('start.opt_photo', lang) }}</strong><span class="muted">{{ t('start.opt_photo_hint', lang) }}</span></span></label>
+        <div class="option-panel">
+          <input type="file" name="upload" accept="image/*" aria-label="{{ t('start.opt_photo', lang) }}">
+        </div>
+      </div>
+      <div class="option">
+        <input type="radio" name="source" value="text" id="opt-type"{% if option == 'type' %} checked{% endif %}>
+        <label for="opt-type" class="option-head">{{ icon('type') }}<span><strong>{{ t('start.opt_type', lang) }}</strong><span class="muted">{{ t('start.opt_type_hint', lang) }}</span></span></label>
+        <div class="option-panel">
+          <textarea name="text" rows="6" maxlength="5000" placeholder="{{ t('start.type_hint', lang) }}" aria-label="{{ t('start.opt_type', lang) }}"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="before-send">
+      <h3>{{ t('start.before_send', lang) }}</h3>
+      <label for="language">{{ t('start.language', lang) }}</label>
+      <select id="language" name="language">
+        {% for code in LANGUAGES %}<option value="{{ code }}"{% if code == lang %} selected{% endif %}>{{ t('lang.' ~ code, lang) }}</option>{% endfor %}
+      </select>
+      <label class="check"><input type="checkbox" name="consent" value="yes" required> <span>{{ t('intake.consent', lang) }}</span></label>
+      <label class="check"><input type="checkbox" name="keep_input" value="yes"> <span>{{ t('intake.keep_input', lang) }}</span></label>
+      <button class="button send" type="submit">{{ t('start.send', lang) }}</button>
+    </div>
   </form>
-  {% endfor %}
+</section>
 </div>
-<script src="/static/record.js" defer></script>
+<script src="{{ static_url('record.js') }}" defer></script>
 {% endblock %}

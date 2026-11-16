@@ -9,6 +9,8 @@ Target: the GoDaddy Docker VPS, using Docker Compose with Caddy for HTTPS.
 3. Copy `.env.example` to `.env` on the server and fill it in (`APP_ENV=production`).
 4. `make up`
 5. Seed the sample businesses once: `docker compose exec app python -m scripts.seed_samples`
+6. Run the agent fix loop once on the home-foods demo business, with real Claude (about $0.25):
+   `docker compose exec app python -m scripts.agent_run savitri-gruh-udyog` (the same as `make agent slug=savitri-gruh-udyog` outside Docker). It prints each round, the final score and the cost. The home page's "Before and after" section stays hidden until such a real run on a demo business has raised the score; mock runs are never shown there. If a run stops without improving, run it again later.
 
 Migrations run automatically on start (`alembic upgrade head`). The app never calls `create_all`.
 

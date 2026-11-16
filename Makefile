@@ -3,7 +3,7 @@ VENV := .venv
 PY := $(VENV)/bin/python
 BIN := $(VENV)/bin
 
-.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score agent eval accuracy up down backup
+.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score agent shots eval accuracy up down backup
 
 setup: ## Create the venv, install dependencies and git hooks
 	test -d $(VENV) || python3.12 -m venv $(VENV)
@@ -62,6 +62,9 @@ score: ## Run customer tests and score a site: make score slug=asha-home-bakery
 
 agent: ## Run the agent fix loop on a draft: make agent slug=<slug> [url=<draft url>]
 	APP_ENV=development $(PY) -m scripts.agent_run $(slug) $(url)
+
+shots: ## Remake the home page's phone screenshot from a real sample site
+	$(PY) -m scripts.home_shots
 
 logs: ## Follow the production app log file
 	docker compose exec app tail -f /app/data/logs/app.log
