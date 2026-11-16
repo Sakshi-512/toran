@@ -1,0 +1,39 @@
+{
+  "id": "mehendi-hi",
+  "reviewed": true,
+  "note": "Hindi codemix (fake business).",
+  "language": "hi",
+  "input": {
+    "type": "transcript",
+    "transcript": "मैं रुखसार, Camp, Pune में mehendi लगाती हूँ। Bridal mehendi दोनों हाथ 2500, party mehendi एक हाथ 300, दोनों हाथ 500। Kondhwa और Wanowrie में घर आकर लगाती हूँ। नंबर 9000000004 पर WhatsApp करें।"
+  },
+  "expected": {
+    "business_type": "mehendi",
+    "phone": "9000000004",
+    "delivery_areas": [
+      "Kondhwa",
+      "Wanowrie"
+    ],
+    "products": [
+      {
+        "name": "Bridal mehendi",
+        "options": [
+          {
+            "price": 2500
+          }
+        ]
+      },
+      {
+        "name": "Party mehendi",
+        "options": [
+          {
+            "price": 300
+          },
+          {
+            "price": 500
+          }
+        ]
+      }
+    ]
+  }
+}

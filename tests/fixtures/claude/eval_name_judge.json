@@ -1,0 +1,7 @@
+{
+  "text": "{\"same\": true, \"reason\": \"Mock answer: no real comparison was made.\"}",
+  "usage": {
+    "input_tokens": 120,
+    "output_tokens": 30
+  }
+}

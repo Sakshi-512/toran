@@ -1,0 +1,47 @@
+{
+  "id": "sample-mr",
+  "reviewed": true,
+  "note": "Sample bakery voice note (fake business).",
+  "language": "mr",
+  "input": {
+    "type": "transcript",
+    "transcript": "नमस्कार, मी आशा, Kothrud, Pune मध्ये home bakery चालवते. Chocolate cake half kg 450 रुपये आणि 1 kg 850 रुपये. उकडीचे मोदक 11 चा box 330 रुपये. Kothrud, Karve Nagar आणि Warje मध्ये delivery करते. कृपया 2 दिवस आधी WhatsApp वर order करा."
+  },
+  "expected": {
+    "business_type": "bakery",
+    "delivery_areas": [
+      "Kothrud",
+      "Karve Nagar",
+      "Warje"
+    ],
+    "lead_time_numbers": [
+      "2"
+    ],
+    "products": [
+      {
+        "name": "Chocolate cake",
+        "options": [
+          {
+            "label": "Half kg",
+            "price": 450
+          },
+          {
+            "label": "1 kg",
+            "price": 850
+          }
+        ]
+      },
+      {
+        "name": "Ukadiche modak",
+        "options": [
+          {
+            "price": 330
+          }
+        ]
+      }
+    ],
+    "questions": [
+      "phone"
+    ]
+  }
+}

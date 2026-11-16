@@ -1,0 +1,51 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('start.title', lang) }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ t('start.title', lang) }}</h1>
+<p>{{ t('start.intro', lang) }}</p>
+{% if error_key %}<p class="notice-error" role="alert">{{ t(error_key, lang) }}</p>{% endif %}
+
+<form class="form intake" method="post" action="/start" enctype="multipart/form-data" id="intake-form">
+  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+  <label for="language">{{ t('start.language', lang) }}</label>
+  <select id="language" name="language">
+    {% for code in LANGUAGES %}<option value="{{ code }}"{% if code == lang %} selected{% endif %}>{{ t('lang.' ~ code, lang) }}</option>{% endfor %}
+  </select>
+
+  <fieldset class="choice">
+    <legend>{{ t('start.record', lang) }}</legend>
+    <button type="button" class="button big" id="record-button" data-idle="{{ t('start.record', lang) }}" data-recording="{{ t('start.recording', lang) }}" hidden>{{ t('start.record', lang) }}</button>
+    <p class="muted" id="record-status" aria-live="polite">{{ t('start.record_hint', lang) }}</p>
+    <p class="muted" id="record-unsupported" hidden>{{ t('start.no_mic', lang) }}</p>
+  </fieldset>
+
+  <fieldset class="choice">
+    <legend>{{ t('start.upload_voice', lang) }} / {{ t('start.upload_photo', lang) }}</legend>
+    <label class="radio"><input type="radio" name="source" value="voice" checked> {{ t('start.upload_voice', lang) }}</label>
+    <label class="radio"><input type="radio" name="source" value="photo"> {{ t('start.upload_photo', lang) }}</label>
+    <input type="file" name="upload" accept="audio/*,image/*" aria-label="{{ t('start.upload_voice', lang) }}">
+  </fieldset>
+
+  <fieldset class="choice">
+    <legend>{{ t('start.type', lang) }}</legend>
+    <label class="radio"><input type="radio" name="source" value="text"> {{ t('start.type', lang) }}</label>
+    <textarea name="text" rows="5" maxlength="5000" placeholder="{{ t('start.type_hint', lang) }}" aria-label="{{ t('start.type_hint', lang) }}"></textarea>
+  </fieldset>
+
+  <label class="check"><input type="checkbox" name="consent" value="yes" required> {{ t('intake.consent', lang) }}</label>
+  <label class="check"><input type="checkbox" name="keep_input" value="yes"> {{ t('intake.keep_input', lang) }}</label>
+  <button class="button" type="submit">{{ t('start.send', lang) }}</button>
+</form>
+
+<h2>{{ t('start.samples', lang) }}</h2>
+<div class="cta-row">
+  {% for s in samples %}
+  <form method="post" action="/start">
+    <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+    <input type="hidden" name="sample" value="{{ s }}">
+    <button class="button secondary" type="submit">{{ t('start.' ~ s|replace('-', '_'), lang) }}</button>
+  </form>
+  {% endfor %}
+</div>
+<script src="/static/record.js" defer></script>
+{% endblock %}

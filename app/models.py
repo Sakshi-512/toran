@@ -28,6 +28,8 @@ class Business(SQLModel, table=True):
     consent_text: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
     owner_link_hash: str | None = Field(default=None, unique=True, max_length=128)
     pin_hash: str | None = Field(default=None, max_length=256)
+    pin_failures: int = 0
+    pin_locked_until: datetime | None = None
     created_at: datetime = Field(default_factory=utcnow)
     updated_at: datetime = Field(default_factory=utcnow)
     deleted_at: datetime | None = None
@@ -48,14 +50,30 @@ class ProfileVersion(SQLModel, table=True):
 
 
 class IntakeSession(SQLModel, table=True):
-    """One intake: what Claude first guessed, what the owner said, and what she corrected."""
+    """One intake: what Claude first guessed, what the owner said, and what she corrected.
+
+    first_guess is Claude's validated answer before the code-side checks; draft is what the
+    confirmation cards start from. The transcript is kept here for accuracy measurement only
+    and never logged. input_path points at audio or a photo waiting to be processed; it is
+    deleted after processing unless the owner agreed to keep it (keep_input).
+    """
 
     id: int | None = Field(default=None, primary_key=True)
     business_id: int | None = Field(default=None, foreign_key="business.id", index=True)
+    token_hash: str | None = Field(default=None, unique=True, max_length=64)
     source: str = Field(max_length=20)
     language: str = Field(default="en", max_length=5)
+    status: str = Field(default="queued", max_length=20)
+    error_key: str | None = Field(default=None, max_length=40)
+    job_id: str | None = Field(default=None, max_length=32)
+    keep_input: bool = False
+    input_path: str | None = Field(default=None, max_length=300)
+    consent_text: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
     transcript: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
+    stt_route: str | None = Field(default=None, max_length=10)
     first_guess: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
+    draft: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
+    web_address: str | None = Field(default=None, max_length=63)
     corrections: list[Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
     created_at: datetime = Field(default_factory=utcnow)
     completed_at: datetime | None = None
@@ -99,6 +117,7 @@ class ClaudeUsage(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     business_id: int | None = Field(default=None, foreign_key="business.id", index=True)
+    intake_id: int | None = Field(default=None, foreign_key="intakesession.id", index=True)
     purpose: str = Field(max_length=60)
     model: str = Field(max_length=60)
     input_tokens: int = 0
@@ -174,6 +193,7 @@ class SttUsage(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     business_id: int | None = Field(default=None, foreign_key="business.id", index=True)
+    intake_id: int | None = Field(default=None, foreign_key="intakesession.id", index=True)
     provider: str = Field(max_length=20)
     model: str = Field(max_length=40)
     route: str = Field(max_length=10)
@@ -181,4 +201,15 @@ class SttUsage(SQLModel, table=True):
     cost_inr_estimate: float = 0.0
     is_mock: bool = False
     day_ist: date = Field(index=True)
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+class Photo(SQLModel, table=True):
+    """An owner's photo (re-encoded, no location data). subject is a product name or None."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    business_id: int = Field(foreign_key="business.id", index=True)
+    filename: str = Field(max_length=80)
+    subject: str | None = Field(default=None, max_length=120)
+    is_main: bool = False
     created_at: datetime = Field(default_factory=utcnow)

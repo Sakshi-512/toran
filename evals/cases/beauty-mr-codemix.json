@@ -1,0 +1,46 @@
+{
+  "id": "beauty-mr-codemix",
+  "reviewed": true,
+  "note": "Marathi codemix with Devanagari digits (fake business).",
+  "language": "mr",
+  "input": {
+    "type": "transcript",
+    "transcript": "नमस्कार, मी सुनीता, Sinhagad Road ला माझं beauty parlour आहे. Threading ४० रुपये, fruit facial ६०० आणि gold facial १,२०० रुपये. Bridal makeup trial सोबत ८००० रुपये. माझा WhatsApp नंबर ९००००००००५."
+  },
+  "expected": {
+    "business_type": "beauty",
+    "phone": "9000000005",
+    "area": "Sinhagad Road",
+    "products": [
+      {
+        "name": "Eyebrow threading",
+        "options": [
+          {
+            "price": 40
+          }
+        ]
+      },
+      {
+        "name": "Facial",
+        "options": [
+          {
+            "label": "Fruit facial",
+            "price": 600
+          },
+          {
+            "label": "Gold facial",
+            "price": 1200
+          }
+        ]
+      },
+      {
+        "name": "Bridal makeup",
+        "options": [
+          {
+            "price": 8000
+          }
+        ]
+      }
+    ]
+  }
+}

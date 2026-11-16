@@ -1,0 +1,7 @@
+{
+  "text": "{\"business_name\": \"Meena Tailors\", \"business_type\": \"tailoring\", \"area\": \"\", \"delivery_areas\": [], \"languages\": [\"hi\"], \"products\": [{\"name\": \"Blouse stitching\", \"unit\": \"piece\", \"options\": [{\"label\": \"Simple\", \"price\": 450}, {\"label\": \"Designer\", \"price\": 900}], \"notes\": \"\"}, {\"name\": \"Fall pico\", \"unit\": \"piece\", \"options\": [{\"label\": \"\", \"price\": 80}], \"notes\": \"\"}], \"order_methods\": [\"whatsapp\"], \"lead_time\": \"\", \"phone\": \"\", \"policy\": \"\", \"missing\": [\"area: आप किस इलाके में हैं?\", \"phone: आपका WhatsApp नंबर क्या है?\"], \"web_address\": \"meena-tailors\"}",
+  "usage": {
+    "input_tokens": 3900,
+    "output_tokens": 1700
+  }
+}

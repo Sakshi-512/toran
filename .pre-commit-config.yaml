@@ -21,6 +21,10 @@ repos:
       - id: gitleaks
   - repo: local
     hooks:
+      - id: private-files
+        name: no voice notes, photos or private eval cases
+        entry: .venv/bin/python scripts/check_private_files.py
+        language: system
       - id: mypy
         name: mypy
         entry: .venv/bin/mypy

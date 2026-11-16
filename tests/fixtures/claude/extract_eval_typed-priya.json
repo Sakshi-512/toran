@@ -1,0 +1,7 @@
+{
+  "text": "{\"business_name\": \"Priya Cakes\", \"business_type\": \"bakery\", \"area\": \"Baner, Pune\", \"delivery_areas\": [\"Baner\", \"Aundh\"], \"languages\": [\"en\"], \"products\": [{\"name\": \"Chocolate cake\", \"unit\": \"kg\", \"options\": [{\"label\": \"1 kg\", \"price\": 1250}], \"notes\": \"Eggless available\"}, {\"name\": \"Cupcakes\", \"unit\": \"box\", \"options\": [{\"label\": \"Box of 6\", \"price\": 300}], \"notes\": \"\"}], \"order_methods\": [\"whatsapp\", \"call\"], \"lead_time\": \"3 days\", \"phone\": \"9876543210\", \"policy\": \"\", \"missing\": [], \"web_address\": \"priya-cakes\"}",
+  "usage": {
+    "input_tokens": 3900,
+    "output_tokens": 1700
+  }
+}

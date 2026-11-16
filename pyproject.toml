@@ -16,7 +16,9 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S105", "S106", "S311"]
+"tests/**" = ["S101", "S105", "S106", "S311", "RUF001", "RUF002", "RUF003"]
+# These modules deliberately work with Devanagari characters.
+"app/services/{numbers,web_address,extract}.py" = ["RUF001", "RUF002", "RUF003"]
 
 [tool.mypy]
 python_version = "3.12"

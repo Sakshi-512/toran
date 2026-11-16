@@ -1,0 +1,13 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('owner.pin_title', lang) }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ t('owner.pin_title', lang) }}</h1>
+<p>{{ t('owner.pin_intro', lang) }}</p>
+{% if error_key %}<p class="notice-error" role="alert">{{ t(error_key, lang) }}</p>{% endif %}
+<form class="form" method="post" action="/o/{{ token }}">
+  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+  <label for="pin">{{ t('owner.pin_label', lang) }}</label>
+  <input id="pin" name="pin" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="one-time-code" required class="pin-input">
+  <button class="button" type="submit">{{ t('owner.pin_submit', lang) }}</button>
+</form>
+{% endblock %}

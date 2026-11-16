@@ -14,15 +14,16 @@ from pathlib import Path
 
 from sqlalchemy import delete
 from sqlalchemy.engine import Engine
-from sqlmodel import Session, col
+from sqlmodel import Session, col, select
 
-from app.models import Enquiry
+from app.models import Enquiry, IntakeSession
 from app.services.logs import LOG_FILE
 
 logger = logging.getLogger(__name__)
 
 ENQUIRY_DAYS = 90
 LOG_DAYS = 30
+INPUT_HOURS = 24
 RUN_EVERY_SECONDS = 24 * 60 * 60
 _ROTATED = re.compile(rf"^{re.escape(LOG_FILE)}\.(\d{{4}}-\d{{2}}-\d{{2}})$")
 
@@ -33,6 +34,7 @@ class RetentionResult:
 
     enquiries_deleted: int
     log_files_deleted: int
+    inputs_deleted: int = 0
 
 
 def purge_enquiries(engine: Engine, now: datetime, days: int = ENQUIRY_DAYS) -> int:
@@ -63,10 +65,35 @@ def purge_logs(log_dir: Path, now: datetime, days: int = LOG_DAYS) -> int:
     return deleted
 
 
+def purge_stale_inputs(engine: Engine, now: datetime, hours: int = INPUT_HOURS) -> int:
+    """Delete voice notes and price-list photos left over for more than a day (unless kept)."""
+    cutoff = now - timedelta(hours=hours)
+    deleted = 0
+    with Session(engine) as session:
+        stale = session.exec(
+            select(IntakeSession).where(
+                col(IntakeSession.input_path).is_not(None),
+                col(IntakeSession.keep_input) == False,  # noqa: E712 - SQL expression
+                col(IntakeSession.created_at) < cutoff,
+            )
+        ).all()
+        for intake in stale:
+            Path(str(intake.input_path)).unlink(missing_ok=True)
+            intake.input_path = None
+            session.add(intake)
+            deleted += 1
+        session.commit()
+    return deleted
+
+
 def run_retention(engine: Engine, log_dir: Path, now: datetime | None = None) -> RetentionResult:
     """Run every cleanup once."""
     moment = now or datetime.now(UTC)
-    result = RetentionResult(purge_enquiries(engine, moment), purge_logs(log_dir, moment))
+    result = RetentionResult(
+        purge_enquiries(engine, moment),
+        purge_logs(log_dir, moment),
+        purge_stale_inputs(engine, moment),
+    )
     logger.info(
         "retention_run",
         extra={

@@ -1,0 +1,36 @@
+{
+  "id": "typed-priya",
+  "reviewed": true,
+  "note": "Typed text (fake business).",
+  "language": "en",
+  "input": {
+    "type": "transcript",
+    "transcript": "Priya Cakes in Baner, Pune. Chocolate cake 1250 for 1 kg, eggless available. Cupcakes 300 for a box of 6. We deliver to Baner and Aundh. Order 3 days ahead. WhatsApp or call 98765 43210."
+  },
+  "expected": {
+    "business_type": "bakery",
+    "phone": "9876543210",
+    "area": "Baner, Pune",
+    "lead_time_numbers": [
+      "3"
+    ],
+    "products": [
+      {
+        "name": "Chocolate cake",
+        "options": [
+          {
+            "price": 1250
+          }
+        ]
+      },
+      {
+        "name": "Cupcakes",
+        "options": [
+          {
+            "price": 300
+          }
+        ]
+      }
+    ]
+  }
+}

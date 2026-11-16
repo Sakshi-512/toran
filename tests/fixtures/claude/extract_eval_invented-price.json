@@ -1,0 +1,7 @@
+{
+  "text": "{\"business_name\": \"\", \"business_type\": \"bakery\", \"area\": \"\", \"delivery_areas\": [], \"languages\": [\"en\"], \"products\": [{\"name\": \"Chocolate cake\", \"unit\": \"kg\", \"options\": [{\"label\": \"1 kg\", \"price\": 500}], \"notes\": \"\"}, {\"name\": \"Cupcakes\", \"unit\": \"box\", \"options\": [], \"notes\": \"\"}], \"order_methods\": [\"whatsapp\"], \"lead_time\": \"\", \"phone\": \"9000000002\", \"policy\": \"\", \"missing\": [], \"web_address\": \"cakes\"}",
+  "usage": {
+    "input_tokens": 3900,
+    "output_tokens": 1700
+  }
+}

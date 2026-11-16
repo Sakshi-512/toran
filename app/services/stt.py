@@ -348,11 +348,14 @@ def get_stt(settings: Settings) -> SpeechToText:
 IST = ZoneInfo("Asia/Kolkata")
 
 
-def record_usage(engine: Engine, business_id: int | None, transcript: Transcript) -> None:
-    """Store the audio duration and estimated cost for this business."""
+def record_usage(
+    engine: Engine, business_id: int | None, transcript: Transcript, intake_id: int | None = None
+) -> None:
+    """Store the audio duration and estimated cost for this business (or intake)."""
     with Session(engine) as session:
         session.add(
             SttUsage(
+                intake_id=intake_id,
                 business_id=business_id,
                 provider=transcript.provider,
                 model=MODEL,
@@ -375,6 +378,7 @@ def transcribe_note(
     language: str | None = None,
     keyterms: Sequence[str] = (),
     stt: SpeechToText | None = None,
+    intake_id: int | None = None,
 ) -> Transcript:
     """Check the upload, transcribe it, and log duration and estimated cost (never the audio)."""
     checked = check_audio(audio)
@@ -393,7 +397,7 @@ def transcribe_note(
             },
         )
         raise
-    record_usage(engine, business_id, transcript)
+    record_usage(engine, business_id, transcript, intake_id)
     if transcript.seconds > MAX_NOTE_SECONDS:
         logger.info("stt_long_note", extra={"seconds": transcript.seconds})
     logger.info(

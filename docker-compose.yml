@@ -18,6 +18,7 @@ services:
       SITES_DIR: /app/data/sites
       LOG_DIR: /app/data/logs
       RUNS_DIR: /app/data/runs
+      UPLOADS_DIR: /app/data/uploads
       # Trust X-Forwarded-For only from the Caddy container's fixed address.
       FORWARDED_ALLOW_IPS: 172.30.0.10
     volumes:

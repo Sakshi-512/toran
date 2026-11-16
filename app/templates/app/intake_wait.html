@@ -1,0 +1,14 @@
+{% extends "app/base.html" %}
+{% block head %}{% if status in ('queued', 'processing') %}<meta http-equiv="refresh" content="3">{% endif %}{% endblock %}
+{% block title %}{{ t('wait.title', lang) }} · {{ app_name }}{% endblock %}
+{% block content %}
+{% if status == 'failed' %}
+<h1>{{ t('wait.failed_title', lang) }}</h1>
+<p class="notice-error" role="alert">{{ t(error_key or 'intake.extract_failed', lang) }}</p>
+<p><a class="button" href="/start">{{ t('wait.try_again', lang) }}</a></p>
+{% else %}
+<h1>{{ t('wait.title', lang) }}</h1>
+<p class="tagline" aria-live="polite">{{ t('wait.' ~ status, lang) }}</p>
+<p class="muted">{{ t('wait.hint', lang) }}</p>
+{% endif %}
+{% endblock %}

@@ -16,6 +16,8 @@ See `CLAUDE.md` for the full flow. Built so far:
 - **Business sites** are served at `https://<slug>.BASE_DOMAIN` (or `http://<slug>.localhost:8000` in development). They load no JavaScript and no external files, use self-hosted Mukta and Rozha One fonts, and stay under 500 KB per page.
 - **Enquiry form** on every site posts to `/api/enquiry/<slug>` and is saved as an `Enquiry`. It is protected by an exact Origin check, a spam trap and a rate limit. Email delivery comes later.
 - **Privacy page** at `/privacy` in all three languages.
+- **Intake** (`/start`, `app/services/intake.py`, `app/services/extract.py`): she records a voice note (up to 2 minutes), uploads one, sends a photo of her price list, or types. Speech-to-text and extraction run as a background job. Claude Sonnet turns the transcript or photo into a draft profile; code then removes any price or phone number she never said (Devanagari digits and Indian comma formats are normalised first), clears anything that looks like a home address, and turns both into questions. Photo prices are kept but marked "please check" on the cards. She edits one card per detail, picks a readable web address (Devanagari names are transliterated, for example `sunita-beauty-parlour`), adds photos if she likes, and confirms. That creates the business (draft), profile version 1 and her consent record, and shows her private link and 4-digit PIN once (both stored only as hashes; 5 wrong PINs lock the link for 15 minutes).
+- **Accuracy**: each intake stores Claude's first guess, the transcript and every correction. `make accuracy` reports field and price accuracy and the correction rate across real businesses (samples excluded). `make eval` reruns extraction on reviewed cases in `evals/` and checks prices and numbers exactly in code; see `evals/README.md`.
 - **Speech-to-text** (`app/services/stt.py`): Sarvam AI through its official `sarvamai` SDK, using Saaras v4 in codemix mode (native script, English words kept in English, numbers as digits), with optional key terms such as product names. Short notes use the REST endpoint; notes it turns away as too long (voice notes are usually 1 to 2 minutes) go to Sarvam's batch API. Audio is never logged, and is only written to a temporary folder for the batch upload, then deleted. Duration and an **estimated** cost (₹0.49 per minute) are stored per business. `STT_PROVIDER=mock` uses saved transcripts; `none` turns voice off and owners type. Try it at `/dev/stt` (development only).
 - **Email** (`app/services/mailer.py`): our GoDaddy mailbox over SMTP (SSL on port 465). The home page contact form (CSRF, spam trap, 5 per minute and 20 per hour) and every business enquiry are saved first, then emailed to `CONTACT_TO_EMAIL` by a background job. A contact form message with an email address sets it as Reply-To. Errors send at most one alert email per error type per hour. Without SMTP settings, mail goes to an in-memory outbox, so tests never send real email.
 - **Customer tests and Readiness Score** (`app/services/customer_tests.py`, `app/services/score.py`): real Chromium visits a site as a customer would: a phone at 360 px, a laptop at 1280 px, and a slow network (1.5 Mbps, 300 ms latency). Each check runs three times and the middle result counts. The score follows `docs/score.md`. Every item records whether it was measured or AI-assessed, and AI-assessed items show as pending until the AI checks exist, so the report reads "X of Y possible so far". Runs happen as background jobs (at most 2 Chromium instances, a 180 s timeout, one retry), and each run is stored with the profile version and a hash of the exact site files tested.
@@ -54,7 +56,7 @@ make migrate && make seed   # 5 sample businesses (marked Sample)
 make dev
 ```
 
-Then open `http://asha-home-bakery.localhost:8000/` (also `/hi/` and `/mr/`), the theme gallery at `http://localhost:8000/dev/themes`, or run the customer tests at `http://localhost:8000/dev/score` (development only; `make score slug=asha-home-bakery` does the same from the command line).
+Start an intake at `http://localhost:8000/start` (the sample voice notes in English, Hindi and Marathi work without a microphone or credits), or open `http://asha-home-bakery.localhost:8000/` (also `/hi/` and `/mr/`), the theme gallery at `http://localhost:8000/dev/themes`, or run the customer tests at `http://localhost:8000/dev/score` (development only; `make score slug=asha-home-bakery` does the same from the command line).
 
 ## Measured vs AI-assessed
 
@@ -67,6 +69,10 @@ Every score item records whether it is `measured` (by the browser) or `ai_assess
 Each Claude call is logged with input, output and cache tokens and an **estimated** USD cost per business (table `claudeusage`). Prices per million tokens, from the hackathon deck: Haiku $0.10 in / $0.50 out, Sonnet $2 / $10, Opus $4 / $20. Reports come later.
 
 Each speech-to-text call is logged with its audio duration and an **estimated** cost of ₹0.49 per minute (Sarvam's published pay-as-you-go rate), per business (table `sttusage`).
+
+## Privacy of real data
+
+The repository is public. Real voice notes, transcripts, photos and answer keys live only in git-ignored folders (`data/`, `voice_notes/`, `evals/private/`, `evals/reports/`), and a pre-commit hook refuses audio files, images outside the asset and sample folders, and anything under those folders. Voice notes and price-list photos are deleted after processing unless the owner agreed to keep them (leftovers are removed after a day). Logs never contain audio, transcripts or extracted details.
 
 ## Known limitations
 

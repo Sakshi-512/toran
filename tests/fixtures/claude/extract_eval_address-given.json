@@ -1,0 +1,7 @@
+{
+  "text": "{\"business_name\": \"\", \"business_type\": \"bakery\", \"area\": \"Flat 12, Shanti Society, Kothrud 411038\", \"delivery_areas\": [], \"languages\": [\"en\"], \"products\": [{\"name\": \"Nankhatai\", \"unit\": \"box\", \"options\": [{\"label\": \"250 g box\", \"price\": 180}], \"notes\": \"\"}], \"order_methods\": [\"whatsapp\"], \"lead_time\": \"\", \"phone\": \"9000000001\", \"policy\": \"\", \"missing\": [\"business_name: What is the name of your bakery?\"], \"web_address\": \"home-bakery\"}",
+  "usage": {
+    "input_tokens": 3900,
+    "output_tokens": 1700
+  }
+}

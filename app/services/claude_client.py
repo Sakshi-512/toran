@@ -217,6 +217,7 @@ class ClaudeClient:
         cache_system: bool = True,
         output_config: dict[str, Any] | None = None,
         max_attempts: int = MAX_ATTEMPTS,
+        intake_id: int | None = None,
     ) -> ClaudeResult:
         """Send one request and return the reply. Raises SpendCapReached or ClaudeUnavailable.
 
@@ -235,7 +236,7 @@ class ClaudeClient:
         reply = self._send_with_retry(request, fixture_key or purpose, max_attempts)
         answered_by = reply.model or model
         cost = estimate_cost(answered_by, reply.usage)
-        self._record(answered_by, reply.usage, cost, purpose, business_id, is_mock)
+        self._record(answered_by, reply.usage, cost, purpose, business_id, is_mock, intake_id)
         return ClaudeResult(reply.text, answered_by, reply.usage, cost, is_mock, reply.stop_reason)
 
     def spent_today(self) -> float:
@@ -306,8 +307,10 @@ class ClaudeClient:
         purpose: str,
         business_id: int | None,
         is_mock: bool,
+        intake_id: int | None = None,
     ) -> None:
         row = ClaudeUsage(
+            intake_id=intake_id,
             business_id=business_id,
             purpose=purpose,
             model=model,

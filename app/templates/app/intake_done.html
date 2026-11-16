@@ -1,0 +1,15 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('done.title', lang) }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ t('done.title', lang) }}</h1>
+<p>{{ t('done.intro', lang) }}</p>
+<section class="card secret">
+  <p class="muted">{{ t('done.link', lang) }}</p>
+  <p class="secret-value"><a href="{{ link }}">{{ link }}</a></p>
+  <p class="muted">{{ t('done.pin', lang) }}</p>
+  <p class="secret-value pin">{{ pin }}</p>
+</section>
+<p>{{ t('done.save_hint', lang) }}</p>
+<p>{{ t('done.next', lang) }}</p>
+<p><a class="button" href="{{ link }}">{{ t('done.open', lang) }}</a></p>
+{% endblock %}

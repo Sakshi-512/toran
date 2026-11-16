@@ -1,0 +1,40 @@
+{% extends "app/base.html" %}
+{% block title %}{{ business.display_name }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ business.display_name }}</h1>
+<p class="notice-ok">{{ t('owner.status_draft', lang) }}</p>
+{% if error_key %}<p class="notice-error" role="alert">{{ t(error_key, lang) }}</p>{% endif %}
+<section class="card">
+  <h2>{{ t('owner.details', lang) }}</h2>
+  <p>{{ t('confirm.type.' ~ business.business_type, lang) }}{% if profile.area %} · {{ profile.area }}{% endif %}</p>
+  {% if profile.phone %}<p>{{ profile.phone }}</p>{% endif %}
+  <ul>{% for p in profile.products %}<li>{{ p.name }}{% for o in p.options %} · {{ o.label }} ₹{{ o.price }}{% endfor %}</li>{% endfor %}</ul>
+</section>
+<section class="card" id="photos">
+  <h2>{{ t('owner.photos', lang) }}</h2>
+  {% if not photos %}<p class="muted">{{ t('owner.no_photos', lang) }}</p>{% endif %}
+  <div class="photo-grid">
+  {% for ph in photos %}
+    <figure>
+      <img src="/owner/photos/{{ ph.id }}" alt="{{ t('site.photo_alt', lang, subject=ph.subject or business.display_name) }}" width="240" height="180" loading="lazy">
+      <figcaption>
+        {% if ph.is_main %}<strong>{{ t('owner.main', lang) }}</strong>{% else %}
+        <form method="post" action="/owner/photos/{{ ph.id }}"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary" name="action" value="main">{{ t('owner.make_main', lang) }}</button></form>{% endif %}
+        <form method="post" action="/owner/photos/{{ ph.id }}"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+          <label for="s{{ ph.id }}">{{ t('owner.shows', lang) }}</label>
+          <select id="s{{ ph.id }}" name="subject"><option value="">{{ t('owner.shows_business', lang) }}</option>{% for n in product_names %}<option value="{{ n }}"{% if ph.subject == n %} selected{% endif %}>{{ n }}</option>{% endfor %}</select>
+          <button class="button secondary" name="action" value="subject">{{ t('owner.save', lang) }}</button></form>
+        <form method="post" action="/owner/photos/{{ ph.id }}"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary" name="action" value="delete">{{ t('owner.delete', lang) }}</button></form>
+      </figcaption>
+    </figure>
+  {% endfor %}
+  </div>
+  <form class="form" method="post" action="/owner/photos" enctype="multipart/form-data">
+    <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+    <label for="more-photos">{{ t('owner.add_photos', lang) }}</label>
+    <input id="more-photos" type="file" name="photos" accept="image/*" multiple>
+    <button class="button" type="submit">{{ t('owner.add_photos', lang) }}</button>
+  </form>
+</section>
+<form method="post" action="/owner/logout"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.logout', lang) }}</button></form>
+{% endblock %}

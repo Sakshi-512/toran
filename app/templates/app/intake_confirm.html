@@ -1,0 +1,81 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('confirm.title', lang) }} · {{ app_name }}{% endblock %}
+{% macro err(name) %}{% if errors.get(name) %}<p class="field-error" role="alert">{{ t(errors[name], lang) }}</p>{% endif %}{% endmacro %}
+{% block content %}
+<h1>{{ t('confirm.title', lang) }}</h1>
+<p>{{ t('confirm.intro', lang) }}</p>
+{% if errors %}<p class="notice-error" role="alert">{{ t('confirm.fix_errors', lang) }}</p>{% endif %}
+<form class="form cards" method="post" action="/start/{{ token }}/confirm" enctype="multipart/form-data">
+  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+
+  {% if draft.missing %}
+  <section class="card questions" aria-labelledby="q-title">
+    <h2 id="q-title">{{ t('confirm.questions', lang) }}</h2>
+    <ul>{% for q in draft.missing %}<li>{{ q.split(':', 1)[1] if ':' in q else q }}</li>{% endfor %}</ul>
+    {% for q in draft.missing %}<input type="hidden" name="missing" value="{{ q }}">{% endfor %}
+  </section>
+  {% endif %}
+
+  <section class="card"><label for="f-name">{{ t('confirm.name', lang) }}</label>
+    <input id="f-name" name="business_name" value="{{ draft.business_name }}" maxlength="120">{{ err('business_name') }}</section>
+
+  <section class="card"><label for="f-address">{{ t('confirm.web_address', lang) }}</label>
+    <div class="address"><input id="f-address" name="web_address" value="{{ address }}" maxlength="40" pattern="[a-z0-9-]+" autocapitalize="none" spellcheck="false"><span class="muted">.{{ base_domain }}</span></div>
+    <p class="muted">{{ t('confirm.web_address_hint', lang) }}</p>{{ err('web_address') }}</section>
+
+  <section class="card"><label for="f-type">{{ t('confirm.type', lang) }}</label>
+    <select id="f-type" name="business_type">{% for k in ('bakery','tailoring','tuition','mehendi','beauty','other') %}<option value="{{ k }}"{% if draft.business_type == k %} selected{% endif %}>{{ t('confirm.type.' ~ k, lang) }}</option>{% endfor %}</select></section>
+
+  <section class="card"><label for="f-phone">{{ t('confirm.phone', lang) }}</label>
+    <input id="f-phone" name="phone" value="{{ draft.phone }}" inputmode="tel" maxlength="20">{{ err('phone') }}</section>
+
+  <section class="card"><label for="f-area">{{ t('confirm.area', lang) }}</label>
+    <input id="f-area" name="area" value="{{ draft.area }}" maxlength="120">{{ err('area') }}
+    <label for="f-delivery">{{ t('confirm.delivery', lang) }}</label>
+    <textarea id="f-delivery" name="delivery_areas" rows="2">{{ draft.delivery_areas|join(', ') }}</textarea>{{ err('delivery_areas') }}</section>
+
+  <section class="card"><fieldset><legend>{{ t('confirm.order_methods', lang) }}</legend>
+    {% for m in ('whatsapp','call','sms','instagram','in_person') %}<label class="check"><input type="checkbox" name="order_methods" value="{{ m }}"{% if m in draft.order_methods %} checked{% endif %}> {{ t('confirm.method.' ~ m, lang) }}</label>{% endfor %}</fieldset>
+    <fieldset><legend>{{ t('confirm.languages', lang) }}</legend>
+    {% for code in LANGUAGES %}<label class="check"><input type="checkbox" name="languages" value="{{ code }}"{% if code in draft.languages %} checked{% endif %}> {{ t('lang.' ~ code, lang) }}</label>{% endfor %}</fieldset></section>
+
+  <h2>{{ t('confirm.products', lang) }}</h2>
+  <input type="hidden" name="product_count" value="{{ draft.products|length }}">
+  {% for p in draft.products %}{% set i = loop.index0 %}
+  <section class="card product">
+    <label for="p{{ i }}-name">{{ t('confirm.product_name', lang) }}</label>
+    <input id="p{{ i }}-name" name="p{{ i }}_name" value="{{ p.name }}" maxlength="120">{{ err('p' ~ i ~ '_name') }}
+    <label for="p{{ i }}-unit">{{ t('confirm.unit', lang) }}</label>
+    <select id="p{{ i }}-unit" name="p{{ i }}_unit">{% for u in ('piece','box','kg','month','hand','service') %}<option value="{{ u }}"{% if p.unit == u %} selected{% endif %}>{{ t('site.unit.' ~ u, lang) }}</option>{% endfor %}</select>
+    <input type="hidden" name="p{{ i }}_option_count" value="{{ p.options|length }}">
+    {% for o in p.options %}{% set j = loop.index0 %}
+    <div class="option-row">
+      <input name="p{{ i }}_o{{ j }}_label" value="{{ o.label }}" maxlength="80" aria-label="{{ t('confirm.option_label', lang) }}" placeholder="{{ t('confirm.option_label', lang) }}">
+      <input name="p{{ i }}_o{{ j }}_price" value="{{ o.price }}" inputmode="numeric" maxlength="12" aria-label="{{ t('confirm.option_price', lang) }}" placeholder="{{ t('confirm.option_price', lang) }}">
+    </div>
+    {% if from_photo and o.price != '' %}<p class="from-photo">{{ t('confirm.from_photo', lang) }}</p>{% endif %}
+    {{ err('p' ~ i ~ '_o' ~ j ~ '_price') }}
+    {% endfor %}
+    <button class="button secondary" type="submit" name="action" value="add_option:{{ i }}">{{ t('confirm.add_option', lang) }}</button>
+    <label for="p{{ i }}-notes">{{ t('confirm.notes', lang) }}</label>
+    <input id="p{{ i }}-notes" name="p{{ i }}_notes" value="{{ p.notes }}" maxlength="500">
+    <label class="check"><input type="checkbox" name="p{{ i }}_remove" value="yes"> {{ t('confirm.remove', lang) }}</label>
+  </section>
+  {% endfor %}
+  <button class="button secondary" type="submit" name="action" value="add_product">{{ t('confirm.add_product', lang) }}</button>
+
+  <section class="card"><label for="f-lead">{{ t('confirm.lead_time', lang) }}</label>
+    <input id="f-lead" name="lead_time" value="{{ draft.lead_time }}" maxlength="120">
+    <label for="f-policy">{{ t('confirm.policy', lang) }}</label>
+    <textarea id="f-policy" name="policy" rows="3" maxlength="500">{{ draft.policy }}</textarea></section>
+
+  <section class="card"><label for="f-photos">{{ t('confirm.photos', lang) }}</label>
+    <input id="f-photos" type="file" name="photos" accept="image/*" multiple>
+    <p class="muted">{{ t('confirm.photos_hint', lang) }}</p>{% if photo_error %}<p class="field-error" role="alert">{{ t(photo_error, lang) }}</p>{% endif %}</section>
+
+  <div class="cta-row">
+    <button class="button secondary" type="submit" name="action" value="save">{{ t('confirm.save', lang) }}</button>
+    <button class="button" type="submit" name="action" value="confirm">{{ t('confirm.confirm', lang) }}</button>
+  </div>
+</form>
+{% endblock %}

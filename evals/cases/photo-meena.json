@@ -1,0 +1,40 @@
+{
+  "id": "photo-meena",
+  "reviewed": true,
+  "note": "Rate-card photo drawn for tests (fake business).",
+  "language": "hi",
+  "input": {
+    "type": "photo",
+    "file": "files/meena-rate-card.png"
+  },
+  "expected": {
+    "business_type": "tailoring",
+    "products": [
+      {
+        "name": "Blouse stitching",
+        "options": [
+          {
+            "label": "Simple",
+            "price": 450
+          },
+          {
+            "label": "Designer",
+            "price": 900
+          }
+        ]
+      },
+      {
+        "name": "Fall pico",
+        "options": [
+          {
+            "price": 80
+          }
+        ]
+      }
+    ],
+    "questions": [
+      "area",
+      "phone"
+    ]
+  }
+}

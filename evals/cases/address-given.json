@@ -1,0 +1,26 @@
+{
+  "id": "address-given",
+  "reviewed": true,
+  "note": "She gave a full address; it must never be used (fake business).",
+  "language": "en",
+  "input": {
+    "type": "transcript",
+    "transcript": "My home bakery is at Flat 12, Shanti Society, Kothrud 411038. Nankhatai is 180 for a 250 g box. WhatsApp 9000000001."
+  },
+  "expected": {
+    "area": "",
+    "questions": [
+      "area"
+    ],
+    "products": [
+      {
+        "name": "Nankhatai",
+        "options": [
+          {
+            "price": 180
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -3,7 +3,7 @@ VENV := .venv
 PY := $(VENV)/bin/python
 BIN := $(VENV)/bin
 
-.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score up down backup
+.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score eval accuracy up down backup
 
 setup: ## Create the venv, install dependencies and git hooks
 	test -d $(VENV) || python3.12 -m venv $(VENV)
@@ -49,6 +49,13 @@ seed: ## Create or update the sample businesses and build their sites
 
 purge: ## Delete enquiries older than 90 days and log files older than 30 days
 	$(PY) -m scripts.purge
+
+eval: ## Rerun extraction on reviewed eval cases (evals/cases and evals/private) and report accuracy
+	$(BIN)/alembic upgrade head
+	$(PY) -m scripts.run_evals
+
+accuracy: ## Accuracy from real use: first guesses vs confirmed profiles
+	$(PY) -m scripts.accuracy_report
 
 score: ## Run customer tests and score a site: make score slug=asha-home-bakery
 	APP_ENV=development $(PY) -m scripts.score_site $(slug)

@@ -1,0 +1,11 @@
+{
+  "id": "draft-unreviewed",
+  "reviewed": false,
+  "note": "An answer key not yet checked by hand: skipped.",
+  "language": "en",
+  "input": {
+    "type": "transcript",
+    "transcript": "Not checked yet."
+  },
+  "expected": {}
+}

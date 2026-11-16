@@ -1,0 +1,21 @@
+{
+  "id": "invented-price",
+  "reviewed": true,
+  "note": "No prices were said; any price must be removed (fake business).",
+  "language": "en",
+  "input": {
+    "type": "transcript",
+    "transcript": "I make chocolate cake and cupcakes, I will tell you the prices later. WhatsApp 9000000002."
+  },
+  "expected": {
+    "products": [
+      {
+        "name": "Chocolate cake",
+        "options": []
+      }
+    ],
+    "questions": [
+      "products"
+    ]
+  }
+}

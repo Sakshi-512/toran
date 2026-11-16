@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     sites_dir: Path = Path("data/sites")
     log_dir: Path = Path("data/logs")
     runs_dir: Path = Path("data/runs")
+    uploads_dir: Path = Path("data/uploads")
 
     anthropic_api_key: SecretStr | None = None
     claude_mock: bool = False

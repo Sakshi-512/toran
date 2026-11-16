@@ -1,0 +1,36 @@
+{
+  "id": "tuition-en",
+  "reviewed": true,
+  "note": "English, product names worded differently (fake business).",
+  "language": "en",
+  "input": {
+    "type": "transcript",
+    "transcript": "I am Mrs Sharma. I teach maths for class 8 at 1500 rupees a month, and class 9 and 10 at 2000. English for class 5 to 7 is 1200 a month. Classes are in Viman Nagar, Pune, evenings Monday to Friday. Call 9000000003."
+  },
+  "expected": {
+    "business_type": "tuition",
+    "phone": "9000000003",
+    "area": "Viman Nagar, Pune",
+    "products": [
+      {
+        "name": "Maths",
+        "options": [
+          {
+            "price": 1500
+          },
+          {
+            "price": 2000
+          }
+        ]
+      },
+      {
+        "name": "English",
+        "options": [
+          {
+            "price": 1200
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "text": "{\"business_name\": \"Rukhsar Mehendi\", \"business_type\": \"mehendi\", \"area\": \"Camp, Pune\", \"delivery_areas\": [\"Kondhwa\", \"Wanowrie\"], \"languages\": [\"hi\"], \"products\": [{\"name\": \"Bridal mehendi\", \"unit\": \"hand\", \"options\": [{\"label\": \"दोनों हाथ\", \"price\": 2500}], \"notes\": \"\"}, {\"name\": \"Party mehendi\", \"unit\": \"hand\", \"options\": [{\"label\": \"एक हाथ\", \"price\": 300}, {\"label\": \"दोनों हाथ\", \"price\": 500}], \"notes\": \"\"}], \"order_methods\": [\"whatsapp\"], \"lead_time\": \"\", \"phone\": \"9000000004\", \"policy\": \"\", \"missing\": [], \"web_address\": \"rukhsar-mehendi\"}",
+  "usage": {
+    "input_tokens": 3900,
+    "output_tokens": 1700
+  }
+}

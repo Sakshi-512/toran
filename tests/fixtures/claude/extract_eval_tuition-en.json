@@ -1,0 +1,7 @@
+{
+  "text": "{\"business_name\": \"Sharma Tuition Classes\", \"business_type\": \"tuition\", \"area\": \"Viman Nagar, Pune\", \"delivery_areas\": [], \"languages\": [\"en\"], \"products\": [{\"name\": \"Maths tuition\", \"unit\": \"month\", \"options\": [{\"label\": \"Class 8\", \"price\": 1500}, {\"label\": \"Class 9 and 10\", \"price\": 2000}], \"notes\": \"Evenings, Monday to Friday\"}, {\"name\": \"English\", \"unit\": \"month\", \"options\": [{\"label\": \"Class 5 to 7\", \"price\": 1200}], \"notes\": \"\"}], \"order_methods\": [\"call\"], \"lead_time\": \"\", \"phone\": \"9000000003\", \"policy\": \"\", \"missing\": [], \"web_address\": \"sharma-tuition-classes\"}",
+  "usage": {
+    "input_tokens": 3900,
+    "output_tokens": 1700
+  }
+}

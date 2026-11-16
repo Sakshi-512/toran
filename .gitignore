@@ -11,3 +11,7 @@ backups/
 *.db
 *.db-wal
 *.db-shm
+# Real cases, voice notes, photos and reports must never be committed (the repo is public).
+evals/private/
+evals/reports/
+uploads/

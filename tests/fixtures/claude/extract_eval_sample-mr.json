@@ -1,0 +1,7 @@
+{
+  "text": "{\"business_type\": \"bakery\", \"area\": \"Kothrud, Pune\", \"delivery_areas\": [\"Kothrud\", \"Karve Nagar\", \"Warje\"], \"order_methods\": [\"whatsapp\"], \"phone\": \"\", \"policy\": \"\", \"web_address\": \"asha-home-bakery\", \"business_name\": \"आशा होम बेकरी\", \"languages\": [\"mr\"], \"products\": [{\"name\": \"Chocolate cake\", \"unit\": \"kg\", \"options\": [{\"label\": \"half kg\", \"price\": 450}, {\"label\": \"1 kg\", \"price\": 850}], \"notes\": \"\"}, {\"name\": \"उकडीचे मोदक\", \"unit\": \"box\", \"options\": [{\"label\": \"11 चा box\", \"price\": 330}], \"notes\": \"\"}], \"lead_time\": \"2 दिवस\", \"missing\": [\"phone: तुमचा WhatsApp नंबर काय आहे?\"]}",
+  "usage": {
+    "input_tokens": 3900,
+    "output_tokens": 1700
+  }
+}

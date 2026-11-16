@@ -1,0 +1,7 @@
+{
+  "text": "{\"business_name\": \"सुनीता ब्युटी पार्लर\", \"business_type\": \"beauty\", \"area\": \"Sinhagad Road\", \"delivery_areas\": [], \"languages\": [\"mr\"], \"products\": [{\"name\": \"Threading\", \"unit\": \"service\", \"options\": [{\"label\": \"\", \"price\": 40}], \"notes\": \"\"}, {\"name\": \"Facial\", \"unit\": \"service\", \"options\": [{\"label\": \"Fruit facial\", \"price\": 600}, {\"label\": \"Gold facial\", \"price\": 1200}], \"notes\": \"\"}, {\"name\": \"Bridal makeup\", \"unit\": \"service\", \"options\": [{\"label\": \"With trial\", \"price\": 8000}], \"notes\": \"\"}], \"order_methods\": [\"whatsapp\"], \"lead_time\": \"\", \"phone\": \"९००००००००५\", \"policy\": \"\", \"missing\": [\"delivery_areas: तुम्ही कोणत्या भागांत सेवा देता?\"], \"web_address\": \"sunita-beauty-parlour\"}",
+  "usage": {
+    "input_tokens": 3900,
+    "output_tokens": 1700
+  }
+}
