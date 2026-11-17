@@ -129,6 +129,14 @@ def wait_page(token: str, request: Request) -> Response:
     return render(request, "app/intake_wait.html", {"status": status, "error_key": error_key})
 
 
+def _already_created(request: Request) -> Response:
+    """A second Confirm (a double tap, or the back button): the business exists and her link
+    and PIN were shown once. Explain that, and how to get new ones from the team."""
+    response = render(request, "app/intake_already.html", {}, status_code=409)
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 def _cards(
     request: Request,
     token: str,
@@ -188,7 +196,7 @@ async def confirm_submit(token: str, request: Request) -> Response:
     with Session(engine) as session:
         intake = svc.intake_for_token(session, token)
         if intake.status in ("confirming", "done"):
-            raise AppError("intake.already_confirmed", status_code=409)
+            return _already_created(request)
         if intake.status != "ready":
             raise AppError("error.not_found", status_code=404)
         source = intake.source
@@ -219,6 +227,8 @@ async def confirm_submit(token: str, request: Request) -> Response:
     try:
         confirmed = svc.confirm_intake(engine, settings, intake_id, profile, address, photos[:8])
     except AppError as exc:
+        if exc.key == "intake.already_confirmed":
+            return _already_created(request)
         if exc.key != "intake.address_taken":
             raise
         errors.add("web_address", exc.key)

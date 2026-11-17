@@ -12,12 +12,14 @@ request. Deleting a business, or issuing new access, makes every older session w
 
 import hashlib
 import hmac
+import logging
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 
-from sqlmodel import Session, select
+from sqlalchemy.engine import Engine
+from sqlmodel import Session, col, select
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -25,6 +27,8 @@ from app.config import Settings
 from app.db import get_engine
 from app.models import Business, OwnerDevice, new_session_epoch, utcnow
 from app.services.errors import AppError
+
+logger = logging.getLogger(__name__)
 
 MAX_PIN_FAILURES = 5
 LOCK_MINUTES = 15
@@ -258,3 +262,34 @@ def require_recent_pin(request: Request) -> int:
     ):
         raise AppError("owner.pin_again", status_code=403)
     return business_id
+
+
+def reissue_access(engine: Engine, business_id: int) -> OwnerAccess:
+    """Team-only: a new private link and PIN after the team has confirmed it is her.
+
+    The old link stops working at once (new hash), every session ends (new session epoch) and
+    every remembered device is revoked. The log records only that it happened, never the
+    link, PIN or any personal detail.
+    """
+    from app.models import ActionLog
+
+    with Session(engine) as session:
+        business = session.get(Business, business_id)
+        if business is None or business.deleted_at is not None:
+            raise AppError("error.not_found", status_code=404)
+        access = issue_access(business)
+        session.add(business)
+        now = utcnow()
+        for device in session.exec(
+            select(OwnerDevice).where(
+                OwnerDevice.business_id == business_id, col(OwnerDevice.revoked_at).is_(None)
+            )
+        ).all():
+            device.revoked_at = now
+            session.add(device)
+        session.add(
+            ActionLog(business_id=business_id, run_id="access", step="access_reissued", ok=True)
+        )
+        session.commit()
+    logger.info("owner_access_reissued", extra={"business_id": business_id})
+    return access

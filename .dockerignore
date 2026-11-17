@@ -6,6 +6,8 @@ backups
 voice_notes
 tests
 !tests/fixtures/profiles
+!tests/fixtures/claude
+!tests/fixtures/gddy
 evals
 docs
 !docs/checklists.md

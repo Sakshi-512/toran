@@ -3,7 +3,9 @@ VENV := .venv
 PY := $(VENV)/bin/python
 BIN := $(VENV)/bin
 
-.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score agent shots eval accuracy up down backup
+
+.PHONY: server-seed server-agent server-access server-backup server-purge
+.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score agent shots access eval accuracy up down backup
 
 setup: ## Create the venv, install dependencies and git hooks
 	test -d $(VENV) || python3.12 -m venv $(VENV)
@@ -66,6 +68,9 @@ agent: ## Run the agent fix loop on a draft: make agent slug=<slug> [url=<draft 
 shots: ## Remake the home page's phone screenshot from a real sample site
 	$(PY) -m scripts.home_shots
 
+access: ## New private link and PIN after the team confirms it's her: make access slug=<slug>
+	$(PY) -m scripts.new_access $(slug)
+
 logs: ## Follow the production app log file
 	docker compose exec app tail -f /app/data/logs/app.log
 
@@ -74,6 +79,22 @@ up: ## Build and start the production stack
 
 down:
 	docker compose down
+
+# On the server (inside the running app container; the server has no virtualenv).
+server-seed: ## Server: create the sample businesses and build their sites
+	docker compose exec app python -m scripts.seed_samples
+
+server-agent: ## Server: run the agent fix loop once: make server-agent slug=savitri-gruh-udyog
+	docker compose exec app python -m scripts.agent_run $(slug)
+
+server-access: ## Server: new link and PIN after the team confirms it's her: make server-access slug=<slug>
+	docker compose exec app python -m scripts.new_access $(slug)
+
+server-backup: ## Server: back up the database now
+	docker compose exec app python -m scripts.backup --dir /app/backups
+
+server-purge: ## Server: run the retention cleanup (and the daily backup) now
+	docker compose exec app python -m scripts.purge
 
 backup: ## Back up the SQLite database (keeps 7 days)
 	$(PY) -m scripts.backup

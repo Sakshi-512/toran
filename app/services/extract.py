@@ -14,6 +14,7 @@ import base64
 import json
 import logging
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, ValidationError
@@ -279,8 +280,13 @@ def extract_profile(
     intake_id: int | None = None,
     fixture_key: str = "extract_default",
     client: ClaudeClient | None = None,
+    saved_answer: Path | None = None,
 ) -> ExtractResult:
-    """Run one extraction. Never raises: failures come back as a status."""
+    """Run one extraction. Never raises: failures come back as a status.
+
+    saved_answer is only for the built-in sample voice notes: when the daily spend cap stops
+    the Claude call, their saved extraction is used instead, so judges can still try a sample.
+    """
     claude = client or ClaudeClient(settings, engine, timeout_seconds=TIMEOUT_SECONDS)
     try:
         result = claude.complete(
@@ -295,7 +301,11 @@ def extract_profile(
             intake_id=intake_id,
         )
     except SpendCapReached:
-        return ExtractResult("spend_cap")
+        if saved_answer is None or not saved_answer.is_file():
+            return ExtractResult("spend_cap")
+        logger.info("extract_saved_sample", extra={"intake_id": intake_id})
+        saved = json.loads(saved_answer.read_text(encoding="utf-8"))
+        return _finish(str(saved["text"]), source, transcript, language, intake_id, "saved", 0.0)
     except ClaudeUnavailable:
         return ExtractResult("failed")
     except Exception:
@@ -303,13 +313,28 @@ def extract_profile(
         return ExtractResult("failed")
     if result.refused:
         return ExtractResult("refused", model=result.model, cost_usd=result.cost_usd_estimate)
+    return _finish(
+        result.text, source, transcript, language, intake_id, result.model, result.cost_usd_estimate
+    )
+
+
+def _finish(
+    text: str,
+    source: Source,
+    transcript: str | None,
+    language: str,
+    intake_id: int | None,
+    model: str,
+    cost: float,
+) -> ExtractResult:
+    """Validate Claude's JSON and apply the code-side checks."""
     try:
-        extraction = Extraction.model_validate(json.loads(result.text))
+        extraction = Extraction.model_validate(json.loads(text))
         data, removed = apply_checks(extraction, source, transcript, language)
         profile = to_profile(data)
     except (ValueError, ValidationError):
         logger.warning("extract_invalid", extra={"intake_id": intake_id})
-        return ExtractResult("invalid", model=result.model, cost_usd=result.cost_usd_estimate)
+        return ExtractResult("invalid", model=model, cost_usd=cost)
     logger.info(
         "extract_done",
         extra={
@@ -326,6 +351,6 @@ def extract_profile(
         extraction.model_dump(),
         extraction.web_address,
         removed,
-        result.model,
-        result.cost_usd_estimate,
+        model,
+        cost,
     )

@@ -83,6 +83,18 @@ def test_in_image_helper_reads_the_build_files() -> None:
     assert not in_image(ROOT / "tests" / "conftest.py")
 
 
+def test_mock_answers_and_saved_sample_extractions_ship_in_the_image() -> None:
+    from app.services.claude_client import FIXTURE_DIR
+    from app.services.godaddy import GDDY_FIXTURES
+    from app.services.intake import SAVED_SAMPLE_DIR
+
+    assert in_image(FIXTURE_DIR / "agent_done.json")
+    assert in_image(FIXTURE_DIR / "extract_sample-en.json")
+    assert in_image(GDDY_FIXTURES / "lookups.json")
+    for sample in ("sample-en", "sample-hi", "sample-mr"):
+        assert in_image(SAVED_SAMPLE_DIR / f"{sample}.json")
+
+
 def test_sample_voice_notes_ship_in_the_image(monkeypatch: pytest.MonkeyPatch) -> None:
     from app.services.stt import STT_SAMPLES, MockSTT
 
@@ -477,7 +489,7 @@ def test_repeat_confirm_post_is_friendly(client: TestClient, engine: Engine) -> 
     _, fields = _cards(client, token)
     assert _confirm(client, token, fields).status_code == 200
     again = _confirm(client, token, fields)
-    assert again.status_code == 409 and "already been created" in again.text
+    assert again.status_code == 409 and "Your website is already created" in again.text
 
 
 # --- 20: two publishes at the same moment ---

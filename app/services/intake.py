@@ -250,6 +250,7 @@ def run_intake(engine: Engine, settings: Settings, intake_id: int) -> None:
                 image_mime=_mime(intake.input_path),
                 intake_id=intake.id,
                 fixture_key=_fixture_key(intake),
+                saved_answer=_saved_sample_answer(intake),
             )
             _store_result(session, intake, result)
         except (SttError, UploadRejected) as exc:
@@ -261,6 +262,18 @@ def run_intake(engine: Engine, settings: Settings, intake_id: int) -> None:
             _delete_input(intake)
             session.add(intake)
             session.commit()
+
+
+SAVED_SAMPLE_DIR = Path(__file__).resolve().parents[1] / "samples" / "extract"
+
+
+def _saved_sample_answer(intake: IntakeSession) -> Path | None:
+    """For the built-in sample voice notes: the saved extraction used if the spend cap is hit."""
+    if not is_sample_intake(intake) or intake.stt_route is None:
+        return None
+    sample_id = intake.stt_route.removeprefix("sample:")
+    path = (SAVED_SAMPLE_DIR / f"{sample_id}.json").resolve()
+    return path if path.parent == SAVED_SAMPLE_DIR.resolve() else None
 
 
 def _mime(path: str | None) -> str:

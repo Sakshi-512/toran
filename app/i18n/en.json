@@ -593,5 +593,12 @@
   "fix.real_photos": "Add real photos of your products.",
   "fix.policy_shown": "Add your ordering terms, such as advance payment or delivery charges.",
   "fix.https": "This comes automatically when your site is live.",
-  "fix.questions_answered": "Add your ordering terms and timings so customers' common questions are answered."
+  "fix.questions_answered": "Add your ordering terms and timings so customers' common questions are answered.",
+  "confirm.saving": "Creating your website…",
+  "already.title": "Your website is already created",
+  "already.created": "Good news: your business was created the first time you pressed Confirm.",
+  "already.shown_once": "Your private link and PIN were shown only once, on the previous screen, so nobody else can see them. We can't show them again.",
+  "already.lost_title": "Didn't save your link and PIN?",
+  "already.lost": "Write to us with your business name. We will check it's you by calling the phone number on your website, then give you a new link and PIN. The old ones will stop working.",
+  "already.contact": "Write to us"
 }

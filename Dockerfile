@@ -23,6 +23,10 @@ COPY app ./app
 COPY scripts ./scripts
 # Sample business profiles, used by scripts.seed_samples.
 COPY tests/fixtures/profiles ./tests/fixtures/profiles
+# Saved Claude and GoDaddy answers for mock mode (CLAUDE_MOCK=1, GDDY_MOCK=1): fake demo data,
+# no secrets. Production runs with both off; these let the stack run without credits.
+COPY tests/fixtures/claude ./tests/fixtures/claude
+COPY tests/fixtures/gddy ./tests/fixtures/gddy
 # Customer checklists are read by the AI checks.
 COPY docs/checklists.md ./docs/checklists.md
 

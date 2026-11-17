@@ -2,18 +2,106 @@
 
 Target: the GoDaddy Docker VPS, using Docker Compose with Caddy for HTTPS.
 
-## First time
+## First deployment: checklist
 
-1. Server: SSH keys only, and a firewall that allows only ports 22, 80 and 443.
-2. DNS (gddy CLI): an `A` record for `@`, `www` and `*` pointing at the VPS IP.
-3. Copy `.env.example` to `.env` on the server and fill it in (`APP_ENV=production`).
-4. Create the backup folder for the app's non-root user (uid 1001 in the Playwright image), or Docker creates it owned by root and backups fail: `mkdir -p backups && sudo chown 1001:1001 backups`
-5. `make up`. The image installs the pinned GoDaddy CLI (gddy 0.2.37, SHA-256 checked during the build); `curl -s https://<BASE_DOMAIN>/health` should show `"gddy": "installed"`.
-6. Seed the sample businesses once: `docker compose exec app python -m scripts.seed_samples`
-7. Run the agent fix loop once on the home-foods demo business, with real Claude (about $0.25):
-   `docker compose exec app python -m scripts.agent_run savitri-gruh-udyog` (the same as `make agent slug=savitri-gruh-udyog` outside Docker). It prints each round, the final score and the cost. The home page's "Before and after" section stays hidden until such a real run on a demo business has raised the score; mock runs are never shown there. If a run stops without improving, run it again later.
+Follow these in order on the GoDaddy VPS. Each step says how to check it. Commands run from the
+project folder on the server (for example `/opt/toran`). The server has no Python virtualenv:
+app commands run inside the container (`make server-...` wraps `docker compose exec app ...`).
 
-Migrations run automatically on start (`alembic upgrade head`). The app never calls `create_all`.
+**Server**
+
+- [ ] 1. SSH keys only (`PasswordAuthentication no`), and a firewall that allows only 22, 80 and 443:
+  `sudo ufw allow 22,80,443/tcp && sudo ufw allow 443/udp && sudo ufw enable`
+- [ ] 2. Docker and the Compose plugin are installed: `docker compose version`
+- [ ] 3. Check the CPU architecture: `uname -m` (expect `x86_64`). The image installs the matching
+  pinned gddy build; step 11 checks it runs.
+- [ ] 4. Clone the repository and `cd` into it.
+
+**DNS** (gddy CLI on your own machine, or the GoDaddy DNS page)
+
+- [ ] 5. Point the domain at the server, then check from your machine with `dig +short <name>`:
+  - `A` record `@` → the VPS IP (`gettoran.com`)
+  - `A` record `www` → the VPS IP
+  - `A` record `*` → the VPS IP (every business subdomain, for example `asha-home-bakery.gettoran.com`)
+
+**Settings** (`.env` on the server only, never in git)
+
+- [ ] 6. `cp .env.example .env && chmod 600 .env`, then set:
+  - `APP_ENV=production`
+  - `BASE_DOMAIN=gettoran.com`
+  - `ACME_EMAIL=` the team address (Let's Encrypt contact)
+  - `SECRET_KEY=` a new random value: `python3 -c "import secrets; print(secrets.token_urlsafe(48))"`
+  - `CLAUDE_MOCK=0`, `GDDY_MOCK=0`, `STT_PROVIDER=sarvam`
+  - Secrets: `ANTHROPIC_API_KEY`, `STT_API_KEY` (Sarvam) and `GDDY_PAT` (GoDaddy personal access token)
+  - `CLAUDE_DAILY_SPEND_CAP_USD=4` (see "When the daily Claude cap is reached" below)
+  - `STT_DAILY_MINUTES_CAP` as planned for the hackathon
+  - Email: `SMTP_HOST`, `SMTP_PORT=465`, `SMTP_USER` (the full mailbox address), `SMTP_PASSWORD`,
+    `CONTACT_TO_EMAIL`
+  - Check nothing was left empty: `grep -E '^[A-Z_]+=$' .env` should print nothing you need.
+- [ ] 7. Create the backup folder for the app's non-root user (uid 1001), or Docker creates it as
+  root and backups fail: `mkdir -p backups && sudo chown 1001:1001 backups`
+
+**Start**
+
+- [ ] 8. `make up` (builds the image, installs the pinned gddy with its SHA-256 check, and starts
+  the app and Caddy). Migrations run on start.
+- [ ] 9. Both containers healthy: `docker compose ps` shows `(healthy)` for `app` and `caddy`.
+- [ ] 10. Logs show the migrations and no errors: `docker compose logs app | grep -E "Running upgrade|ERROR"`
+- [ ] 11. gddy on this architecture: `docker compose exec app gddy --version` prints
+  `gddy version 0.2.37`, and `curl -s https://gettoran.com/health` shows `"gddy": "installed"`.
+
+**HTTPS**
+
+- [ ] 12. Main domain: `curl -sI https://gettoran.com/ | head -1` is `HTTP/2 200`, and
+  `curl -svo /dev/null https://gettoran.com 2>&1 | grep issuer` names Let's Encrypt.
+- [ ] 13. `http://gettoran.com` redirects to HTTPS: `curl -sI http://gettoran.com | head -3`
+
+**Content**
+
+- [ ] 14. `make server-seed` (the six demo businesses and their sites).
+- [ ] 15. A business subdomain over HTTPS: `curl -sI https://asha-home-bakery.gettoran.com/ | head -1`
+  is `HTTP/2 200` (its certificate is made on the first request; allow a few seconds). An unknown
+  subdomain gets no certificate: `curl -sI https://nobody.gettoran.com/` fails at the TLS step.
+- [ ] 16. `make server-agent slug=savitri-gruh-udyog` once, with real Claude (about $0.25). It
+  prints each round, the score before and after, and the cost. The home page's "Before and
+  after" appears only after a real run that raised the score; if it stops without improving,
+  run it again later.
+
+**Check it like a judge**
+
+- [ ] 17. On a phone: open https://gettoran.com, tap a "Try this voice note" card, reach the
+  confirmation cards, confirm, note the link and PIN, sign in, and see the draft score.
+- [ ] 18. Send the contact form on the home page and check the `CONTACT_TO_EMAIL` inbox.
+- [ ] 19. Backups: `ls -l backups/` shows today's `app-*.db` owned by uid 1001 (the app makes one
+  on start, then once a day).
+- [ ] 20. Write down the image tag that works, for rollback: `docker image ls toran`
+
+## When the daily Claude cap is reached
+
+`CLAUDE_DAILY_SPEND_CAP_USD=4` stops new Claude calls for the rest of the day (Asia/Kolkata), so
+judges cannot use up the hackathon credit. 30% of the cap is kept for businesses that already
+exist (their agent runs, AI checks and web addresses). When the cap is reached:
+
+- Judges see a friendly message where a new Claude call was needed: "Our helper is resting for
+  today. Your site stays live. Please try again tomorrow." Nothing crashes.
+- The three one-tap sample voice notes still work: their saved extraction is used instead of a
+  new Claude call, so the confirmation cards appear as usual. Their draft is still built and
+  tested in the browser; only the AI-assessed score items wait, with a friendly note.
+- The home page, the demo businesses' sites, the gallery, the before and after, and every live
+  site keep working, because they need no Claude call.
+- Spending today: `make server-agent` prints its own cost; for the day's total, check the
+  `claude_call` and `claude_spend_cap_reached` lines in `make logs`.
+
+## Giving an owner a new link and PIN
+
+Her link and PIN are shown once, when she confirms. If she lost them:
+
+1. Confirm it is her: call or WhatsApp the phone number on her live site (never a number given in
+   the request). If her site has no number, use the email thread from her contact form message.
+2. `make server-access slug=<her web address>` asks you to type `confirmed`, then prints a new
+   link and PIN once. The old link stops working at once, she is signed out everywhere, and
+   remembered devices are revoked. The log records only that access was reissued.
+3. Give them to her directly. Do not store them anywhere.
 
 ## Release with a tagged image
 

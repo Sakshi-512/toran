@@ -1,5 +1,6 @@
 {% extends "app/base.html" %}
-{% block title %}{{ t('confirm.title', lang) }} · {{ app_name }}{% endblock %}
+{% block title %}{{ t('confirm.title', lang) }} · {{ app_name }}<script src="{{ static_url('once.js') }}" defer></script>
+{% endblock %}
 {% macro err(name) %}{% if errors.get(name) %}<p class="field-error" role="alert">{{ t(errors[name], lang) }}</p>{% endif %}{% endmacro %}
 {% block content %}
 <h1>{{ t('confirm.title', lang) }}</h1>
@@ -81,7 +82,8 @@
 
   <div class="cta-row">
     <button class="button secondary" type="submit" name="action" value="save">{{ t('confirm.save', lang) }}</button>
-    <button class="button" type="submit" name="action" value="confirm">{{ t('confirm.confirm', lang) }}</button>
+    <button class="button" type="submit" name="action" value="confirm" data-once="{{ t('confirm.saving', lang) }}">{{ t('confirm.confirm', lang) }}</button>
   </div>
 </form>
+<script src="{{ static_url('once.js') }}" defer></script>
 {% endblock %}

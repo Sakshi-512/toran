@@ -1,0 +1,10 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('already.title', lang) }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ t('already.title', lang) }}</h1>
+<p class="notice-ok" role="status">{{ t('already.created', lang) }}</p>
+<p>{{ t('already.shown_once', lang) }}</p>
+<h2>{{ t('already.lost_title', lang) }}</h2>
+<p>{{ t('already.lost', lang) }}</p>
+<p><a class="button" href="/#contact">{{ t('already.contact', lang) }}</a></p>
+{% endblock %}
