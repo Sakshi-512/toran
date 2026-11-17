@@ -1,5 +1,6 @@
 """Database tables. Every change here needs a new Alembic migration (make migration msg=...)."""
 
+import secrets
 from datetime import UTC, date, datetime
 from typing import Any
 
@@ -12,8 +13,18 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
+def new_session_epoch() -> str:
+    """A random value stored in owner sessions; changing it signs out every old session."""
+    return secrets.token_hex(16)
+
+
 class Business(SQLModel, table=True):
-    """A small business. Real businesses need recorded consent; samples are labelled everywhere."""
+    """A small business. Real businesses need recorded consent; samples are labelled everywhere.
+
+    Ids use AUTOINCREMENT, so a deleted business's id is never given to a new business.
+    """
+
+    __table_args__ = {"sqlite_autoincrement": True}
 
     id: int | None = Field(default=None, primary_key=True)
     slug: str = Field(index=True, unique=True, max_length=63)
@@ -33,6 +44,7 @@ class Business(SQLModel, table=True):
     pin_hash: str | None = Field(default=None, max_length=256)
     pin_failures: int = 0
     pin_locked_until: datetime | None = None
+    session_epoch: str = Field(default_factory=new_session_epoch, max_length=32)
     created_at: datetime = Field(default_factory=utcnow)
     updated_at: datetime = Field(default_factory=utcnow)
     deleted_at: datetime | None = None

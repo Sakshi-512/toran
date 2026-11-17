@@ -75,6 +75,7 @@ STOP_REASONS = (
     "max_rounds",
     "spend_cap",
     "claude_unavailable",
+    "error",
 )
 
 SYSTEM_PROMPT = """You improve the draft website of a small home business in India so that its \
@@ -142,14 +143,41 @@ def new_run_id() -> str:
     return "ag_" + secrets.token_hex(12)
 
 
+def close_stale_run(session: Session, run: AgentRun) -> bool:
+    """Close a queued or running run whose job is gone or has failed (for example timed out).
+
+    Returns True if the run was closed. The caller commits.
+    """
+    job = session.get(Job, run.job_id) if run.job_id else None
+    if job is not None and job.status not in ("failed", "succeeded"):
+        return False
+    if job is None and run.job_id is None and run.status == "queued":
+        return False  # start_agent is still adding its job
+    if run.after_run_id is None:
+        run.after_run_id, run.score_after = run.before_run_id, run.score_before
+    run.status, run.stop_reason, run.finished_at = "done", "error", utcnow()
+    session.add(run)
+    logger.warning(
+        "agent_run_closed", extra={"business_id": run.business_id, "agent_run_id": run.id}
+    )
+    return True
+
+
 def active_run(session: Session, business_id: int) -> AgentRun | None:
-    """A queued or running agent run for this business."""
-    return session.exec(
+    """A queued or running agent run for this business (stale runs are closed on the way)."""
+    runs = session.exec(
         select(AgentRun).where(
             AgentRun.business_id == business_id,
             col(AgentRun.status).in_(("queued", "running")),
         )
-    ).first()
+    ).all()
+    active = None
+    for run in runs:
+        if close_stale_run(session, run):
+            session.commit()
+        elif active is None:
+            active = run
+    return active
 
 
 def latest_run(session: Session, business_id: int) -> AgentRun | None:
@@ -279,7 +307,12 @@ class AgentLoop:
     # --- the loop ---
 
     async def run(self) -> None:
-        """Run rounds until a stop condition; always records how it ended."""
+        """Run rounds until a stop condition; always records how it ended.
+
+        An unexpected error ends the run ("error") instead of retrying it, so she is never left
+        waiting on a run that cannot finish. A timeout cancels the job; the next start closes
+        such a run (close_stale_run).
+        """
         self._update(status="running")
         stop = "max_rounds"
         try:
@@ -289,6 +322,11 @@ class AgentLoop:
             stop = "spend_cap"
         except ClaudeUnavailable:
             stop = "claude_unavailable"
+        except Exception:
+            logger.exception(
+                "agent_error", extra={"business_id": self.business_id, "agent_run_id": self.run_id}
+            )
+            stop = "error"
         self._finish(stop)
 
     async def _start(self) -> Best:
@@ -321,7 +359,8 @@ class AgentLoop:
             if any(i.status == "pending" for i in items):
                 return "claude_unavailable"
             self._log(number, "diagnosis", detail=self._diagnosis(items, best.total))
-            decision = self._decide(number, items, best.total)
+            # Claude calls block for many seconds: keep them off the event loop.
+            decision = await asyncio.to_thread(self._decide, number, items, best.total)
             for topic in decision.questions:
                 self._save_question(topic)
             if not decision.site_changes:

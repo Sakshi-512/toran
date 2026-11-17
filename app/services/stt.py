@@ -5,6 +5,9 @@
   Short notes use the REST endpoint; when it turns a recording away as too long, the batch API
   takes it (voice notes of 1 to 2 minutes).
 - mock: saved transcripts from tests/fixtures/stt/ (tests and demos, no credits needed).
+
+The built-in sample voice notes (STT_SAMPLES) are app data in app/samples/stt/, so the "try a
+sample" buttons work in every environment, including the Docker image.
 - none: speech-to-text is off; the owner is offered typing.
 
 Audio is never logged. It is written to disk only for the batch upload, in a private temporary
@@ -54,6 +57,7 @@ EXTENSIONS = {
 }
 STT_SAMPLES = ("sample-en", "sample-hi", "sample-mr")
 FIXTURE_DIR = Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "stt"
+SAMPLES_DIR = Path(__file__).resolve().parents[1] / "samples" / "stt"
 
 
 class SttError(AppError):
@@ -143,8 +147,9 @@ class MockSTT:
 
     name = "mock"
 
-    def __init__(self, fixture_dir: Path = FIXTURE_DIR) -> None:
+    def __init__(self, fixture_dir: Path = FIXTURE_DIR, samples_dir: Path = SAMPLES_DIR) -> None:
         self.fixture_dir = fixture_dir
+        self.samples_dir = samples_dir
 
     @staticmethod
     def audio_key(audio: bytes) -> str:
@@ -153,7 +158,7 @@ class MockSTT:
 
     def sample(self, sample_id: str) -> Transcript:
         """A built-in sample voice note (sample-en, sample-hi, sample-mr)."""
-        return self._load(sample_id)
+        return self._load(sample_id, self.samples_dir)
 
     def transcribe(
         self,
@@ -163,11 +168,11 @@ class MockSTT:
         keyterms: Sequence[str] = (),
     ) -> Transcript:
         """Return the saved transcript for this exact recording."""
-        return self._load(self.audio_key(audio))
+        return self._load(self.audio_key(audio), self.fixture_dir)
 
-    def _load(self, key: str) -> Transcript:
-        path = (self.fixture_dir / f"{key}.json").resolve()
-        if not path.is_relative_to(self.fixture_dir.resolve()) or not path.is_file():
+    def _load(self, key: str, folder: Path) -> Transcript:
+        path = (folder / f"{key}.json").resolve()
+        if not path.is_relative_to(folder.resolve()) or not path.is_file():
             raise SttError("stt.no_mock")
         data = json.loads(path.read_text(encoding="utf-8"))
         return Transcript(

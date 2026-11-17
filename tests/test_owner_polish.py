@@ -10,7 +10,7 @@ from app.config import get_settings
 from app.models import Enquiry, OwnerDevice, ScoreItem, TestRun, utcnow
 from app.services import publish as pub
 from app.services import ratelimit
-from app.services.auth import DEVICE_COOKIE, require_recent_pin
+from app.services.auth import DEVICE_COOKIE, require_recent_pin, session_epoch
 from app.services.score_summary import owner_summary
 from app.services.security import CSRF_FIELD
 from tests.test_publish import _business
@@ -261,6 +261,7 @@ def test_remembered_device_is_not_a_recent_pin(client: TestClient, engine: Engin
             "session": {
                 "owner_business_id": business_id,
                 "owner_signed_in_at": utcnow().timestamp(),
+                "owner_epoch": session_epoch(business_id),
             },
             "headers": [],
             "query_string": b"",

@@ -16,6 +16,7 @@ from app.services.jobs import JobWorker
 from app.services.score_runs import SCORE_JOB, score_runner
 from app.services.security import CSRF_FIELD
 from tests.live_server import live_server
+from tests.test_publish import publish_form
 
 pytestmark = pytest.mark.browser
 
@@ -80,7 +81,7 @@ def test_voice_note_to_live_site_and_undo(client: TestClient, engine: Engine) ->
         client.post(link, data={CSRF_FIELD: _csrf(client, link), "pin": pin})
         home = client.get("/owner").text
         assert "status-draft" in home and "Make my site live" in home
-        client.post("/owner/publish", data={CSRF_FIELD: _csrf(client, "/owner/publish")})
+        client.post("/owner/publish", data=publish_form(client))
         # 5. The live site is tested at <slug>.localhost.
         _point_jobs_at(engine, f"http://{slug}.localhost:{port}/")
         _run(engine, SCORE_JOB)

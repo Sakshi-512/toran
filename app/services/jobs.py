@@ -2,7 +2,8 @@
 
 A worker inside the app process claims queued jobs, runs at most `concurrency` at once, gives
 each a timeout, and retries a failed or timed-out job once. Jobs left "running" by a restart are
-put back in the queue when the worker starts.
+put back in the queue once at startup (requeue_stale, called by the app before any worker
+starts), never by a worker, so one worker starting can never requeue another worker's job.
 """
 
 import asyncio
@@ -131,8 +132,7 @@ class JobWorker:
         self._tasks: set[asyncio.Task[None]] = set()
 
     async def run_forever(self) -> None:
-        """Requeue stale jobs, then keep claiming and running jobs until cancelled."""
-        requeue_stale(self.engine)
+        """Keep claiming and running jobs until cancelled."""
         try:
             while True:
                 if not await self._start_next():

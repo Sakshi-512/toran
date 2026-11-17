@@ -39,7 +39,7 @@ from app.services.samples import get_sample
 from app.services.security import CSRF_FIELD
 from app.services.site_extras import EMPTY, Extras, Translation, current_extras
 from app.services.sitegen import SiteInput, build_site
-from tests.test_publish import _business
+from tests.test_publish import _business, publish_form
 
 HOME_FOODS = get_sample("savitri-gruh-udyog")
 assert HOME_FOODS is not None
@@ -469,7 +469,7 @@ def test_approval_is_required_before_anything_goes_live(
     publish_page = client.get("/owner/publish").text
     assert "Changes Toran made to your draft" in publish_page
     assert "Marathi text added in 1 place" in publish_page
-    client.post("/owner/publish", data={CSRF_FIELD: _csrf(client, "/owner/publish")})
+    client.post("/owner/publish", data=publish_form(client))
     with Session(engine) as session:
         run = session.get(AgentRun, run.id)  # type: ignore[assignment]
         assert run.approved_at is not None

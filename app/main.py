@@ -28,10 +28,11 @@ from app.routes import (
 )
 from app.services.agent import AGENT_JOB, agent_runner
 from app.services.alerts import install_alerts
+from app.services.bodylimit import BodyLimitMiddleware
 from app.services.errors import register_error_handlers
 from app.services.godaddy import DOMAINS_JOB, domains_runner
 from app.services.intake import INTAKE_JOB, intake_runner
-from app.services.jobs import JobWorker
+from app.services.jobs import JobWorker, requeue_stale
 from app.services.logs import setup_logging
 from app.services.mail_jobs import EMAIL_JOB, email_runner
 from app.services.ratelimit import RateLimitMiddleware
@@ -58,6 +59,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     domains_worker = JobWorker(engine, {DOMAINS_JOB: domains_runner(engine, settings)})
     tasks = [asyncio.create_task(retention_loop(engine, settings.log_dir, settings=settings))]
     if settings.app_env != "test":  # tests run jobs themselves, step by step
+        requeue_stale(engine)  # once, before any worker can claim a job
         tasks += [
             asyncio.create_task(worker.run_forever()),
             asyncio.create_task(mail_worker.run_forever()),
@@ -90,6 +92,7 @@ def create_app() -> FastAPI:
     )
     # Added inner-first: the last one added is the outermost.
     app.add_middleware(SiteHostMiddleware)
+    app.add_middleware(BodyLimitMiddleware)
     app.add_middleware(RateLimitMiddleware)
     app.add_middleware(RequestContextMiddleware)
     app.add_middleware(SessionMiddleware, **session_options(settings))

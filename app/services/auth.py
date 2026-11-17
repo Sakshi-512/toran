@@ -5,6 +5,9 @@ cookie and remembers her device for 30 days (a separate secure, HTTP-only cookie
 stored only as a hash, so it can be revoked). A remembered device signs her in again, but never
 counts as a recent PIN: payment details and deleting the site need the PIN again
 (require_recent_pin).
+
+Every session also carries the business's session_epoch, checked against the database on each
+request. Deleting a business, or issuing new access, makes every older session worthless.
 """
 
 import hashlib
@@ -20,7 +23,7 @@ from starlette.responses import Response
 
 from app.config import Settings
 from app.db import get_engine
-from app.models import Business, OwnerDevice, utcnow
+from app.models import Business, OwnerDevice, new_session_epoch, utcnow
 from app.services.errors import AppError
 
 MAX_PIN_FAILURES = 5
@@ -33,6 +36,7 @@ _SCRYPT = {"n": 2**14, "r": 8, "p": 1, "dklen": 32}
 _OWNER_KEY = "owner_business_id"
 _SIGNED_IN_KEY = "owner_signed_in_at"
 _PIN_AT_KEY = "owner_pin_at"
+_EPOCH_KEY = "owner_epoch"
 
 PinResult = Literal["ok", "wrong", "locked"]
 
@@ -81,6 +85,7 @@ def issue_access(business: Business) -> OwnerAccess:
     business.pin_hash = hash_pin(access.pin)
     business.pin_failures = 0
     business.pin_locked_until = None
+    business.session_epoch = new_session_epoch()  # signs out every older session
     return access
 
 
@@ -125,11 +130,21 @@ def check_pin(
     return result
 
 
+def session_epoch(business_id: int) -> str | None:
+    """The business's current session epoch, or None if it no longer exists."""
+    with Session(get_engine()) as session:
+        business = session.get(Business, business_id)
+        if business is None or business.deleted_at is not None:
+            return None
+        return business.session_epoch
+
+
 def sign_in(request: Request, business_id: int, pin_entered: bool = True) -> None:
     """Remember the signed-in owner in the session cookie."""
     now = utcnow().timestamp()
     request.session[_OWNER_KEY] = business_id
     request.session[_SIGNED_IN_KEY] = now
+    request.session[_EPOCH_KEY] = session_epoch(business_id) or ""
     if pin_entered:
         request.session[_PIN_AT_KEY] = now
     else:
@@ -200,25 +215,28 @@ def forget_device(request: Request, response: Response) -> None:
 
 def sign_out(request: Request) -> None:
     """Forget the owner."""
-    for key in (_OWNER_KEY, _SIGNED_IN_KEY, _PIN_AT_KEY):
+    for key in (_OWNER_KEY, _SIGNED_IN_KEY, _PIN_AT_KEY, _EPOCH_KEY):
         request.session.pop(key, None)
 
 
+def _from_device(request: Request) -> int | None:
+    remembered = device_owner(request)
+    if remembered is not None:
+        sign_in(request, remembered, pin_entered=False)
+    return remembered
+
+
 def current_owner(request: Request) -> int | None:
-    """The signed-in owner's business id, if the sign-in is still fresh."""
+    """The signed-in owner's business id, if the sign-in is fresh and still belongs to it."""
     business_id = request.session.get(_OWNER_KEY)
     signed_in = request.session.get(_SIGNED_IN_KEY)
     if not isinstance(business_id, int) or not isinstance(signed_in, int | float):
-        remembered = device_owner(request)
-        if remembered is not None:
-            sign_in(request, remembered, pin_entered=False)
-        return remembered
-    if utcnow().timestamp() - signed_in > SESSION_HOURS * 3600:
+        return _from_device(request)
+    expired = utcnow().timestamp() - signed_in > SESSION_HOURS * 3600
+    epoch = request.session.get(_EPOCH_KEY)
+    if expired or not epoch or epoch != session_epoch(business_id):
         sign_out(request)
-        remembered = device_owner(request)
-        if remembered is not None:
-            sign_in(request, remembered, pin_entered=False)
-        return remembered
+        return _from_device(request)
     return business_id
 
 

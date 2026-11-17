@@ -9,6 +9,10 @@
 
 (app) {
 	encode zstd gzip
+	# Uploads are checked again by the app; nothing larger ever reaches it.
+	request_body {
+		max_size 70MB
+	}
 	# Internal endpoints are never reachable from the internet.
 	@internal path /internal /internal/*
 	respond @internal 404

@@ -183,8 +183,15 @@ def needs_phone(business: Business, profile: BusinessProfile | None) -> bool:
     return not profile.phone and bool(profile.order_methods)
 
 
-def publish(engine: Engine, settings: Settings, business_id: int) -> SiteVersion:
-    """Make the current draft the live site (after her approval) and save it as a version."""
+def publish(
+    engine: Engine, settings: Settings, business_id: int, approved_hash: str | None = None
+) -> SiteVersion:
+    """Make the current draft the live site (after her approval) and save it as a version.
+
+    Refused while the agent is changing the draft, and, when approved_hash is given (the draft
+    she saw on the confirmation screen), if the draft has changed since (rule 2).
+    """
+    from app.services.agent import active_run
     from app.services.score_runs import site_hash
 
     with Session(engine) as session:
@@ -192,6 +199,10 @@ def publish(engine: Engine, settings: Settings, business_id: int) -> SiteVersion
         paths = folders(settings, business.slug)
         if not (paths.draft / "index.html").is_file():
             raise AppError("publish.no_draft", status_code=409)
+        if active_run(session, business_id) is not None:
+            raise AppError("publish.agent_busy", status_code=409)
+        if approved_hash is not None and approved_hash != site_hash(paths.draft):
+            raise AppError("publish.draft_changed", status_code=409)
         profile = latest_profile(session, business_id)
         confirmed = BusinessProfile.model_validate(profile.profile) if profile else None
         if needs_phone(business, confirmed):

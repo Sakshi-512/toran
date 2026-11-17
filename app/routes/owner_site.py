@@ -19,7 +19,7 @@ from app.services.auth import require_owner
 from app.services.errors import AppError
 from app.services.i18n import pick_language, t
 from app.services.jobs import queue_position
-from app.services.score_runs import SCORE_JOB, queue_score, report_parts
+from app.services.score_runs import SCORE_JOB, queue_score, report_parts, site_hash
 from app.services.score_summary import FIX_LINKS, OwnerSummary, owner_summary
 from app.services.security import site_security_headers, verify_csrf
 from app.services.sitegen import SiteBuild
@@ -264,13 +264,18 @@ def publish_page(request: Request, business_id: int = Depends(require_owner)) ->
         context["agent_changes"] = pending_changes(session, business_id, lang)
     if not context["has_draft"]:
         raise AppError("publish.no_draft", status_code=409)
+    # The exact draft she is approving; publishing refuses if it changes before she says yes.
+    context["draft_hash"] = site_hash(pub.folders(get_settings(), business.slug).draft)
     return render(request, "app/owner_publish.html", {"business": business, **context})
 
 
 @router.post("/publish", include_in_schema=False, dependencies=[Depends(verify_csrf)])
-def publish_confirmed(business_id: int = Depends(require_owner)) -> RedirectResponse:
-    """She said yes: publish the draft and test the live site."""
-    pub.publish(get_engine(), get_settings(), business_id)
+async def publish_confirmed(
+    request: Request, business_id: int = Depends(require_owner)
+) -> RedirectResponse:
+    """She said yes to the draft she saw: publish it and test the live site."""
+    approved = str((await request.form()).get("draft_hash", ""))
+    pub.publish(get_engine(), get_settings(), business_id, approved)
     queue_score(get_engine(), business_id, "live")
     return RedirectResponse("/owner#site", status_code=303)
 

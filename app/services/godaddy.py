@@ -20,7 +20,7 @@ import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import UTC, timedelta
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -233,12 +233,29 @@ def suggest_names(client: ClaudeClient, business: Business, profile: BusinessPro
 
 
 def latest_lookup(session: Session, business_id: int) -> DomainLookup | None:
-    """The newest lookup for this business."""
-    return session.exec(
+    """The newest lookup for this business. One stuck past its job's timeout is closed."""
+    lookup = session.exec(
         select(DomainLookup)
         .where(DomainLookup.business_id == business_id)
         .order_by(col(DomainLookup.id).desc())
     ).first()
+    if lookup is not None and _stuck(lookup):
+        lookup.status = "unavailable"
+        session.add(lookup)
+        session.commit()
+        session.refresh(lookup)
+        logger.warning("domain_lookup_closed", extra={"business_id": business_id})
+        return None
+    return lookup
+
+
+def _stuck(lookup: DomainLookup) -> bool:
+    """True for a lookup still "running" well after its job must have ended (timeout, crash)."""
+    if lookup.status != "running":
+        return False
+    created = lookup.created_at
+    created = created if created.tzinfo else created.replace(tzinfo=UTC)
+    return utcnow() - created > timedelta(seconds=JOB_TIMEOUT_SECONDS * 2)
 
 
 def fresh(lookup: DomainLookup | None) -> bool:

@@ -25,7 +25,7 @@
 </div>
 {% else %}
 <div class="cta-row">
-  <form method="post" action="/owner/publish"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button" type="submit">{{ t('publish.yes', lang) }}</button></form>
+  <form method="post" action="/owner/publish"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><input type="hidden" name="draft_hash" value="{{ draft_hash }}"><button class="button" type="submit">{{ t('publish.yes', lang) }}</button></form>
   <a class="button secondary" href="/owner">{{ t('publish.no', lang) }}</a>
 </div>
 {% endif %}

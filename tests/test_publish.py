@@ -83,6 +83,13 @@ def _csrf(client: TestClient, path: str = "/owner") -> str:
     return re.search(rf'name="{CSRF_FIELD}" value="([^"]+)"', client.get(path).text).group(1)  # type: ignore[union-attr]
 
 
+def publish_form(client: TestClient) -> dict[str, str]:
+    """The publish screen's form as she would send it: CSRF token and the draft she saw."""
+    page = client.get("/owner/publish").text
+    fields = dict(re.findall(r'name="([a-z_]+)" value="([^"]*)"', page))
+    return {CSRF_FIELD: fields[CSRF_FIELD], "draft_hash": fields["draft_hash"]}
+
+
 def _status(engine: Engine, business_id: int) -> str:
     with Session(engine) as session:
         business = session.get(Business, business_id)
@@ -209,7 +216,7 @@ def test_publish_needs_confirmation(client: TestClient, engine: Engine, owner: i
     )
     assert client.post("/owner/publish", data={}).status_code == 403  # no CSRF token
     assert _status(engine, owner) == "draft"
-    client.post("/owner/publish", data={CSRF_FIELD: _csrf(client)})
+    client.post("/owner/publish", data=publish_form(client))
     assert _status(engine, owner) == "live"
     with Session(engine) as session:
         assert [j.payload for j in session.exec(select(Job))] == [{"kind": "live"}]

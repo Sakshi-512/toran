@@ -8,6 +8,7 @@ from itsdangerous import BadSignature, URLSafeTimedSerializer
 from starlette.requests import Request
 
 from app.config import Settings, get_settings
+from app.services.bodylimit import MAX_FILES
 from app.services.errors import AppError
 
 CSRF_FIELD = "csrf_token"
@@ -66,7 +67,8 @@ async def verify_csrf(request: Request) -> None:
     """FastAPI dependency for every state-changing form: checks the form field or header."""
     token = request.headers.get(CSRF_HEADER)
     if token is None:
-        form = await request.form()
+        # Parsed once here (and cached), so the file cap applies to every form route.
+        form = await request.form(max_files=MAX_FILES)
         field = form.get(CSRF_FIELD)
         token = field if isinstance(field, str) else None
     check_csrf_token(request, token)
