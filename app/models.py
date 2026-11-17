@@ -168,6 +168,10 @@ class Job(SQLModel, table=True):
 class SiteVersion(SQLModel, table=True):
     """One published version of a business site. Every publish is kept, which powers undo."""
 
+    __table_args__ = (
+        UniqueConstraint("business_id", "number", name="uq_siteversion_business_number"),
+    )
+
     id: int | None = Field(default=None, primary_key=True)
     business_id: int = Field(foreign_key="business.id", index=True)
     number: int

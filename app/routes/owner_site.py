@@ -17,7 +17,7 @@ from app.services import publish as pub
 from app.services.agent_report import pending_changes
 from app.services.auth import require_owner
 from app.services.errors import AppError
-from app.services.i18n import pick_language, t
+from app.services.i18n import pick_language, queue_text, t
 from app.services.jobs import queue_position
 from app.services.score_runs import SCORE_JOB, queue_score, report_parts, site_hash
 from app.services.score_summary import FIX_LINKS, OwnerSummary, owner_summary
@@ -34,13 +34,6 @@ _CACHE_SIZE = 12
 NOINDEX = {"X-Robots-Tag": "noindex, nofollow"}
 
 
-def _ordinal(n: int, lang: str) -> str:
-    if lang != "en":
-        return str(n)
-    suffix = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
-    return f"{n}{suffix}"
-
-
 def scoring_status(session: Session, business_id: int, lang: str) -> dict[str, Any] | None:
     """Progress of the newest score job: queued (with place in line), running or failed."""
     job = session.exec(
@@ -54,12 +47,7 @@ def scoring_status(session: Session, business_id: int, lang: str) -> dict[str, A
         return {"state": "failed"}
     place, wait = queue_position(get_engine(), job.id)
     if job.status == "queued" and place > 1:
-        minutes = max(1, round(wait / 60))
-        key = "owner.queue_one" if minutes == 1 else "owner.queue_many"
-        return {
-            "state": "queued",
-            "text": t(key, lang, place=_ordinal(place, lang), minutes=minutes),
-        }
+        return {"state": "queued", "text": queue_text(place, wait, lang)}
     return {"state": "running", "text": t("owner.scoring", lang)}
 
 

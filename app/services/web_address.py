@@ -5,6 +5,7 @@ import unicodedata
 
 from sqlmodel import Session, select
 
+from app.config import get_settings
 from app.models import Business
 from app.services.sites import RESERVED_LABELS
 
@@ -167,7 +168,7 @@ def problem(value: str) -> str | None:
     """i18n key describing what is wrong with a web address, or None if it can be used."""
     if len(value) < MIN_LENGTH or len(value) > MAX_LENGTH or not _VALID.match(value):
         return "intake.address_invalid"
-    if "--" in value or value in RESERVED_LABELS:
+    if "--" in value or value in RESERVED_LABELS or value == clean(get_settings().app_name):
         return "intake.address_invalid"
     return None
 

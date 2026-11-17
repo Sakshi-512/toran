@@ -15,7 +15,13 @@ from app.services.errors import AppError
 from app.services.i18n import normalise_language, pick_language
 from app.services.jobs import get_job
 from app.services.publish import build_draft
-from app.services.ratelimit import FORM_LIMIT, INTAKE_HOURLY_LIMIT, RateLimited, check
+from app.services.ratelimit import (
+    FORM_LIMIT,
+    INTAKE_DAILY_LIMIT,
+    INTAKE_HOURLY_LIMIT,
+    RateLimited,
+    check,
+)
 from app.services.score_runs import queue_score
 from app.services.security import verify_csrf
 from app.services.sites import main_origin
@@ -65,7 +71,7 @@ def start_page(request: Request) -> Response:
 async def start_submit(request: Request) -> Response:
     """Save the input and queue processing, then show the waiting page."""
     try:
-        check(request, FORM_LIMIT, INTAKE_HOURLY_LIMIT)
+        check(request, FORM_LIMIT, INTAKE_HOURLY_LIMIT, INTAKE_DAILY_LIMIT)
     except RateLimited as exc:
         return render(
             request,
@@ -181,6 +187,8 @@ async def confirm_submit(token: str, request: Request) -> Response:
     engine, settings = get_engine(), get_settings()
     with Session(engine) as session:
         intake = svc.intake_for_token(session, token)
+        if intake.status in ("confirming", "done"):
+            raise AppError("intake.already_confirmed", status_code=409)
         if intake.status != "ready":
             raise AppError("error.not_found", status_code=404)
         source = intake.source
@@ -208,7 +216,13 @@ async def confirm_submit(token: str, request: Request) -> Response:
             return _cards(request, token, draft, address, source, errors.errors, 422, sample)
         intake_id = intake.id
     assert intake_id is not None  # noqa: S101
-    confirmed = svc.confirm_intake(engine, settings, intake_id, profile, address, photos[:8])
+    try:
+        confirmed = svc.confirm_intake(engine, settings, intake_id, profile, address, photos[:8])
+    except AppError as exc:
+        if exc.key != "intake.address_taken":
+            raise
+        errors.add("web_address", exc.key)
+        return _cards(request, token, draft, address, source, errors.errors, 422, sample)
     assert confirmed.business.id is not None  # noqa: S101
     build_draft(engine, settings, confirmed.business.id)  # warm style by default
     queue_score(engine, confirmed.business.id, "draft")

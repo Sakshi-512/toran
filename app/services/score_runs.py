@@ -168,6 +168,8 @@ async def score_business(
         version = _latest_profile(session, business_id)
         if business is None or version is None:
             raise LookupError("business has no profile yet")
+        if business.deleted_at is not None:  # she deleted it: test nothing, write nothing
+            raise LookupError("business deleted")
         target = _target(session, business, payload, settings)
         session.expunge(business)
         session.expunge(version)

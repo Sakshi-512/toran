@@ -27,8 +27,9 @@ from pathlib import Path
 from typing import Any, Protocol
 from zoneinfo import ZoneInfo
 
+from sqlalchemy import func
 from sqlalchemy.engine import Engine
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.config import Settings
 from app.models import SttUsage
@@ -374,6 +375,19 @@ def record_usage(
         session.commit()
 
 
+def minutes_today(engine: Engine, now: datetime | None = None) -> float:
+    """Minutes of real (not mock) audio transcribed today, Asia/Kolkata time."""
+    day = (now or datetime.now(UTC)).astimezone(IST).date()
+    with Session(engine) as session:
+        seconds = session.exec(
+            select(func.coalesce(func.sum(SttUsage.seconds), 0.0)).where(
+                SttUsage.day_ist == day,
+                SttUsage.is_mock == False,  # noqa: E712 - SQL expression
+            )
+        ).one()
+    return float(seconds) / 60
+
+
 def transcribe_note(
     engine: Engine,
     settings: Settings,
@@ -385,9 +399,18 @@ def transcribe_note(
     stt: SpeechToText | None = None,
     intake_id: int | None = None,
 ) -> Transcript:
-    """Check the upload, transcribe it, and log duration and estimated cost (never the audio)."""
+    """Check the upload, transcribe it, and log duration and estimated cost (never the audio).
+
+    Real transcription stops for the day once STT_DAILY_MINUTES_CAP is used; she is asked to
+    type instead.
+    """
     checked = check_audio(audio)
     provider = stt or get_stt(settings)
+    if provider.name != "mock" and minutes_today(engine) >= settings.stt_daily_minutes_cap:
+        logger.warning(
+            "stt_daily_cap_reached", extra={"cap_minutes": settings.stt_daily_minutes_cap}
+        )
+        raise SttError("stt.daily_cap")
     started = time.monotonic()
     try:
         transcript = provider.transcribe(checked.data, checked.mime, language, keyterms)

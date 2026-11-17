@@ -23,7 +23,7 @@ from app.config import Settings
 from app.schemas import BusinessProfile, normalise_phone
 from app.services.address_guard import looks_like_address
 from app.services.ai_checks import _inline_schema
-from app.services.claude_client import SONNET, ClaudeClient, ClaudeUnavailable
+from app.services.claude_client import SONNET, ClaudeClient, ClaudeUnavailable, as_data
 from app.services.errors import SpendCapReached
 from app.services.i18n import t
 from app.services.numbers import ascii_digits, digits_only, numbers_in
@@ -168,7 +168,7 @@ def _messages(
             }
         ]
     kind = "a transcript of her voice note" if source == "voice" else "what she typed"
-    text = (transcript or "")[:MAX_TRANSCRIPT_CHARS]
+    text = as_data((transcript or "")[:MAX_TRANSCRIPT_CHARS])
     return [
         {
             "role": "user",

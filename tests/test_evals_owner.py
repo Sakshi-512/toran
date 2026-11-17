@@ -32,7 +32,7 @@ def test_committed_cases_are_fake_and_mostly_reviewed() -> None:
 def test_mock_eval_scores_every_reviewed_case(engine: Engine) -> None:
     report = run_evals(engine, get_settings(), (CASES,))
     totals = report.totals()
-    assert totals["cases"] == 10 and report.skipped == ["draft-unreviewed"]
+    assert totals["cases"] == 11 and report.skipped == ["draft-unreviewed"]
     assert totals["accuracy"] == 1.0 and totals["price_accuracy"] == 1.0
     text = render_report(report)
     assert "Product-name decisions by Claude (please check)" in text

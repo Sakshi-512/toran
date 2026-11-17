@@ -30,7 +30,33 @@ logger = logging.getLogger(__name__)
 
 DEV_PORT = 8000
 LIVE_DIR = "live"
-RESERVED_LABELS = frozenset({"www", "api", "admin", "mail", "app"})
+# Never a business: our own names, plus names mail clients, DNS and people expect to be ours
+# (with the * DNS record, a business called "login" or "autodiscover" would be served there).
+RESERVED_LABELS = frozenset(
+    {
+        "www",
+        "api",
+        "admin",
+        "mail",
+        "app",
+        "autodiscover",
+        "autoconfig",
+        "webmail",
+        "smtp",
+        "imap",
+        "pop",
+        "email",
+        "mx",
+        "ftp",
+        "ns1",
+        "ns2",
+        "login",
+        "secure",
+        "support",
+        "help",
+        "status",
+    }
+)
 _LABEL = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
 APP_STATIC_PREFIX = "/static/"
 IMMUTABLE = "public, max-age=31536000, immutable"

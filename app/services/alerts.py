@@ -1,9 +1,10 @@
 """Error alert emails: at most one email per error type per hour to CONTACT_TO_EMAIL.
 
-An error type is the logger, the log message and the exception class. The email body is the
-already-redacted JSON log line (no secrets, no full phone numbers). Sending happens on a
-background thread so logging never blocks. Mailer and alert errors are ignored so alerts can
-never loop. The hourly limit is kept in memory, which suits our single app process.
+An error type is the logger, the log message template and the exception class. The email body
+is the already-redacted JSON log line (no secrets, no full phone numbers or email addresses).
+Sending happens on a background thread so logging never blocks. Mailer and alert errors are
+ignored so alerts can never loop. The hourly limit is kept in memory, which suits our single
+app process.
 """
 
 import contextlib
@@ -22,9 +23,10 @@ _IGNORED = ("app.services.mailer", "app.services.alerts", "app.services.mail_job
 
 
 def error_type(record: logging.LogRecord) -> str:
-    """Key that groups repeats of the same error."""
+    """Key that groups repeats of the same error: the logger, the message template (before any
+    values are filled in, so changing values never bypass the hourly limit) and the exception."""
     exc = record.exc_info[0].__name__ if record.exc_info and record.exc_info[0] else "-"
-    return f"{record.name}:{record.getMessage()}:{exc}"
+    return f"{record.name}:{record.msg}:{exc}"
 
 
 class AlertHandler(logging.Handler):

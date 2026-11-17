@@ -1,4 +1,4 @@
-"""Structured JSON logging with request IDs and redaction of secrets and phone numbers.
+"""Structured JSON logging with request IDs and redaction of secrets, phone numbers and emails.
 
 Never pass audio, uploaded file bytes or full profiles to the logger.
 """
@@ -24,6 +24,7 @@ _PHONE_PATTERNS = [
     re.compile(r"(?<![\w+])(?:\+?91[\s\-]?)?[6-9]\d{4}[\s\-]?\d{5}(?!\w)"),
     re.compile(r"(?<![\w+])\+\d[\d\s\-]{8,16}\d(?!\w)"),
 ]
+_EMAIL = re.compile(r"(?<![\w.+-])([\w.+-])[\w.+-]*@([\w-]+(?:\.[\w-]+)+)")
 _STANDARD_ATTRS = frozenset(
     vars(logging.LogRecord("", 0, "", 0, "", None, None)).keys() | {"message", "asctime"}
 )
@@ -37,7 +38,8 @@ def mask_phone(match: re.Match[str]) -> str:
 
 
 class Redactor:
-    """Removes known secret values, token-like strings and full phone numbers from text."""
+    """Removes secret values, token-like strings, full phone numbers and email addresses
+    (kept as n***@domain) from text."""
 
     def __init__(self, secret_values: list[str] | None = None) -> None:
         self._secrets = sorted(set(secret_values or []), key=len, reverse=True)
@@ -50,7 +52,7 @@ class Redactor:
             value = pattern.sub(REDACTED, value)
         for pattern in _PHONE_PATTERNS:
             value = pattern.sub(mask_phone, value)
-        return value
+        return _EMAIL.sub(r"\1***@\2", value)
 
     def value(self, key: str, value: Any) -> Any:
         """Redact a structured value; keys that look sensitive are blanked entirely."""

@@ -18,6 +18,7 @@ from typing import Any
 
 from sqlalchemy import update
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, select
 
 from app.config import Settings
@@ -312,6 +313,12 @@ def _price(value: str) -> int | None:
     return int(cleaned)
 
 
+def _count(value: Any) -> int:
+    """A card count from the form; anything that is not a small whole number counts as 0."""
+    text = str(value or "").strip()
+    return int(text) if text.isdigit() and len(text) <= 3 else 0
+
+
 def _list(value: str) -> list[str]:
     return [p.strip() for p in value.replace("\n", ",").split(",") if p.strip()]
 
@@ -336,7 +343,7 @@ def draft_from_form(
         "missing": list(multi.get("missing", [])),
         "products": [],
     }
-    count = min(int(form.get("product_count", 0) or 0), MAX_PRODUCTS)
+    count = min(_count(form.get("product_count")), MAX_PRODUCTS)
     for i in range(count):
         if form.get(f"p{i}_remove"):
             continue
@@ -352,7 +359,7 @@ def _product_from_form(
     """Read product card i, which will be shown as card number `out` (errors use `out`)."""
     name = str(form.get(f"p{i}_name", "")).strip()
     options: list[dict[str, Any]] = []
-    for j in range(min(int(form.get(f"p{i}_option_count", 0) or 0), MAX_OPTIONS)):
+    for j in range(min(_count(form.get(f"p{i}_option_count")), MAX_OPTIONS)):
         label = str(form.get(f"p{i}_o{j}_label", "")).strip()
         raw = str(form.get(f"p{i}_o{j}_price", "")).strip()
         if not label and not raw:
@@ -432,58 +439,97 @@ def confirm_intake(
     address: str,
     photos: Sequence[bytes] = (),
 ) -> Confirmed:
-    """Create the business, profile version 1, consent, photos, corrections and owner access."""
+    """Create the business, profile version 1, consent, photos, corrections and owner access.
+
+    The intake is claimed first (ready -> confirming in one statement), so a double tap creates
+    one business; the second gets "already confirmed". If another business took the web
+    address meanwhile, the intake goes back to ready and she is asked for another address.
+    """
     with Session(engine) as session:
+        claimed = session.exec(
+            update(IntakeSession)
+            .where(col(IntakeSession.id) == intake_id, col(IntakeSession.status) == "ready")
+            .values(status="confirming")
+        )
+        session.commit()
         intake = session.get(IntakeSession, intake_id)
-        if intake is None or intake.status != "ready":
+        if intake is None:
             raise AppError("error.not_found", status_code=404)
-        confirmed = profile.model_dump(mode="json")
-        business = Business(
-            slug=address,
-            display_name=profile.business_name,
-            status="draft",
-            # Intakes from the built-in sample voice notes are demos, never real businesses.
-            is_sample=bool(intake.stt_route and intake.stt_route.startswith("sample:")),
-            business_type=profile.business_type,
-            owner_language=intake.language,
-            consent_given_at=intake.created_at,
-            consent_method="intake_checkbox",
-            consent_text=intake.consent_text,
+        if not claimed.rowcount:
+            raise AppError("intake.already_confirmed", status_code=409)
+        try:
+            return _create_business(session, settings, intake, profile, address, photos)
+        except IntegrityError as exc:
+            session.rollback()
+            _release(engine, intake_id)
+            raise AppError("intake.address_taken", status_code=409) from exc
+
+
+def _release(engine: Engine, intake_id: int) -> None:
+    with Session(engine) as session:
+        session.exec(
+            update(IntakeSession)
+            .where(col(IntakeSession.id) == intake_id, col(IntakeSession.status) == "confirming")
+            .values(status="ready")
         )
-        access = issue_access(business)
-        session.add(business)
         session.commit()
-        session.refresh(business)
-        assert business.id is not None  # noqa: S101
-        session.add(
-            ProfileVersion(
-                business_id=business.id,
-                version=1,
-                profile=confirmed,
-                created_by="owner",
-                note="confirmed at intake",
-            )
+
+
+def _create_business(
+    session: Session,
+    settings: Settings,
+    intake: IntakeSession,
+    profile: BusinessProfile,
+    address: str,
+    photos: Sequence[bytes],
+) -> Confirmed:
+    """Business, profile version 1, consent, usage links, photos and owner access."""
+    intake_id = intake.id
+    confirmed = profile.model_dump(mode="json")
+    business = Business(
+        slug=address,
+        display_name=profile.business_name,
+        status="draft",
+        # Intakes from the built-in sample voice notes are demos, never real businesses.
+        is_sample=bool(intake.stt_route and intake.stt_route.startswith("sample:")),
+        business_type=profile.business_type,
+        owner_language=intake.language,
+        consent_given_at=intake.created_at,
+        consent_method="intake_checkbox",
+        consent_text=intake.consent_text,
+    )
+    access = issue_access(business)
+    session.add(business)
+    session.commit()
+    session.refresh(business)
+    assert business.id is not None  # noqa: S101
+    session.add(
+        ProfileVersion(
+            business_id=business.id,
+            version=1,
+            profile=confirmed,
+            created_by="owner",
+            note="confirmed at intake",
         )
-        intake.corrections = corrections(intake.first_guess or {}, confirmed)
-        intake.draft, intake.business_id = confirmed, business.id
-        intake.status, intake.completed_at = "done", utcnow()
-        session.add(intake)
-        for table in (ClaudeUsage, SttUsage):
-            session.exec(
-                update(table)
-                .where(col(table.intake_id) == intake_id)
-                .values(business_id=business.id)
-            )
-        session.commit()
-        for data in photos:
-            add_photo(session, settings, business.id, data)
-        session.refresh(business)
-        logger.info(
-            "intake_confirmed",
-            extra={
-                "intake_id": intake_id,
-                "business_id": business.id,
-                "corrections": len(intake.corrections or []),
-            },
+    )
+    intake.corrections = corrections(intake.first_guess or {}, confirmed)
+    intake.draft, intake.business_id = confirmed, business.id
+    intake.status, intake.completed_at = "done", utcnow()
+    session.add(intake)
+    for table in (ClaudeUsage, SttUsage):
+        session.exec(
+            update(table).where(col(table.intake_id) == intake_id).values(business_id=business.id)
         )
-        return Confirmed(business, access)
+    session.commit()
+    for data in photos:
+        add_photo(session, settings, business.id, data)
+    session.refresh(business)
+    logger.info(
+        "intake_confirmed",
+        extra={
+            "intake_id": intake_id,
+            "business_id": business.id,
+            "corrections": len(intake.corrections or []),
+        },
+    )
+    return Confirmed(business, access)

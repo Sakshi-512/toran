@@ -9,7 +9,8 @@ Nothing is bought here. Her "I want this one" records a DomainRequest and emails
 buy it on godaddy.com and point DNS at her site (rule 2). Lookups run as background jobs and
 are cached for an hour per business, so a business makes at most one lookup an hour (the
 routes are rate limited too). Every step goes to the action log as a tool call.
-In mock mode (CLAUDE_MOCK=1) names and lookups come from saved fixtures.
+Names come from saved Claude answers when CLAUDE_MOCK=1, and lookups from saved GoDaddy answers
+when GDDY_MOCK=1 (two separate switches).
 """
 
 import json
@@ -22,7 +23,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import UTC, timedelta
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 from sqlalchemy.engine import Engine
@@ -31,7 +32,13 @@ from sqlmodel import Session, col, select
 from app.config import Settings
 from app.models import ActionLog, Business, DomainLookup, DomainRequest, Job, utcnow
 from app.schemas import BusinessProfile
-from app.services.claude_client import FIXTURE_DIR, HAIKU, ClaudeClient, ClaudeUnavailable
+from app.services.claude_client import (
+    FIXTURE_DIR,
+    HAIKU,
+    ClaudeClient,
+    ClaudeUnavailable,
+    as_data,
+)
 from app.services.errors import AppError, SpendCapReached
 from app.services.jobs import Runner, enqueue
 from app.services.publish import latest_profile
@@ -193,8 +200,28 @@ class MockChecker:
 
 
 def checker_for(settings: Settings) -> DomainChecker:
-    """Mock answers in mock mode, otherwise the real CLI."""
-    return MockChecker() if settings.claude_mock else GddyCli(settings)
+    """Saved answers when GDDY_MOCK=1, otherwise the real CLI."""
+    return MockChecker() if settings.gddy_mock else GddyCli(settings)
+
+
+GddyStatus = Literal["mock", "installed", "missing"]
+
+
+def gddy_status(settings: Settings) -> GddyStatus:
+    """Whether domain lookups can run: saved answers, the installed CLI, or no CLI."""
+    if settings.gddy_mock:
+        return "mock"
+    return "installed" if GddyCli(settings).installed else "missing"
+
+
+def log_gddy_status(settings: Settings) -> GddyStatus:
+    """At startup: record the CLI's state. A missing CLI in production is an error (alerted)."""
+    status = gddy_status(settings)
+    if status == "missing" and settings.is_production:
+        logger.error("gddy_missing")
+    else:
+        logger.info("gddy_status", extra={"gddy": status})
+    return status
 
 
 # --- suggestions ---
@@ -209,13 +236,14 @@ def suggest_names(client: ClaudeClient, business: Business, profile: BusinessPro
         "sells": [p.name for p in profile.products[:5]],
     }
     key = f"domain_suggest_{business.slug}"
+    data = as_data(json.dumps(details, ensure_ascii=False))
     result = client.complete(
         model=HAIKU,
         system=SYSTEM_PROMPT,
         messages=[
             {
                 "role": "user",
-                "content": f"<business>{json.dumps(details, ensure_ascii=False)}</business>",
+                "content": f"<business>{data}</business>",
             }
         ],
         max_tokens=MAX_TOKENS,
@@ -348,7 +376,7 @@ def run_lookup(
         if stored is not None:
             stored.results = [c.to_json() for c in checks]
             stored.status = status
-            stored.is_mock = settings.claude_mock
+            stored.is_mock = settings.claude_mock or settings.gddy_mock
             session.add(stored)
             session.commit()
     logger.info(
@@ -472,7 +500,7 @@ def request_domain(engine: Engine, business_id: int, domain: str) -> int:
 def domains_context(session: Session, settings: Settings, business_id: int) -> dict[str, Any]:
     """The "Get your own web address" card on her page."""
     lookup = latest_lookup(session, business_id)
-    usable = settings.claude_mock or GddyCli(settings).installed
+    usable = gddy_status(settings) != "missing"
     return {
         "domains_available": usable,
         "domains_lookup": lookup if lookup is None or fresh(lookup) else None,

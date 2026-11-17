@@ -13,6 +13,9 @@
     <label for="d-phone">{{ t('confirm.phone', lang) }}</label>
     <input id="d-phone" name="phone" value="{{ v.phone }}" inputmode="tel" maxlength="20" autocomplete="tel">
     {{ err('phone') }}
+    <label for="d-pin">{{ t('details.pin_label', lang) }}</label>
+    <input id="d-pin" name="pin" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="one-time-code" class="pin-input">
+    {{ err('pin') }}
     {% if not business.is_sample and not v.phone %}
     <p class="notice-error">{{ t('phone.missing', lang) }}</p>
     <label class="check"><input type="checkbox" name="no_order_button" value="yes"{% if not sent and profile.order_methods == [] %} checked{% endif %}{% if sent and sent.no_order_button %} checked{% endif %}> <span>{{ t('phone.no_button', lang) }}</span></label>

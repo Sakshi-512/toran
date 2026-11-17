@@ -1,8 +1,10 @@
 """My details: the owner changes her phone, area or ordering policy after confirming.
 
 Only these three fields (never products or prices). Each save is a new profile version, so
-undo still works, and the draft is rebuilt and tested again. Her text is data: it only fills
-these fields, and the same checks as the confirmation cards apply (phone format, no address).
+undo still works, and the draft is rebuilt and tested again. A new phone number decides where
+her customers' orders go, so changing it needs her PIN (checked by the route). Her text is
+data: it only fills these fields, and the same checks as the confirmation cards apply (phone
+format, no address).
 """
 
 from dataclasses import dataclass
@@ -56,6 +58,22 @@ def check(details: Details) -> dict[str, str]:
     elif details.policy and address_reason(details.policy):
         errors["policy"] = "agent.answer_address"
     return errors
+
+
+def phone_changes(engine: Engine, business_id: int, phone: str) -> bool:
+    """True if saving this phone number would change where her customers' orders go."""
+    with Session(engine) as session:
+        old = current(session, business_id).phone
+    return _comparable(phone) != _comparable(old)
+
+
+def _comparable(phone: str) -> str:
+    if not phone:
+        return ""
+    try:
+        return normalise_phone(phone)
+    except ValueError:
+        return phone
 
 
 def save(engine: Engine, settings: Settings, business_id: int, details: Details) -> bool:

@@ -37,6 +37,7 @@ from app.services.claude_client import (
     ClaudeClient,
     ClaudeResult,
     ClaudeUnavailable,
+    as_data,
 )
 from app.services.errors import AppError, SpendCapReached
 from app.services.jobs import Runner, enqueue
@@ -252,6 +253,11 @@ def agent_runner(engine: Engine, settings: Settings, client: ClaudeClient | None
 
 def _fixture_exists(key: str) -> bool:
     return (FIXTURE_DIR / f"{key}.json").is_file()
+
+
+def _data(value: Any) -> str:
+    """JSON for a data block in the brief, with angle brackets neutralised (as_data)."""
+    return as_data(json.dumps(value, ensure_ascii=False))
 
 
 def _clean_blocks(content: tuple[dict[str, Any], ...]) -> list[dict[str, Any]]:
@@ -545,10 +551,10 @@ class AgentLoop:
         }
         return (
             f"Round {number} of at most {MAX_ROUNDS}. Score now: {total}/100. Target: {TARGET}.\n"
-            f"<business>{json.dumps(business, ensure_ascii=False)}</business>\n"
-            f"<score>{json.dumps(score, ensure_ascii=False)}</score>\n"
-            f"<improvements>{json.dumps(improvements, ensure_ascii=False)}</improvements>\n"
-            f"<history>{json.dumps(self.history, ensure_ascii=False)}</history>\n"
+            f"<business>{_data(business)}</business>\n"
+            f"<score>{_data(score)}</score>\n"
+            f"<improvements>{_data(improvements)}</improvements>\n"
+            f"<history>{_data(self.history)}</history>\n"
             "Choose this round's fixes with the tools, then call run_tests."
         )
 

@@ -1,8 +1,9 @@
 """All Claude calls go through ClaudeClient.
 
 It adds: a required max_tokens, a timeout, retry with backoff, prompt caching of the system
-prompt, token and estimated-cost logging per business, a daily spend cap (Asia/Kolkata days)
-and mock mode (CLAUDE_MOCK=1 reads tests/fixtures/claude/<fixture_key>.json, no network).
+prompt, token and estimated-cost logging per business, a daily spend cap (Asia/Kolkata days,
+with a share reserved for existing businesses) and mock mode (CLAUDE_MOCK=1 reads
+tests/fixtures/claude/<fixture_key>.json, no network).
 """
 
 import json
@@ -42,6 +43,9 @@ PRICES_PER_MTOK: dict[str, tuple[float, float]] = {
 }
 CACHE_WRITE_MULTIPLIER = 1.25
 CACHE_READ_MULTIPLIER = 0.10
+
+# Share of the daily spend cap kept for existing businesses (agent, AI checks, web addresses).
+RESERVED_SHARE = 0.3
 
 DEFAULT_TIMEOUT_SECONDS = 60.0
 MAX_ATTEMPTS = 4
@@ -168,6 +172,19 @@ class MockTransport:
         )
 
 
+_DATA_BRACKETS = str.maketrans({"<": "\u2039", ">": "\u203a"})
+
+
+def as_data(text: str) -> str:
+    """Owner, customer or page text made safe to place inside a prompt's data tags.
+
+    Angle brackets become look-alike single angle quotes (U+2039 and U+203A), so text such as
+    "</transcript>" can never close a data block early and pose as instructions. Words and
+    numbers are unchanged.
+    """
+    return text.translate(_DATA_BRACKETS)
+
+
 def estimate_cost(model: str, usage: Usage) -> float:
     """Estimated USD cost of one call. Unknown models use the most expensive known price."""
     input_price, output_price = PRICES_PER_MTOK.get(model, max(PRICES_PER_MTOK.values()))
@@ -246,7 +263,7 @@ class ClaudeClient:
             raise ValueError("max_tokens must be positive")
         is_mock = self._settings.claude_mock
         if not is_mock:
-            self.check_spend_cap()
+            self.check_spend_cap(for_business=business_id is not None)
         request = self._build_request(model, system, messages, max_tokens, cache_system)
         if output_config:
             request["output_config"] = output_config
@@ -269,10 +286,16 @@ class ClaudeClient:
             )
             return float(session.exec(statement).one())
 
-    def check_spend_cap(self) -> None:
-        """Raise SpendCapReached if today's estimated spend has reached the cap."""
+    def check_spend_cap(self, for_business: bool = True) -> None:
+        """Raise SpendCapReached if today's estimated spend has reached the cap.
+
+        Calls not tied to a business yet (an anonymous intake) may only use the public share
+        of the cap, so RESERVED_SHARE is always left for businesses that already exist.
+        """
         spent = self.spent_today()
         cap = self._settings.claude_daily_spend_cap_usd
+        if not for_business:
+            cap *= 1 - RESERVED_SHARE
         if spent >= cap:
             logger.warning("claude_spend_cap_reached", extra={"spent_usd": spent, "cap_usd": cap})
             raise SpendCapReached(spent, cap)

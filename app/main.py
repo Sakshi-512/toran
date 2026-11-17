@@ -30,7 +30,7 @@ from app.services.agent import AGENT_JOB, agent_runner
 from app.services.alerts import install_alerts
 from app.services.bodylimit import BodyLimitMiddleware
 from app.services.errors import register_error_handlers
-from app.services.godaddy import DOMAINS_JOB, domains_runner
+from app.services.godaddy import DOMAINS_JOB, domains_runner, log_gddy_status
 from app.services.intake import INTAKE_JOB, intake_runner
 from app.services.jobs import JobWorker, requeue_stale
 from app.services.logs import setup_logging
@@ -54,8 +54,9 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     # Email gets its own worker so a long score job never delays a notification.
     mail_worker = JobWorker(engine, {EMAIL_JOB: email_runner(engine, settings)})
     intake_worker = JobWorker(engine, {INTAKE_JOB: intake_runner(engine, settings)})
-    # One agent loop at a time: it runs its own customer tests and Claude calls.
-    agent_worker = JobWorker(engine, {AGENT_JOB: agent_runner(engine, settings)}, concurrency=1)
+    # Two agent loops at a time (queued runs show their place in line). Their customer tests
+    # share the global limit of two Chromium instances.
+    agent_worker = JobWorker(engine, {AGENT_JOB: agent_runner(engine, settings)}, concurrency=2)
     domains_worker = JobWorker(engine, {DOMAINS_JOB: domains_runner(engine, settings)})
     tasks = [asyncio.create_task(retention_loop(engine, settings.log_dir, settings=settings))]
     if settings.app_env != "test":  # tests run jobs themselves, step by step
@@ -82,6 +83,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     setup_logging(settings.secret_values(), settings.log_dir)
     install_alerts(settings)
+    log_gddy_status(settings)
 
     app = FastAPI(
         title=settings.app_name,

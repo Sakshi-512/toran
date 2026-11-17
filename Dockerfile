@@ -13,6 +13,10 @@ COPY requirements.txt .
 # Every package, including indirect ones, is pinned with hashes in the lock file.
 RUN pip install --break-system-packages --require-hashes --no-deps -r requirements.txt
 
+# GoDaddy CLI for web address lookups: a pinned release, refused unless its SHA-256 matches.
+COPY scripts/install_gddy.py /tmp/install_gddy.py
+RUN python3 /tmp/install_gddy.py /usr/local/bin && rm /tmp/install_gddy.py && gddy --version
+
 COPY alembic.ini ./
 COPY migrations ./migrations
 COPY app ./app

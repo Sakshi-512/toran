@@ -37,6 +37,7 @@ class Settings(BaseSettings):
 
     stt_provider: Literal["none", "mock", "sarvam"] = "none"
     stt_api_key: SecretStr | None = None
+    stt_daily_minutes_cap: float = Field(default=120.0, gt=0)
 
     smtp_host: str | None = None
     smtp_port: int = 465
@@ -45,6 +46,7 @@ class Settings(BaseSettings):
     contact_to_email: str | None = None
 
     gddy_pat: SecretStr | None = None
+    gddy_mock: bool = False
 
     @field_validator("base_domain")
     @classmethod

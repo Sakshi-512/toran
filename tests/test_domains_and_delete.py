@@ -190,7 +190,7 @@ def test_the_routes_are_rate_limited(client: TestClient, engine: Engine) -> None
 def test_missing_cli_hides_the_section(
     client: TestClient, engine: Engine, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setenv("CLAUDE_MOCK", "0")
+    monkeypatch.setenv("GDDY_MOCK", "0")
     get_settings.cache_clear()
     monkeypatch.setattr(shutil, "which", lambda _name: None)
     _signed_in(client, engine)

@@ -6,6 +6,10 @@ services:
     image: toran:${IMAGE_TAG:-latest}
     build: .
     restart: unless-stopped
+    # Chromium (customer tests) needs an init process to reap its child processes and more
+    # shared memory than Docker's 64 MB default, or it crashes on heavier pages.
+    init: true
+    shm_size: "1gb"
     # Full logs live in LOG_DIR (deleted after 30 days). Docker keeps only a small rolling buffer.
     logging:
       driver: local
@@ -23,6 +27,7 @@ services:
       FORWARDED_ALLOW_IPS: 172.30.0.10
     volumes:
       - app-data:/app/data
+      # Daily backups by the app itself (7 kept). Create it owned by uid 1001 (docs/deploy.md).
       - ./backups:/app/backups
     networks:
       web:

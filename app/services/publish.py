@@ -11,12 +11,16 @@ owner's confirmation screen.
 
 import logging
 import shutil
+import threading
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import delete, update
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, select
 
 from app.config import Settings
@@ -39,6 +43,7 @@ from app.models import (
     SiteVersion,
     SttUsage,
     TestRun,
+    new_session_epoch,
     utcnow,
 )
 from app.schemas import BusinessProfile
@@ -183,14 +188,37 @@ def needs_phone(business: Business, profile: BusinessProfile | None) -> bool:
     return not profile.phone and bool(profile.order_methods)
 
 
+_LOCKS: dict[int, threading.Lock] = {}
+_LOCKS_GUARD = threading.Lock()
+
+
+@contextmanager
+def business_lock(business_id: int) -> Iterator[None]:
+    """One publish, undo or offline change at a time per business (the app is one process;
+    the unique version number is the database's own backstop)."""
+    with _LOCKS_GUARD:
+        lock = _LOCKS.setdefault(business_id, threading.Lock())
+    with lock:
+        yield
+
+
 def publish(
     engine: Engine, settings: Settings, business_id: int, approved_hash: str | None = None
 ) -> SiteVersion:
     """Make the current draft the live site (after her approval) and save it as a version.
 
     Refused while the agent is changing the draft, and, when approved_hash is given (the draft
-    she saw on the confirmation screen), if the draft has changed since (rule 2).
+    she saw on the confirmation screen), if the draft has changed since (rule 2). The version
+    folder is written first, then the database, and only then is the live folder replaced, so a
+    failed save never changes what customers see.
     """
+    with business_lock(business_id):
+        return _publish(engine, settings, business_id, approved_hash)
+
+
+def _publish(
+    engine: Engine, settings: Settings, business_id: int, approved_hash: str | None
+) -> SiteVersion:
     from app.services.agent import active_run
     from app.services.score_runs import site_hash
 
@@ -211,8 +239,9 @@ def publish(
             select(SiteVersion.number).where(SiteVersion.business_id == business_id)
         ).all()
         number = max(numbers, default=0) + 1
-        shutil.copytree(paths.draft, paths.version(number))
-        _copy(paths.version(number), paths.live)
+        version_dir = paths.version(number)
+        shutil.rmtree(version_dir, ignore_errors=True)  # left by a publish that failed to save
+        shutil.copytree(paths.draft, version_dir)
         previous = live_version(session, business_id)
         if previous is not None:
             previous.status = "superseded"
@@ -223,7 +252,7 @@ def publish(
             number=number,
             theme=business.theme,
             profile_version_id=profile.id if profile else None,
-            site_hash=site_hash(paths.live),
+            site_hash=site_hash(version_dir),
             approved_at=now,
             published_at=now,
         )
@@ -234,7 +263,11 @@ def publish(
             business.first_live_at = now
             _record_time_to_live(session, business_id, now)
         session.add(business)
-        session.commit()
+        try:
+            session.commit()
+        except IntegrityError as exc:  # another process saved this version number first
+            raise AppError("publish.try_again", status_code=409) from exc
+        _copy(version_dir, paths.live)
         session.refresh(version)
         logger.info("site_published", extra={"business_id": business_id, "version": number})
         return version
@@ -272,6 +305,11 @@ def _aware(moment: datetime) -> datetime:
 
 def undo_publish(engine: Engine, settings: Settings, business_id: int) -> SiteVersion | None:
     """Restore the previous published version. Undoing the first publish returns to draft."""
+    with business_lock(business_id):
+        return _undo_publish(engine, settings, business_id)
+
+
+def _undo_publish(engine: Engine, settings: Settings, business_id: int) -> SiteVersion | None:
     with Session(engine) as session:
         business = _business(session, business_id)
         current = live_version(session, business_id)
@@ -308,7 +346,7 @@ def undo_publish(engine: Engine, settings: Settings, business_id: int) -> SiteVe
 
 def set_offline(engine: Engine, business_id: int, offline: bool) -> None:
     """Take the live site offline, or bring it back online."""
-    with Session(engine) as session:
+    with business_lock(business_id), Session(engine) as session:
         business = _business(session, business_id)
         if live_version(session, business_id) is None:
             raise AppError("publish.not_published", status_code=409)
@@ -317,8 +355,62 @@ def set_offline(engine: Engine, business_id: int, offline: bool) -> None:
         session.commit()
 
 
+def delete_business(engine: Engine, settings: Settings, business_id: int) -> bool:
+    """Her "delete everything": stop the site and every session now, then wipe all data.
+
+    Step one happens at once: the business is marked deleted (no site, no link, no sessions,
+    no enquiries) and its queued jobs are dropped. The wipe follows straight away, unless a
+    job for it is still running; then the hourly cleanup wipes it once that job has ended
+    (purge_deleted). The row keeps its web address until the wipe, so files a running job
+    still writes can never pass to a new business. Returns True if everything is gone now.
+    """
+    with Session(engine) as session:
+        business = session.get(Business, business_id)
+        if business is None:
+            return True
+        if business.deleted_at is None:
+            business.deleted_at = utcnow()
+        business.status = "deleted"
+        business.session_epoch = new_session_epoch()
+        session.add(business)
+        session.exec(
+            delete(Job).where(col(Job.business_id) == business_id, col(Job.status) == "queued")
+        )
+        session.exec(delete(OwnerDevice).where(col(OwnerDevice.business_id) == business_id))
+        session.commit()
+        running = _running_jobs(session, business_id)
+    logger.info("business_marked_deleted", extra={"business_id": business_id})
+    if running:
+        return False
+    delete_business_data(engine, settings, business_id)
+    return True
+
+
+def _running_jobs(session: Session, business_id: int) -> int:
+    return len(
+        session.exec(
+            select(Job.id).where(Job.business_id == business_id, Job.status == "running")
+        ).all()
+    )
+
+
+def purge_deleted(engine: Engine, settings: Settings) -> int:
+    """Wipe businesses marked deleted whose jobs have all ended. Returns how many."""
+    with Session(engine) as session:
+        marked = session.exec(
+            select(Business.id).where(col(Business.deleted_at).is_not(None))
+        ).all()
+        ready = [b for b in marked if b is not None and not _running_jobs(session, b)]
+    for business_id in ready:
+        delete_business_data(engine, settings, business_id)
+    return len(ready)
+
+
 def delete_business_data(engine: Engine, settings: Settings, business_id: int) -> None:
-    """Delete a business and all its data and files. Usage rows stay, without the link."""
+    """Delete a business and all its data and files. Usage rows stay, without the link.
+
+    Call delete_business instead: it first stops everything and waits for running jobs.
+    """
     with Session(engine) as session:
         business = session.get(Business, business_id)
         if business is None:
@@ -335,6 +427,8 @@ def delete_business_data(engine: Engine, settings: Settings, business_id: int) -
         for intake in intakes:
             if intake.input_path:
                 Path(intake.input_path).unlink(missing_ok=True)
+            if intake.id is not None:
+                shutil.rmtree(settings.uploads_dir / "intake" / str(intake.id), ignore_errors=True)
         for table in (ClaudeUsage, SttUsage):
             session.exec(
                 update(table)
@@ -380,9 +474,10 @@ def purge_expired_samples(
                 col(Business.is_sample) == True,  # noqa: E712 - SQL expression
                 col(Business.source) == "intake",
                 col(Business.created_at) < cutoff,
+                col(Business.deleted_at).is_(None),
             )
         ).all()
     for business_id in expired:
         if business_id is not None:
-            delete_business_data(engine, settings, business_id)
+            delete_business(engine, settings, business_id)
     return len(expired)

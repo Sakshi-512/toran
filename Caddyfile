@@ -11,7 +11,7 @@
 	encode zstd gzip
 	# Uploads are checked again by the app; nothing larger ever reaches it.
 	request_body {
-		max_size 70MB
+		max_size 70MiB
 	}
 	# Internal endpoints are never reachable from the internet.
 	@internal path /internal /internal/*

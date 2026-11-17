@@ -59,3 +59,18 @@ def pick_language(request: Request) -> Language:
         if lang:
             return lang
     return DEFAULT_LANGUAGE
+
+
+def ordinal(n: int, lang: str) -> str:
+    """A place in line: "2nd" in English, the plain number in Hindi and Marathi."""
+    if lang != "en":
+        return str(n)
+    suffix = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
+
+
+def queue_text(place: int, wait_seconds: int, lang: str) -> str:
+    """ "You're 2nd in line, about 3 minutes." for a queued background job."""
+    minutes = max(1, round(wait_seconds / 60))
+    key = "owner.queue_one" if minutes == 1 else "owner.queue_many"
+    return t(key, lang, place=ordinal(place, lang), minutes=minutes)

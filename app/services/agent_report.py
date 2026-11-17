@@ -15,7 +15,8 @@ from sqlmodel import Session, col, select
 
 from app.models import ActionLog, AgentRun, Job, OwnerQuestion
 from app.services.agent import MAX_ROUNDS
-from app.services.i18n import t
+from app.services.i18n import queue_text, t
+from app.services.jobs import queue_position
 
 
 @dataclass
@@ -207,6 +208,9 @@ def agent_view(session: Session, run: AgentRun, lang: str) -> AgentView:
     state = _state(session, run)
     if state == "queued":
         progress = t("agent.queued", lang)
+        place, wait = queue_position(session.get_bind(), run.job_id) if run.job_id else (0, 0)  # type: ignore[arg-type]
+        if place > 1:  # more than one run is ahead: say where she is in line
+            progress = f"{progress} {queue_text(place, wait, lang)}"
     elif state == "running":
         current = max([r.number for r in rounds], default=0) or 1
         progress = t("agent.running", lang, round=current, max=MAX_ROUNDS)

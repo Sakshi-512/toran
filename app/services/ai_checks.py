@@ -20,7 +20,7 @@ from sqlalchemy.engine import Engine
 
 from app.config import Settings
 from app.services.checklists import checklist_for
-from app.services.claude_client import SONNET, ClaudeClient, ClaudeUnavailable
+from app.services.claude_client import SONNET, ClaudeClient, ClaudeUnavailable, as_data
 from app.services.errors import SpendCapReached
 from app.services.sitegen import LANGUAGES, SiteBuild
 
@@ -226,7 +226,9 @@ def build_messages(
     """The user turn: cached checklist first, then this run's pages and screenshot."""
     questions = checklist_for(business_type)
     checklist = "\n".join(f"{i}. {q}" for i, q in enumerate(questions, start=1))
-    pages = "\n\n".join(f'<page lang="{lang}">\n{texts[lang]}\n</page>' for lang in LANGUAGES)
+    pages = "\n\n".join(
+        f'<page lang="{lang}">\n{as_data(texts[lang])}\n</page>' for lang in LANGUAGES
+    )
     sample_note = SAMPLE_NOTE if is_sample else REAL_NOTE
     return [
         {

@@ -2,7 +2,8 @@
 
 Deleting is permanent. She sees a warning and the full list of what goes, enters her PIN again
 (require_recent_pin), and presses a final button. The site stops being served at once, she is
-signed out everywhere on this device, and the team mailbox gets a note with no personal details.
+signed out everywhere, and the team mailbox gets a note with no personal details. The data is
+wiped at once, or within the hour if a test of her site is still running (publish.delete_business).
 """
 
 from fastapi import APIRouter, Depends, Request
@@ -103,7 +104,7 @@ def delete_page(request: Request, business_id: int = Depends(require_owner)) -> 
 def delete_confirmed(request: Request) -> Response:
     """Her final yes: delete everything now, sign her out and say goodbye."""
     business_id = require_recent_pin(request)
-    pub.delete_business_data(get_engine(), get_settings(), business_id)
+    pub.delete_business(get_engine(), get_settings(), business_id)
     queue_team_email(
         get_engine(), {"team": "deletion", "at": utcnow().isoformat(timespec="minutes")}
     )

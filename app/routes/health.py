@@ -12,6 +12,7 @@ from starlette.responses import Response
 
 from app.config import get_settings
 from app.db import get_session
+from app.services.godaddy import gddy_status
 from app.services.sites import (
     SERVED_STATUSES,
     active_business,
@@ -25,9 +26,13 @@ router = APIRouter()
 
 @router.get("/health", include_in_schema=False)
 def health(request: Request, session: Session = Depends(get_session)) -> dict[str, str]:
-    """Liveness and database check for Docker and Caddy health checks."""
+    """Liveness and database check for Docker and Caddy health checks.
+
+    Also reports the GoDaddy CLI ("installed", "missing" or "mock"). A missing CLI only hides
+    web address suggestions, so the app still counts as healthy.
+    """
     session.exec(select(text("1"))).one()
-    return {"status": "ok"}
+    return {"status": "ok", "gddy": gddy_status(get_settings())}
 
 
 def require_direct_internal_call(request: Request) -> None:

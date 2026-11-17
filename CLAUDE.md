@@ -50,7 +50,7 @@ Hackathon: GoDaddy Inclusive Innovation Hackathon 2026. Challenge: "Build agenti
 
 All settings come from environment variables, loaded with pydantic-settings. Never hard-code any of them. .env.example lists the names with empty values.
 
-APP_NAME, BASE_DOMAIN, SECRET_KEY, DATABASE_URL, ANTHROPIC_API_KEY, CLAUDE_MOCK, CLAUDE_DAILY_SPEND_CAP_USD, STT_PROVIDER, STT_API_KEY, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, CONTACT_TO_EMAIL, GDDY_PAT, APP_ENV, ACME_EMAIL, SITES_DIR, LOG_DIR, RUNS_DIR, UPLOADS_DIR
+APP_NAME, BASE_DOMAIN, SECRET_KEY, DATABASE_URL, ANTHROPIC_API_KEY, CLAUDE_MOCK, CLAUDE_DAILY_SPEND_CAP_USD, STT_PROVIDER, STT_API_KEY, STT_DAILY_MINUTES_CAP, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, CONTACT_TO_EMAIL, GDDY_PAT, GDDY_MOCK, APP_ENV, ACME_EMAIL, SITES_DIR, LOG_DIR, RUNS_DIR, UPLOADS_DIR
 
 - APP_ENV: production (default) or development. development turns off the Secure cookie flag so local login and CSRF work over http://localhost.
 - ACME_EMAIL: used only by Caddy, as the contact email for Let's Encrypt certificates. The app does not read it.
@@ -59,6 +59,8 @@ APP_NAME, BASE_DOMAIN, SECRET_KEY, DATABASE_URL, ANTHROPIC_API_KEY, CLAUDE_MOCK,
 - RUNS_DIR: folder for customer-test phone screenshots (default data/runs; /app/data/runs in Docker).
 - UPLOADS_DIR: folder for owner photos and voice notes or price-list photos waiting to be processed (default data/uploads; /app/data/uploads in Docker). Inputs are deleted after processing unless the owner agreed to keep them.
 - STT_PROVIDER: none (default; voice off, the owner types), mock (saved transcripts in tests/fixtures/stt/), or sarvam (Sarvam AI via the official sarvamai SDK, key in STT_API_KEY).
+- STT_DAILY_MINUTES_CAP: real speech-to-text minutes per day (Asia/Kolkata, default 120). When reached, owners are asked to type instead.
+- GDDY_MOCK: 1 makes domain lookups use saved GoDaddy answers (tests/fixtures/gddy/), separate from CLAUDE_MOCK. Tests set it.
 
 SMTP: if login to smtp.titan.email is rejected, use smtpout.secureserver.net, with the full email address as the username.
 

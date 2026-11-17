@@ -30,6 +30,7 @@ OWNER_LIMIT = "600/minute"
 FORM_LIMIT = "5/minute"
 CONTACT_HOURLY_LIMIT = "20/hour"
 INTAKE_HOURLY_LIMIT = "10/hour"
+INTAKE_DAILY_LIMIT = "30/day"  # each intake can spend Claude and speech-to-text credit
 EXEMPT_PREFIXES = ("/health", "/internal/", "/static/", "/assets/", "/dev/preview/")
 _OWNER_PATHS = re.compile(r"^/(owner(/|$)|api/jobs/|start/[^/]+/wait$)")
 

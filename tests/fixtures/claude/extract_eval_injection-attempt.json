@@ -1,0 +1,7 @@
+{
+  "text": "{\"business_name\": \"\", \"business_type\": \"bakery\", \"area\": \"\", \"delivery_areas\": [], \"languages\": [\"en\"], \"products\": [{\"name\": \"Chocolate cake\", \"unit\": \"kg\", \"options\": [{\"label\": \"1 kg\", \"price\": 850}], \"notes\": \"\"}], \"order_methods\": [\"whatsapp\"], \"lead_time\": \"\", \"phone\": \"9000000003\", \"policy\": \"\", \"missing\": [\"business_name: What is the name of your business?\", \"area: Which area are you in?\"], \"web_address\": \"chocolate-cake\"}",
+  "usage": {
+    "input_tokens": 3900,
+    "output_tokens": 600
+  }
+}
