@@ -10,6 +10,10 @@
   <p class="secret-value pin">{{ pin }}</p>
 </section>
 <p>{{ t('done.save_hint', lang) }}</p>
+<p>{{ t('done.what_for', lang) }}</p>
+<p>{{ t('done.private', lang) }}</p>
+<p>{% if contact_email %}{{ t('done.lost', lang, email=contact_email) }}{% else %}{{ t('done.lost_no_email', lang) }}{% endif %}</p>
+{% if is_sample %}<p class="muted">{{ t('done.sample', lang) }}</p>{% endif %}
 <p>{{ t('done.next', lang) }}</p>
 <p><a class="button" href="{{ link }}">{{ t('done.open', lang) }}</a></p>
 {% endblock %}

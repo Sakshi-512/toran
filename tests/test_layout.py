@@ -329,3 +329,39 @@ def test_the_check_finds_a_card_overflow(browser: Browser) -> None:
     found = page.evaluate(CHECK_JS, CONTAINERS)
     context.close()
     assert any("sticks out" in p and "section.card" in p for p in found), json.dumps(found)
+
+
+@pytest.mark.parametrize("lang", ["en", "hi", "mr"])
+def test_done_page_fits(browser: Browser, client: Any, engine: Engine, lang: str) -> None:
+    """The "Your details are saved!" page (shown once, so it is rendered and then laid out)."""
+    import threading
+
+    from tests.test_confirm_once import _ready
+    from tests.test_intake_flow import _confirm
+
+    result: dict[str, str] = {}
+
+    def make() -> None:  # in its own thread: Playwright already runs an event loop here
+        token, fields = _ready(client, engine)
+        client.get(f"/start?lang={lang}")
+        result["html"] = _confirm(client, token, fields).text
+
+    worker = threading.Thread(target=make)
+    worker.start()
+    worker.join(timeout=60)
+    html = result["html"]
+    assert "secret-value pin" in html
+    with live_server() as port:
+        context = browser.new_context(viewport={"width": WIDTHS[0], "height": HEIGHT})
+        page = context.new_page()
+        problems: list[str] = []
+        for width in WIDTHS:
+            page.set_viewport_size({"width": width, "height": HEIGHT})
+            page.goto(f"http://localhost:{port}/start")  # same origin, so the styles load
+            page.set_content(html, wait_until="networkidle")
+            assert page.evaluate("document.styleSheets[0].cssRules.length") > 0  # styles loaded
+            problems += [
+                f"{width}px done ({lang}): {p}" for p in page.evaluate(CHECK_JS, CONTAINERS)
+            ]
+        context.close()
+    assert not problems, "\n".join(problems[:40])

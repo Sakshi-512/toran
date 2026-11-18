@@ -11,7 +11,7 @@ A voice-first agent that takes a small business owner from idea to launch. It is
 3. The owner picks one of three styles. The app builds a mobile-first website and publishes it on a subdomain of our domain.
 4. A real browser (Playwright) tests the live site as the owner's customers would, and computes a Customer Readiness Score (0 to 100).
 5. An agent fix loop improves a DRAFT copy, re-tests, and shows the owner the changes and the score before and after. The owner approves before anything goes live.
-6. The owner can update prices or services later by voice, with undo.
+6. The owner can edit the menu and prices later from the owner page ("Edit my menu and prices"): changes go to a draft the owner can preview, go live only when the owner publishes, the previous menu can be restored, and large price changes need the PIN again. Phone, area and ordering policy are edited in "My details". (Editing by voice is not built yet.)
 7. The agent can suggest domain names with real prices through GoDaddy. Nothing is bought without the owner's approval.
 
 ## How we're judged

@@ -214,6 +214,11 @@ stored, how long, and the right to delete). Please read them first.
 | `done.link` | Your private link | आपका निजी लिंक | तुमची खासगी लिंक |  |
 | `done.pin` | Your PIN | आपका PIN | तुमचा PIN |  |
 | `done.save_hint` | Tip: send them to yourself on WhatsApp, or take a screenshot. | सुझाव: इन्हें WhatsApp पर खुद को भेज दीजिए, या स्क्रीनशॉट ले लीजिए। | सूचना: हे WhatsApp वर स्वतःला पाठवा, किंवा स्क्रीनशॉट घ्या. |  |
+| `done.what_for` | Use this same link and PIN any time to update your site: change your menu and prices or your details, see customer enquiries, and publish your changes. | अपनी साइट में कभी भी बदलाव करने के लिए यही लिंक और PIN इस्तेमाल करें: मेन्यू और दाम या अपनी जानकारी बदलें, ग्राहकों के सवाल देखें, और बदलाव लाइव करें। | तुमच्या साइटमध्ये कधीही बदल करण्यासाठी हीच लिंक आणि PIN वापरा: मेन्यू आणि दर किंवा तुमची माहिती बदला, ग्राहकांच्या चौकशी पाहा, आणि बदल लाइव्ह करा. |  |
+| `done.private` | Anyone who has both the link and the PIN can change your site, so keep them private. | जिसके पास लिंक और PIN दोनों हैं, वह आपकी साइट बदल सकता है। इसलिए इन्हें सुरक्षित और निजी रखें। | ज्याच्याकडे लिंक आणि PIN दोन्ही आहेत, ती व्यक्ती तुमची साइट बदलू शकते. म्हणून ते सुरक्षित आणि खासगी ठेवा. |  |
+| `done.lost` | Lost them? Write to us at {email}. Once we have checked that it's you, we will send you a new link and PIN. | खो गए? हमें {email} पर लिखें। आप ही हैं, यह पक्का करने के बाद हम आपको नया लिंक और PIN भेज देंगे। | हरवले? आम्हाला {email} वर लिहा. तुम्हीच आहात याची खात्री झाल्यावर आम्ही तुम्हाला नवीन लिंक आणि PIN पाठवू. |  |
+| `done.lost_no_email` | Lost them? Write to us using the contact form on our home page. Once we have checked that it's you, we will send you a new link and PIN. | खो गए? हमारे होम पेज के संपर्क फ़ॉर्म से हमें लिखें। आप ही हैं, यह पक्का करने के बाद हम आपको नया लिंक और PIN भेज देंगे। | हरवले? आमच्या होम पेजवरील संपर्क फॉर्ममधून आम्हाला लिहा. तुम्हीच आहात याची खात्री झाल्यावर आम्ही तुम्हाला नवीन लिंक आणि PIN पाठवू. |  |
+| `done.sample` | This is a sample; it is deleted after 7 days. | यह एक नमूना है; 7 दिन बाद यह हटा दिया जाएगा। | हा एक नमुना आहे; 7 दिवसांनी तो काढून टाकला जाईल. |  |
 | `done.next` | Next, we will build your website. Nothing goes live until you say yes. | अब हम आपकी वेबसाइट बनाएँगे। आपकी हाँ के बिना कुछ भी लाइव नहीं होगा। | आता आम्ही तुमची वेबसाइट बनवू. तुमच्या होकाराशिवाय काहीही लाइव्ह होणार नाही. |  |
 | `done.open` | Open my page | मेरा पेज खोलें | माझे पान उघडा |  |
 | `phone.missing` | Without a number, customers can't order. | नंबर के बिना ग्राहक ऑर्डर नहीं कर सकते। | नंबरशिवाय ग्राहक ऑर्डर करू शकत नाहीत. |  |
@@ -327,7 +332,7 @@ stored, how long, and the right to delete). Please read them first.
 | `details.area_hint` | The area or neighbourhood only, never your home address. | सिर्फ़ इलाक़े का नाम, घर का पता कभी नहीं। | फक्त भागाचे नाव, घरचा पत्ता कधीही नाही. |  |
 | `details.area_invalid` | This looks like an address. Please write only the area name. | यह पता लगता है। सिर्फ़ इलाक़े का नाम लिखिए। | हा पत्ता वाटतो. कृपया फक्त भागाचे नाव लिहा. |  |
 | `details.policy` | Your ordering terms | आपकी ऑर्डर की शर्तें | तुमच्या ऑर्डरच्या अटी |  |
-| `details.products_note` | To change your products or prices, please contact us. | सामान या दाम बदलने हों, तो हमसे बात कीजिए। | उत्पादने किंवा दर बदलायचे असतील, तर आमच्याशी बोला. |  |
+| `details.products_note` | To change your products or prices, use “Edit my menu and prices” on your page. | प्रोडक्ट या दाम बदलने के लिए अपने पेज पर “मेरा मेन्यू और दाम बदलें” इस्तेमाल करें। | उत्पादने किंवा दर बदलण्यासाठी तुमच्या पेजवरील “माझा मेन्यू आणि दर बदला” वापरा. |  |
 | `details.save` | Save my details | मेरी जानकारी सेव करें | माझी माहिती जतन करा |  |
 | `details.saved` | Saved. Your draft is being tested again. | सेव हो गया। आपका ड्राफ्ट फिर से जाँचा जा रहा है। | जतन झाले. तुमचा ड्राफ्ट पुन्हा तपासला जात आहे. |  |
 | `details.pin_label` | Your 4-digit PIN (needed only to change your phone number) | आपका 4 अंकों का PIN (सिर्फ़ फ़ोन नंबर बदलने के लिए ज़रूरी) | तुमचा 4 अंकी PIN (फक्त फोन नंबर बदलण्यासाठी लागतो) |  |
@@ -683,3 +688,29 @@ stored, how long, and the right to delete). Please read them first.
 | `error.back_home` | Go to home page | होम पेज पर जाएँ | मुख्य पानावर जा |  |
 | `error.enquiry_origin` | This form can only be sent from the business's own website. | यह फ़ॉर्म सिर्फ़ उसी व्यवसाय की अपनी वेबसाइट से भेजा जा सकता है। | हा फॉर्म फक्त व्यवसायाच्या स्वतःच्या वेबसाइटवरूनच पाठवता येतो. |  |
 | `mail.failed` | We could not send the email right now. Your message is saved; please try again later. | अभी ईमेल नहीं जा सका। आपका संदेश सुरक्षित है; थोड़ी देर बाद फिर कोशिश कीजिए। | आत्ता ईमेल पाठवता आला नाही. तुमचा संदेश जतन केला आहे; कृपया नंतर पुन्हा प्रयत्न करा. |  |
+
+## Other
+
+| Key | English | Hindi | Marathi | Fix |
+| --- | --- | --- | --- | --- |
+| `menu.title` | Edit my menu and prices | मेरा मेन्यू और दाम बदलें | माझा मेन्यू आणि दर बदला |  |
+| `menu.intro` | Change your products, options and prices. Prices are whole rupees. Your draft is rebuilt and tested again after you save. | अपने प्रोडक्ट, विकल्प और दाम बदलें। दाम पूरे रुपयों में लिखें। सेव करने के बाद आपका ड्राफ़्ट फिर से बनेगा और जाँचा जाएगा। | तुमची उत्पादने, पर्याय आणि दर बदला. दर पूर्ण रुपयांत लिहा. सेव्ह केल्यावर तुमचा ड्राफ्ट पुन्हा तयार होईल आणि तपासला जाईल. |  |
+| `menu.save` | Save my menu | मेन्यू सेव करें | मेन्यू सेव्ह करा |  |
+| `menu.saved` | Saved. | सेव हो गया। | सेव्ह झाले. |  |
+| `menu.restored` | The previous menu is back. | पिछला मेन्यू वापस आ गया। | आधीचा मेन्यू परत आला. |  |
+| `menu.in_draft` | Changes are in your draft. Make your site live to show them to customers. | बदलाव आपके ड्राफ़्ट में हैं। ग्राहकों को दिखाने के लिए अपनी साइट लाइव करें। | बदल तुमच्या ड्राफ्टमध्ये आहेत. ग्राहकांना दाखवण्यासाठी तुमची साइट लाइव्ह करा. |  |
+| `menu.same` | Nothing changed, so nothing was saved. | कुछ नहीं बदला, इसलिए कुछ सेव नहीं हुआ। | काहीच बदलले नाही, म्हणून काही सेव्ह झाले नाही. |  |
+| `menu.busy` | Toran is testing or improving your draft right now. Please wait a minute and try again. | Toran अभी आपके ड्राफ़्ट को जाँच रहा है या सुधार रहा है। एक मिनट रुककर फिर से कोशिश करें। | Toran आत्ता तुमचा ड्राफ्ट तपासत आहे किंवा सुधारत आहे. एक मिनिट थांबून पुन्हा प्रयत्न करा. |  |
+| `menu.invalid` | Something in your menu could not be saved. Please check each product and try again. | आपके मेन्यू में कुछ सेव नहीं हो सका। हर प्रोडक्ट देखकर फिर से कोशिश करें। | तुमच्या मेन्यूमधील काहीतरी सेव्ह होऊ शकले नाही. प्रत्येक उत्पादन तपासून पुन्हा प्रयत्न करा. |  |
+| `menu.empty` | Please keep at least one product. | कम से कम एक प्रोडक्ट रखें। | किमान एक उत्पादन ठेवा. |  |
+| `menu.nothing_to_restore` | There is no earlier menu to go back to. | वापस जाने के लिए कोई पिछला मेन्यू नहीं है। | परत जाण्यासाठी आधीचा कोणताही मेन्यू नाही. |  |
+| `menu.address_in_name` | Product name: this looks like an address (house, flat, building or PIN code). Please write only the product's name. | प्रोडक्ट का नाम: यह पता जैसा लगता है (मकान, फ़्लैट, बिल्डिंग या पिन कोड)। सिर्फ़ प्रोडक्ट का नाम लिखें। | उत्पादनाचे नाव: हे पत्त्यासारखे दिसते (घर, फ्लॅट, इमारत किंवा पिन कोड). फक्त उत्पादनाचे नाव लिहा. |  |
+| `menu.address_in_label` | Option: this looks like an address (house, flat, building or PIN code). Please write only the size or kind. | विकल्प: यह पता जैसा लगता है (मकान, फ़्लैट, बिल्डिंग या पिन कोड)। सिर्फ़ साइज़ या प्रकार लिखें। | पर्याय: हे पत्त्यासारखे दिसते (घर, फ्लॅट, इमारत किंवा पिन कोड). फक्त आकार किंवा प्रकार लिहा. |  |
+| `menu.address_in_notes` | Notes: this looks like an address (house, flat, building or PIN code). Please don't put your address here. | नोट: यह पता जैसा लगता है (मकान, फ़्लैट, बिल्डिंग या पिन कोड)। यहाँ अपना पता न लिखें। | टीप: हे पत्त्यासारखे दिसते (घर, फ्लॅट, इमारत किंवा पिन कोड). इथे तुमचा पत्ता लिहू नका. |  |
+| `menu.translations_note` | If you rename a product, Toran's translations of the old name are dropped. Toran can add them again. | प्रोडक्ट का नाम बदलने पर पुराने नाम के Toran वाले अनुवाद हट जाते हैं। Toran उन्हें फिर से जोड़ सकता है। | उत्पादनाचे नाव बदलल्यास जुन्या नावाचे Toran ने केलेले भाषांतर निघून जाते. Toran ते पुन्हा जोडू शकतो. |  |
+| `menu.pin_label` | Your 4-digit PIN | आपका 4 अंकों का PIN | तुमचा 4 अंकी PIN |  |
+| `menu.pin_needed` | You changed many prices, or one price by a lot. To save this, please enter your PIN. | आपने कई दाम बदले हैं, या एक दाम बहुत ज़्यादा बदला है। इसे सेव करने के लिए अपना PIN डालें। | तुम्ही बरेच दर बदलले आहेत, किंवा एक दर खूप बदलला आहे. हे सेव्ह करण्यासाठी तुमचा PIN टाका. |  |
+| `menu.restore` | Restore the previous menu | पिछला मेन्यू वापस लाएँ | आधीचा मेन्यू परत आणा |  |
+| `menu.restore_hint` | Brings back the products and prices from your last saved version. | आपके पिछले सेव किए गए वर्शन के प्रोडक्ट और दाम वापस लाता है। | तुमच्या मागच्या सेव्ह केलेल्या आवृत्तीतील उत्पादने आणि दर परत आणते. |  |
+| `menu.product_count` | {n} products | {n} प्रोडक्ट | {n} उत्पादने |  |
+| `menu.product_count_one` | 1 product | 1 प्रोडक्ट | 1 उत्पादन |  |

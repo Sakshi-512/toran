@@ -245,6 +245,8 @@ async def confirm_submit(token: str, request: Request) -> Response:
             "link": link,
             "pin": confirmed.access.pin,
             "business_name": confirmed.business.display_name,
+            "is_sample": confirmed.business.is_sample,
+            "contact_email": settings.contact_to_email or "",
         },
     )
     response.headers["Cache-Control"] = "no-store"  # the PIN is shown once; never cache it

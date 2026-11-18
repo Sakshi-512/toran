@@ -18,6 +18,7 @@ Toran is a voice-first agent that takes a small business owner from idea to laun
 4. A real browser tests the site like a customer on a slow phone and gives a **Customer Readiness Score** (0 to 100).
 5. An agent improves a draft copy, re-tests it, and shows the owner the score before and after. Nothing goes live until the owner approves.
 6. Toran can suggest a web address with real GoDaddy prices; the team buys it only after the owner asks.
+7. Later, the owner edits the menu and prices from the owner page ("Edit my menu and prices"). The changes go to a draft the owner can preview and go live only after the owner approves. "Restore the previous menu" undoes an edit, and big price changes need the PIN again. Phone, area and ordering policy are in "My details".
 
 ## What to try (about 5 minutes)
 
@@ -25,7 +26,8 @@ Toran is a voice-first agent that takes a small business owner from idea to laun
 2. **Confirm the cards**: check the details Toran heard, then press "Confirm my details". Save the private link and PIN it shows once.
 3. **Open the owner page** with that link and PIN, and look at the **draft score** and "See the full report" (each item says how to fix it).
 4. **Press "Let Toran improve my draft"**, wait for it to finish, then open **"See how Toran thinks"**: before and after first, then every round, tool call and score change, with "Details for judges".
-5. **Open a live demo site in another language**, for example https://asha-home-bakery.gettoran.com/mr/ or https://savitri-gruh-udyog.gettoran.com/hi/.
+5. **Tap "Edit my menu and prices"**, change a price, and save: the draft is rebuilt and tested again, and the live site changes only when you publish. Try "Restore the previous menu" too.
+6. **Open a live demo site in another language**, for example https://asha-home-bakery.gettoran.com/mr/ or https://savitri-gruh-udyog.gettoran.com/hi/.
 
 ## How it maps to the judging criteria
 
@@ -34,7 +36,7 @@ Toran is a voice-first agent that takes a small business owner from idea to laun
 | **Impact (35%)** | Built for small business owners in India who find technology a barrier, starting with home-based businesses (first real users: women running businesses from home in Pune); voice in Marathi, Hindi and English; sites readable in all three; real vs sample businesses tracked; accuracy measured on real voice notes; cost per business measured | `app/services/accuracy.py`, `scripts/accuracy_report.py`, `app/services/showcase.py` ("Measured on the live system"), real-world results below |
 | **Demo (35%)** | One-tap samples, no sign-up; the score improves visibly; "How Toran thinks" panel; friendly messages instead of errors (spend cap, Claude down, stuck jobs); works at 360 px to 1280 px | `app/templates/app/home.html`, `app/templates/app/owner_agent.html`, `tests/test_layout.py` |
 | **Tech Usage (15%)** | Claude agent loop with six guarded tools, vision (price-list photos), structured outputs, prompt caching, cost logging and a daily cap; GoDaddy CLI for live domain availability and prices, DNS, VPS and mailbox | "How it uses Claude" and "How it uses GoDaddy" below |
-| **Execution (15%)** | Layered FastAPI app (thin routes, services, swappable providers), Alembic migrations, 737 tests including real-Chromium layout and end-to-end checks, ruff, mypy, gitleaks, pip-audit, CI on every push, an independent code review with fixes | `docs/review.md`, `.github/workflows/ci.yml`, `tests/` |
+| **Execution (15%)** | Layered FastAPI app (thin routes, services, swappable providers), Alembic migrations, 777 tests including real-Chromium layout and end-to-end checks, ruff, mypy, gitleaks, pip-audit, CI on every push, an independent code review with fixes | `docs/review.md`, `.github/workflows/ci.yml`, `tests/` |
 
 ## Architecture
 
@@ -146,7 +148,7 @@ Everything works in mock mode (`CLAUDE_MOCK=1`, `GDDY_MOCK=1`, `STT_PROVIDER=moc
 
 ```bash
 make lint      # ruff, formatting, mypy, gitleaks, private-files hook, whitespace (pre-commit)
-make test      # 737 tests, mock mode, including real-Chromium end-to-end and layout checks
+make test      # 777 tests, mock mode, including real-Chromium end-to-end and layout checks
 make eval      # extraction evals (evals/), checked in code
 ```
 
@@ -160,7 +162,7 @@ Docker Compose on the GoDaddy VPS: the app (non-root, `init`, 1 GB shared memory
 
 ## Known limitations
 
-- **Owners can't edit prices or menu items from their page yet.** They can edit their phone number, area and ordering policy ("My details"); the Toran team updates prices on request. Price updates by voice are not built.
+- **Prices and menu can be edited only by typing, not by voice.** Owners edit them on the owner page; updating them by voice is a next step.
 - **Owners are not notified by WhatsApp or email when a customer's form message arrives.** It appears in the enquiries inbox on the owner page and is emailed to the Toran team.
 - **One agent run per draft at a time.**
 - **The Pune audit is a small, non-random sample**, so its numbers show direction, not a population estimate.
@@ -171,7 +173,7 @@ Docker Compose on the GoDaddy VPS: the app (non-root, `init`, 1 GB shared memory
 
 ## Next steps
 
-- Price and menu updates by voice, with undo (every profile version is already kept).
+- Price and menu updates by voice, using the same draft, restore and PIN rules as the menu editor.
 - Notify owners on WhatsApp when a customer sends an enquiry.
 - Finish the native-speaker review of Hindi and Marathi, then add more Indian languages.
 - Automate buying and DNS setup for a requested web address, still only after the owner's approval.

@@ -77,3 +77,58 @@ def test_new_access_stops_the_old_link_sessions_and_devices(
     csrf = re.search(rf'name="{CSRF_FIELD}" value="([^"]+)"', client.get(new).text).group(1)  # type: ignore[union-attr]
     client.post(new, data={CSRF_FIELD: csrf, "pin": access.pin})
     assert client.get("/owner").status_code == 200
+
+
+# --- the done page: what the link and PIN are for ------------------------------------------------
+
+
+def test_done_page_explains_the_link_pin_and_lost_access(
+    client: TestClient, engine: Engine
+) -> None:
+    token, fields = _ready(client, engine)
+    page = _confirm(client, token, fields).text
+    assert "change your menu and prices or your details" in page
+    assert "so keep them private" in page
+    assert "Write to us at team@example.test" in page  # from CONTACT_TO_EMAIL
+    assert "This is a sample" not in page
+
+
+@pytest.mark.parametrize(
+    ("lang", "words"),
+    [
+        ("hi", ["मेन्यू और दाम", "सुरक्षित और निजी", "team@example.test"]),
+        ("mr", ["मेन्यू आणि दर", "सुरक्षित आणि खासगी", "team@example.test"]),
+    ],
+)
+def test_done_page_in_hindi_and_marathi(
+    client: TestClient, engine: Engine, lang: str, words: list[str]
+) -> None:
+    token, fields = _ready(client, engine)
+    client.get(f"/start?lang={lang}")
+    page = _confirm(client, token, fields).text
+    assert all(w in page for w in words)
+
+
+def test_done_page_without_a_contact_address(
+    client: TestClient, engine: Engine, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.config import get_settings
+
+    monkeypatch.setenv("CONTACT_TO_EMAIL", "")
+    get_settings.cache_clear()
+    token, fields = _ready(client, engine)
+    page = _confirm(client, token, fields).text
+    assert "contact form on our home page" in page and "Write to us at" not in page
+
+
+def test_done_page_marks_a_sample(client: TestClient, engine: Engine) -> None:
+    from tests.test_intake_flow import _run_jobs, _token
+
+    response = client.post(
+        "/start", data={CSRF_FIELD: _token(client), "sample": "sample-en"}, follow_redirects=False
+    )
+    _run_jobs(engine)
+    token = response.headers["location"].split("/")[2]
+    _, fields = _cards(client, token)
+    fields["phone"] = "9000012345"
+    assert "This is a sample; it is deleted after 7 days." in _confirm(client, token, fields).text
