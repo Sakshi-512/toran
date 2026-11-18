@@ -65,7 +65,7 @@ main:has(.score-layout) { max-width: 1100px; }
 .choice legend { font-weight: 700; padding: 0 4px; }
 .radio, .check { display: flex; gap: 10px; align-items: center; min-height: 44px; font-weight: 400; }
 .radio input, .check input { width: 22px; height: 22px; min-height: 0; }
-.card { background: #fff; border: 1px solid #eadfd2; border-radius: 14px; padding: 16px; margin: 12px 0; display: grid; gap: 8px; }
+.card { background: #fff; border: 1px solid #eadfd2; border-radius: 14px; padding: 16px; margin: 12px 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .card.questions { border-color: #e2a24a; background: #fff7ea; }
 .cards h2 { margin-top: 24px; }
 .option-row { display: grid; grid-template-columns: 1fr 120px; gap: 8px; }
@@ -232,13 +232,12 @@ a.brand, a.brand:visited, a.lang, a.lang:visited, .gallery-card a, .gallery-card
 /* Owner page actions: one clear primary button, then tidy secondary actions. */
 .primary-action { margin: 8px 0 4px; }
 .primary-action .button { width: 100%; }
-.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.action-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .action-grid form, .action-grid .button { width: 100%; }
 .action-grid .button { min-height: 48px; padding: 0 10px; text-align: center; line-height: 1.25; font-weight: 700; }
 .live-actions { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 4px; }
 @media (min-width: 720px) {
   .primary-action .button { width: auto; }
-  .action-grid { grid-template-columns: repeat(4, max-content); }
   .action-grid .button { padding: 0 18px; }
 }
 
@@ -248,3 +247,10 @@ a.brand, a.brand:visited, a.lang, a.lang:visited, .gallery-card a, .gallery-card
 
 .how-to-fix { margin: 4px 0; }
 .fix-label { font-weight: 700; }
+
+/* Layout safety (shared): grid and flex children may shrink to their container, long words
+   wrap instead of pushing a box wider, and media never exceed their box. */
+.card > *, .cta-row > *, .action-grid > *, .try-grid > *, .two-col > *, .options > *, .gallery > * { min-width: 0; }
+main { overflow-wrap: break-word; }
+main img, main iframe, main video, main select, main input, main textarea { max-width: 100%; }
+.button { max-width: 100%; text-align: center; }
