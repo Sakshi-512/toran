@@ -1,0 +1,33 @@
+{% extends "app/base.html" %}
+{% block title %}{{ t('menu.title', lang) }} · {{ business.display_name }}{% endblock %}
+{% macro err(name) %}{% if errors.get(name) %}<p class="field-error" role="alert">{{ t(errors[name], lang) }}</p>{% endif %}{% endmacro %}
+{% block content %}
+<p><a class="text-link" href="/owner">{{ t('owner.back', lang) }}</a></p>
+<h1>{{ t('menu.title', lang) }}</h1>
+<p>{{ t('menu.intro', lang) }}</p>
+{% if done == 'saved' or done == 'restored' %}<p class="notice-ok" role="status">{{ t('menu.' ~ done, lang) }} {{ t('menu.in_draft', lang) }}</p>{% endif %}
+{% if done == 'same' %}<p class="notice-ok" role="status">{{ t('menu.same', lang) }}</p>{% endif %}
+{% if busy %}<p class="notice-error" role="status">{{ t('menu.busy', lang) }}</p>{% endif %}
+{{ err('form') }}
+<p class="muted">{{ t('menu.translations_note', lang) }}</p>
+<form class="form" method="post" action="/owner/menu">
+  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+  {{ err('products') }}
+  {% include "app/_product_cards.html" %}
+  {% if ask_pin or errors.get('pin') %}
+  <section class="card" id="pin">
+    <label for="m-pin">{{ t('menu.pin_label', lang) }}</label>
+    <input id="m-pin" name="pin" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="one-time-code" class="pin-input">
+    {{ err('pin') }}
+  </section>
+  {% endif %}
+  <button class="button" type="submit" name="action" value="save">{{ t('menu.save', lang) }}</button>
+</form>
+{% if previous %}
+<form class="form" method="post" action="/owner/menu/restore">
+  <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+  <p class="muted">{{ t('menu.restore_hint', lang) }}</p>
+  <button class="button secondary" type="submit">{{ t('menu.restore', lang) }} ({{ previous_when }}, {{ t('menu.product_count' ~ ('_one' if previous.product_count == 1 else ''), lang, n=previous.product_count) }})</button>
+</form>
+{% endif %}
+{% endblock %}

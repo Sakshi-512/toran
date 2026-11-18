@@ -31,15 +31,20 @@ def _page(request: Request, business_id: int, **extra: object) -> dict[str, obje
     return {"business": business, "profile": profile, "errors": {}, **extra}
 
 
-def _pin_problem(request: Request, business_id: int, pin: str) -> str | None:
-    """None if the owner's PIN allows a phone change (entered now, or in the last few minutes)."""
+def pin_problem(
+    request: Request, business_id: int, pin: str, missing: str = "details.pin_needed"
+) -> str | None:
+    """None if the owner's PIN allows a sensitive change (entered now, or in the last few minutes).
+
+    Otherwise the message key to show; `missing` is the one used when no PIN was typed.
+    """
     try:
         require_recent_pin(request)
         return None
     except AppError:
         pass
     if not pin:
-        return "details.pin_needed"
+        return missing
     check_rate(request, FORM_LIMIT)  # same limit as the sign-in PIN
     with Session(get_engine()) as session:
         business = session.get(Business, business_id)
@@ -74,7 +79,7 @@ async def details_save(request: Request, business_id: int = Depends(require_owne
         context = _page(request, business_id, errors=errors, sent=sent)
         return render(request, "app/owner_details.html", context, 422)
     if svc.phone_changes(get_engine(), business_id, sent.phone):
-        problem = _pin_problem(request, business_id, str(form.get("pin", "")).strip())
+        problem = pin_problem(request, business_id, str(form.get("pin", "")).strip())
         if problem:
             context = _page(request, business_id, errors={"pin": problem}, sent=sent)
             return render(request, "app/owner_details.html", context, 401)

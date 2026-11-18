@@ -47,29 +47,7 @@
     {% for code in LANGUAGES %}<label class="check"><input type="checkbox" name="languages" value="{{ code }}"{% if code in draft.languages %} checked{% endif %}> {{ t('lang.' ~ code, lang) }}</label>{% endfor %}</fieldset></section>
 
   <h2>{{ t('confirm.products', lang) }}</h2>
-  <input type="hidden" name="product_count" value="{{ draft.products|length }}">
-  {% for p in draft.products %}{% set i = loop.index0 %}
-  <section class="card product">
-    <label for="p{{ i }}-name">{{ t('confirm.product_name', lang) }}</label>
-    <input id="p{{ i }}-name" name="p{{ i }}_name" value="{{ p.name }}" maxlength="120">{{ err('p' ~ i ~ '_name') }}
-    <label for="p{{ i }}-unit">{{ t('confirm.unit', lang) }}</label>
-    <select id="p{{ i }}-unit" name="p{{ i }}_unit">{% for u in ('piece','box','kg','month','hand','service') %}<option value="{{ u }}"{% if p.unit == u %} selected{% endif %}>{{ t('site.unit.' ~ u, lang) }}</option>{% endfor %}</select>
-    <input type="hidden" name="p{{ i }}_option_count" value="{{ p.options|length }}">
-    {% for o in p.options %}{% set j = loop.index0 %}
-    <div class="option-row">
-      <input name="p{{ i }}_o{{ j }}_label" value="{{ o.label }}" maxlength="80" aria-label="{{ t('confirm.option_label', lang) }}" placeholder="{{ t('confirm.option_label', lang) }}">
-      <input name="p{{ i }}_o{{ j }}_price" value="{{ o.price }}" inputmode="numeric" maxlength="12" aria-label="{{ t('confirm.option_price', lang) }}" placeholder="{{ t('confirm.option_price', lang) }}">
-    </div>
-    {% if from_photo and o.price != '' %}<p class="from-photo">{{ t('confirm.from_photo', lang) }}</p>{% endif %}
-    {{ err('p' ~ i ~ '_o' ~ j ~ '_price') }}
-    {% endfor %}
-    <button class="button secondary" type="submit" name="action" value="add_option:{{ i }}">{{ t('confirm.add_option', lang) }}</button>
-    <label for="p{{ i }}-notes">{{ t('confirm.notes', lang) }}</label>
-    <input id="p{{ i }}-notes" name="p{{ i }}_notes" value="{{ p.notes }}" maxlength="500">
-    <label class="check"><input type="checkbox" name="p{{ i }}_remove" value="yes"> {{ t('confirm.remove', lang) }}</label>
-  </section>
-  {% endfor %}
-  <button class="button secondary" type="submit" name="action" value="add_product">{{ t('confirm.add_product', lang) }}</button>
+  {% include "app/_product_cards.html" %}
 
   <section class="card"><label for="f-lead">{{ t('confirm.lead_time', lang) }}</label>
     <input id="f-lead" name="lead_time" value="{{ draft.lead_time }}" maxlength="120">

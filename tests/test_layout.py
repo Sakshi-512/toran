@@ -259,6 +259,9 @@ def test_owner_pages_fit_their_cards(engine: Engine, owner: tuple[Owner, Page]) 
         "/owner",  # draft, with a score, the agent card, questions and domain suggestions
         "/owner?lang=mr",
         "/owner/details",
+        "/owner/menu",
+        "/owner/menu?lang=hi",
+        "/owner/menu?lang=mr",
         "/owner/styles",
         f"/owner/score/{o.run_id}",
         f"/owner/agent/{o.agent_run_id}",

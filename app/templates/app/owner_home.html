@@ -27,6 +27,7 @@
     {% if has_draft %}<a class="button secondary" href="/owner/preview/{% if lang != 'en' %}{{ lang }}/{% endif %}" target="_blank" rel="noopener">{{ t('owner.preview', lang) }}</a>{% endif %}
     <a class="button secondary" href="/owner/styles">{{ t('owner.styles', lang) }}</a>
     <a class="button secondary" href="/owner/details">{{ t('details.title', lang) }}</a>
+    <a class="button secondary" href="/owner/menu">{{ t('menu.title', lang) }}</a>
     <form method="post" action="/owner/draft"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.rebuild', lang) }}</button></form>
   </div>
   {% if live %}
