@@ -260,7 +260,7 @@ def test_reports_are_hers_only(client: TestClient, engine: Engine, owner: int) -
         mine_id, theirs_id = mine.id, theirs.id
     report = client.get(f"/owner/score/{mine_id}?lang=mr")
     assert report.status_code == 200 and "40/100" in report.text
-    assert "ग्राहकांनी पाहण्यापूर्वी तुमच्या साइटमध्ये काही सुधारणा हव्यात." in report.text
+    assert "ग्राहकांना दाखवण्याआधी तुमच्या साइटमध्ये थोड्या सुधारणा हव्यात." in report.text
     assert "शक्य" not in report.text  # the detailed "X of Y possible" stays in the dev report
     assert client.get(f"/owner/score/{theirs_id}").status_code == 404
     assert "Score history" in client.get("/owner?lang=en").text

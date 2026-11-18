@@ -487,11 +487,11 @@
   "home.thumb_alt": "The website of {name} on a phone",
   "home.score": "Readiness Score {n}/100",
   "home.inclusive_title": "Inclusive at both ends",
-  "home.inclusive_owner": "Simple for the owner",
-  "home.inclusive_owner_1": "She speaks; there is nothing to learn.",
-  "home.inclusive_owner_2": "Everything is in her language: Marathi, Hindi or English.",
-  "home.inclusive_owner_3": "She approves every detail and every change.",
-  "home.inclusive_customers": "Good for her customers",
+  "home.inclusive_owner": "Simple for you",
+  "home.inclusive_owner_1": "You speak; there is nothing to learn.",
+  "home.inclusive_owner_2": "Everything is in your language: Marathi, Hindi or English.",
+  "home.inclusive_owner_3": "You approve every detail and every change.",
+  "home.inclusive_customers": "Good for your customers",
   "home.inclusive_customers_1": "Fast on cheap phones and slow internet.",
   "home.inclusive_customers_2": "Readable in English, Hindi and Marathi.",
   "home.inclusive_customers_3": "Big buttons to order on WhatsApp or call.",
@@ -600,5 +600,9 @@
   "already.shown_once": "Your private link and PIN were shown only once, on the previous screen, so nobody else can see them. We can't show them again.",
   "already.lost_title": "Didn't save your link and PIN?",
   "already.lost": "Write to us with your business name. We will check it's you by calling the phone number on your website, then give you a new link and PIN. The old ones will stop working.",
-  "already.contact": "Write to us"
+  "already.contact": "Write to us",
+  "site.enquiry_note": "Your message is sent to the business through {app_name}.",
+  "home.measured_title": "Measured on the live system",
+  "home.measured_intro": "Real numbers from real use, updated as people use {app_name}.",
+  "home.measured_on": "last measured {date}"
 }

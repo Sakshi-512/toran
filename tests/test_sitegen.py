@@ -334,7 +334,7 @@ def test_enquiry_form_fields() -> None:
 
 def test_footer() -> None:
     p = page(build(), "hi/index.html")
-    assert "दाम आख़िरी बार बदले: 14/11/2026" in p.text
+    assert "दाम अपडेट किए गए: 14/11/2026" in p.text
     assert "Test App से बनाई गई" in p.text
     assert any(a.get("href") == "https://example.test/privacy?lang=hi" for a in p.find("a"))
 
@@ -466,7 +466,7 @@ def test_single_unnamed_option_shows_price_beside_name() -> None:
     assert '<dl class="prices">' not in cupcakes
     assert "per box" not in cupcakes
     hindi = page(build(), "hi/index.html").html.split("Cupcakes")[1].split("</li>")[0]
-    assert '<span class="unit">/ डिब्बा</span>' in hindi
+    assert '<span class="unit">/ बॉक्स</span>' in hindi
 
 
 @pytest.mark.parametrize(

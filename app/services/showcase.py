@@ -7,8 +7,10 @@ Anything produced in mock mode is excluded: a Claude call counts only if it was 
 import io
 import statistics
 from dataclasses import dataclass
+from datetime import UTC, date, datetime
 from functools import lru_cache
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from PIL import Image
 from sqlalchemy import exists
@@ -21,6 +23,7 @@ from app.services.address_guard import looks_like_address
 from app.services.publish import latest_profile
 
 MIN_REAL_FOR_ACCURACY = 2
+IST = ZoneInfo("Asia/Kolkata")
 THUMB_WIDTH = 240
 THUMB_HEIGHT = 400
 THUMB_QUALITY = 70
@@ -37,6 +40,10 @@ class Stats:
     field_accuracy: float | None = None
     price_accuracy: float | None = None
     accuracy_count: int = 0
+    # The day of the newest measurement behind each figure (shown next to it).
+    check_date: date | None = None
+    draft_date: date | None = None
+    accuracy_date: date | None = None
 
     @property
     def any(self) -> bool:
@@ -61,18 +68,20 @@ def _real_intake_ids(session: Session) -> set[int]:
 
 def home_stats(session: Session) -> Stats:
     """Cost of one full check, voice note to tested draft, and accuracy on real voice notes."""
-    costs = session.exec(
-        select(ClaudeUsage.cost_usd_estimate).where(
+    checks = session.exec(
+        select(ClaudeUsage.cost_usd_estimate, ClaudeUsage.created_at).where(
             ClaudeUsage.purpose == "ai_checks", col(ClaudeUsage.is_mock).is_(False)
         )
     ).all()
+    costs = [cost for cost, _ in checks]
     real = _real_intake_ids(session)
     intakes = (
         session.exec(select(IntakeSession).where(col(IntakeSession.id).in_(real))).all()
         if real
         else []
     )
-    seconds = [i.seconds_to_draft_scored for i in intakes if i.seconds_to_draft_scored]
+    timed = [i for i in intakes if i.seconds_to_draft_scored]
+    seconds = [i.seconds_to_draft_scored for i in timed if i.seconds_to_draft_scored]
     voice = [
         i
         for i in intakes
@@ -89,7 +98,18 @@ def home_stats(session: Session) -> Stats:
         field_accuracy=statistics.mean(r.field_accuracy for r in results) if enough else None,
         price_accuracy=statistics.mean(r.price_accuracy for r in results) if enough else None,
         accuracy_count=len(results) if enough else 0,
+        check_date=_newest([when for _, when in checks]),
+        draft_date=_newest([i.created_at for i in timed]),
+        accuracy_date=_newest([i.created_at for i in real_voice]) if enough else None,
     )
+
+
+def _newest(moments: list[datetime]) -> date | None:
+    """The calendar day (India time) of the newest moment."""
+    if not moments:
+        return None
+    newest = max(m if m.tzinfo else m.replace(tzinfo=UTC) for m in moments)
+    return newest.astimezone(IST).date()
 
 
 def _is_real_business(session: Session, business_id: int | None) -> bool:

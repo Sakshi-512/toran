@@ -254,3 +254,5 @@ a.brand, a.brand:visited, a.lang, a.lang:visited, .gallery-card a, .gallery-card
 main { overflow-wrap: break-word; }
 main img, main iframe, main video, main select, main input, main textarea { max-width: 100%; }
 .button { max-width: 100%; text-align: center; }
+
+.measured .stats { margin-top: 12px; }

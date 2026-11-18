@@ -262,7 +262,7 @@ def test_contact_with_phone_has_no_reply_to(client: TestClient, engine: Engine) 
 
 def test_thank_you_message_in_owner_language(client: TestClient) -> None:
     assert "Thank you! Your message has been sent." in client.get("/?sent=1").text
-    assert "धन्यवाद! तुमचा संदेश पाठवला आहे." in client.get("/?sent=1&lang=mr").text
+    assert "धन्यवाद! तुमचा संदेश आम्हाला मिळाला आहे." in client.get("/?sent=1&lang=mr").text
 
 
 def test_contact_requires_csrf(client: TestClient, engine: Engine) -> None:

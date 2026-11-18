@@ -276,15 +276,40 @@ def test_owner_pages_fit_their_cards(engine: Engine, owner: tuple[Owner, Page]) 
     assert not problems, "\n".join(problems[:40])
 
 
-def test_public_pages_fit(browser: Browser) -> None:
+def test_public_pages_fit(browser: Browser, engine: Engine) -> None:
+    from tests.test_home import _usage
+
+    _usage(engine, "ai_checks", 0.04, mock=False)  # shows "Measured on the live system"
     with live_server() as port:
         context = browser.new_context(viewport={"width": WIDTHS[0], "height": HEIGHT})
         page = context.new_page()
-        problems = []
-        for path in ("/", "/?lang=mr", "/start", "/start?option=photo&lang=hi", "/privacy"):
+        problems = _problems(page, f"http://localhost:{port}/", shot="home")
+        problems += _problems(page, f"http://localhost:{port}/?lang=hi", shot="home-hi")
+        for path in ("/?lang=mr", "/start", "/start?option=photo&lang=hi", "/privacy?lang=hi"):
             problems += _problems(page, f"http://localhost:{port}{path}")
         context.close()
     assert not problems, "\n".join(problems[:40])
+
+
+def test_business_site_fits(browser: Browser, engine: Engine) -> None:
+    """A live business site in all three languages, including the enquiry note."""
+    business_id, _, _ = _business(engine, slug="layout-shop")
+    pub.build_draft(engine, get_settings(), business_id)
+    pub.publish(engine, get_settings(), business_id)
+    with live_server() as port:
+        context = browser.new_context(viewport={"width": WIDTHS[0], "height": HEIGHT})
+        page = context.new_page()
+        problems: list[str] = []
+        for lang in ("", "hi/", "mr/"):
+            url = f"http://layout-shop.localhost:{port}/{lang}"
+            problems += _site_problems(page, url, shot=f"site-{lang.strip('/') or 'en'}")
+        context.close()
+    assert not problems, "\n".join(problems[:40])
+
+
+def _site_problems(page: Page, url: str, shot: str) -> list[str]:
+    """Business sites use <main> too, so the same check applies."""
+    return _problems(page, url, shot=shot)
 
 
 def test_the_check_finds_a_card_overflow(browser: Browser) -> None:

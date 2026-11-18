@@ -5,7 +5,7 @@ BIN := $(VENV)/bin
 
 
 .PHONY: server-seed server-agent server-access server-backup server-purge
-.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score agent shots access eval accuracy up down backup
+.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score agent shots access i18n-sheet i18n-apply eval accuracy up down backup
 
 setup: ## Create the venv, install dependencies and git hooks
 	test -d $(VENV) || python3.12 -m venv $(VENV)
@@ -70,6 +70,13 @@ shots: ## Remake the home page's phone screenshot from a real sample site
 
 access: ## New private link and PIN after the team confirms it's her: make access slug=<slug>
 	$(PY) -m scripts.new_access $(slug)
+
+i18n-sheet: ## Write docs/translation-review.md for a native speaker to check
+	$(PY) -m scripts.i18n_review sheet
+
+i18n-apply: ## Apply corrections from a filled-in review sheet: make i18n-apply file=<copy.md>
+	$(PY) -m scripts.i18n_review apply $(file)
+	$(PY) -m scripts.i18n_review check
 
 logs: ## Follow the production app log file
 	docker compose exec app tail -f /app/data/logs/app.log
