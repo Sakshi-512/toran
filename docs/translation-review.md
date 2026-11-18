@@ -68,7 +68,7 @@ stored, how long, and the right to delete). Please read them first.
 | `home.stat_accuracy` | Details right first time on real voice notes | असली वॉइस नोट से पहली बार में सही जानकारी | खऱ्या व्हॉइस नोटमधून पहिल्याच वेळी बरोबर माहिती |  |
 | `home.stat_accuracy_note` | prices {prices}% · based on {n} real businesses | दाम {prices}% · {n} असली व्यवसायों पर आधारित | दर {prices}% · {n} खऱ्या व्यवसायांवर आधारित |  |
 | `home.try_title` | Try it in 3 languages | 3 भाषाओं में आज़माइए | 3 भाषांत वापरून पाहा |  |
-| `home.try_intro` | Tap a sample voice note to start the real flow. No microphone or sign-up needed. | कोई भी नमूना वॉइस नोट दबाइए और पूरी प्रक्रिया अपनी आँखों से देखिए। न माइक चाहिए, न साइन-अप। | कोणतीही नमुना व्हॉइस नोट दाबा आणि पूर्ण प्रक्रिया स्वतः पाहा. माइक किंवा साइन-अप लागत नाही. |  |
+| `home.try_intro` | Tap a sample voice note to start the real flow. No microphone or sign-up needed. | किसी भी नमूना वॉइस नोट पर टैप कीजिए, और पूरी प्रक्रिया शुरू हो जाएगी। | कोणत्याही नमुना व्हॉइस नोटवर टॅप करा, आणि संपूर्ण प्रक्रिया सुरू होईल. |  |
 | `home.try_en` | Asha describes her home bakery in English. | आशा अंग्रेज़ी में अपनी होम बेकरी के बारे में बताती हैं। | आशा इंग्रजीत तिच्या होम बेकरीबद्दल सांगते. |  |
 | `home.try_hi` | Asha describes her home bakery in Hindi. | आशा हिंदी में अपनी होम बेकरी के बारे में बताती हैं। | आशा हिंदीत तिच्या होम बेकरीबद्दल सांगते. |  |
 | `home.try_mr` | Asha describes her home bakery in Marathi. | आशा मराठी में अपनी होम बेकरी के बारे में बताती हैं। | आशा मराठीत तिच्या होम बेकरीबद्दल सांगते. |  |
@@ -115,8 +115,8 @@ stored, how long, and the right to delete). Please read them first.
 | `start.intro` | Choose how you want to tell us. Speak in Marathi, Hindi or English, for up to 2 minutes: what you sell, your prices, your area and your WhatsApp number. | बताने का तरीका चुनिए। मराठी, हिंदी या अंग्रेज़ी में 2 मिनट तक बोलिए: आपका सामान या सेवा, दाम, इलाका और WhatsApp नंबर। | सांगायची पद्धत निवडा. मराठी, हिंदी किंवा इंग्रजीत 2 मिनिटांपर्यंत बोला: तुमचा माल किंवा सेवा, दर, भाग आणि WhatsApp नंबर. |  |
 | `start.language` | Which language will you use? | बोलने की भाषा | बोलण्याची भाषा |  |
 | `start.record` | Record a voice note | वॉइस नोट रिकॉर्ड करें | व्हॉइस नोट रेकॉर्ड करा |  |
-| `start.record_hint` | Tap to start. Tap again to stop and send. Up to 2 minutes. | शुरू करने के लिए दबाइए। रोककर भेजने के लिए फिर दबाइए। 2 मिनट तक। | सुरू करण्यासाठी दाबा. थांबवून पाठवण्यासाठी पुन्हा दाबा. 2 मिनिटांपर्यंत. |  |
-| `start.recording` | Recording… tap to stop and send | रिकॉर्ड हो रहा है… रोककर भेजने के लिए दबाइए | रेकॉर्ड होत आहे… थांबवून पाठवण्यासाठी दाबा |  |
+| `start.record_hint` | Tap to start. Tap again to stop and send. Up to 2 minutes. | शुरू करने के लिए टैप कीजिए। रोककर भेजने के लिए फिर टैप कीजिए। 2 मिनट तक। | सुरू करण्यासाठी टॅप करा. थांबवून पाठवण्यासाठी पुन्हा टॅप करा. 2 मिनिटांपर्यंत. |  |
+| `start.recording` | Recording… tap to stop and send | रिकॉर्ड हो रहा है… रोककर भेजने के लिए टैप कीजिए | रेकॉर्ड होत आहे… थांबवून पाठवण्यासाठी टॅप करा |  |
 | `start.no_mic` | Recording is not available here. Please upload a voice note or type instead. | यहाँ रिकॉर्डिंग नहीं हो पाएगी। वॉइस नोट अपलोड कीजिए या टाइप कर दीजिए। | इथे रेकॉर्डिंग होऊ शकत नाही. कृपया व्हॉइस नोट अपलोड करा किंवा टाइप करा. |  |
 | `start.upload_voice` | Upload a voice note | वॉइस नोट अपलोड करें | व्हॉइस नोट अपलोड करा |  |
 | `start.upload_photo` | Photo of your price list or rate card | अपनी रेट लिस्ट या रेट कार्ड की फ़ोटो | तुमच्या दरपत्रकाचा किंवा रेट कार्डचा फोटो |  |
@@ -134,7 +134,7 @@ stored, how long, and the right to delete). Please read them first.
 | `wait.failed_title` | Something went wrong | कुछ गड़बड़ हो गई | काहीतरी चुकलं |  |
 | `wait.try_again` | Try again | फिर कोशिश करें | पुन्हा प्रयत्न करा |  |
 | `start.samples_title` | Try a sample | नमूना आज़माइए | नमुना वापरून पाहा |  |
-| `start.samples_intro` | One tap starts the real flow with a sample voice note. | एक बार दबाइए, और नमूना वॉइस नोट से पूरी प्रक्रिया शुरू हो जाएगी। | एकदा दाबा, आणि नमुना व्हॉइस नोटने पूर्ण प्रक्रिया सुरू होईल. |  |
+| `start.samples_intro` | One tap starts the real flow with a sample voice note. | टैप कीजिए, और नमूना वॉइस नोट से पूरी प्रक्रिया शुरू हो जाएगी। | टॅप करा, आणि नमुना व्हॉइस नोटने पूर्ण प्रक्रिया सुरू होईल. |  |
 | `start.own_title` | Or tell us about your business | या अपने व्यवसाय के बारे में बताइए | किंवा तुमच्या व्यवसायाबद्दल सांगा |  |
 | `start.opt_record` | Record | रिकॉर्ड करें | रेकॉर्ड करा |  |
 | `start.opt_record_hint` | Speak for up to 2 minutes | 2 मिनट तक बोलिए | 2 मिनिटांपर्यंत बोला |  |
@@ -221,7 +221,7 @@ stored, how long, and the right to delete). Please read them first.
 | `phone.required` | Please add a phone number, or choose that you don't want an order button, before going live. | लाइव करने से पहले फ़ोन नंबर जोड़िए, या चुनिए कि ऑर्डर बटन नहीं चाहिए। | लाइव्ह करण्याआधी फोन नंबर जोडा, किंवा ऑर्डर बटण नको असं निवडा. |  |
 | `confirm.saving` | Creating your website… | आपकी वेबसाइट बन रही है… | तुमची वेबसाइट तयार होत आहे… |  |
 | `already.title` | Your website is already created | आपकी वेबसाइट पहले ही बन चुकी है | तुमची वेबसाइट आधीच तयार झाली आहे |  |
-| `already.created` | Good news: your business was created the first time you pressed Confirm. | अच्छी खबर: पहली बार 'पक्की करें' दबाते ही आपका व्यवसाय बन गया था। | चांगली बातमी: पहिल्यांदा 'पक्की करा' दाबलं तेव्हाच तुमचा व्यवसाय तयार झाला. |  |
+| `already.created` | Good news: your business was created the first time you pressed Confirm. | अच्छी खबर: पहली बार 'पक्की करें' पर टैप करते ही आपका व्यवसाय बन गया था। | चांगली बातमी: पहिल्यांदा 'पक्की करा' वर टॅप केलं तेव्हाच तुमचा व्यवसाय तयार झाला. |  |
 | `already.shown_once` | Your private link and PIN were shown only once, on the previous screen, so nobody else can see them. We can't show them again. | आपका निजी लिंक और PIN सिर्फ़ एक बार, पिछली स्क्रीन पर दिखाया गया था, ताकि कोई और उसे न देख सके। हम उसे दोबारा नहीं दिखा सकते। | तुमची खासगी लिंक आणि PIN फक्त एकदा, आधीच्या स्क्रीनवर, दाखवले होते म्हणजे दुसरे कोणी ते पाहू शकणार नाही. आम्ही ते पुन्हा दाखवू शकत नाही. |  |
 | `already.lost_title` | Didn't save your link and PIN? | लिंक और PIN सेव नहीं किया? | लिंक आणि PIN जतन केले नाहीत? |  |
 | `already.lost` | Write to us with your business name. We will check it's you by calling the phone number on your website, then give you a new link and PIN. The old ones will stop working. | अपने व्यवसाय के नाम के साथ हमें लिखिए। आपकी वेबसाइट पर दिए फ़ोन नंबर पर कॉल करके हम पक्का करेंगे कि यह आप ही हैं, फिर नया लिंक और PIN देंगे। पुराने लिंक और PIN काम करना बंद कर देंगे। | तुमच्या व्यवसायाच्या नावासह आम्हाला लिहा. तुमच्या वेबसाइटवरच्या फोन नंबरवर कॉल करून आम्ही खात्री करू की तुम्हीच आहात, मग नवीन लिंक आणि PIN देऊ. जुनी लिंक आणि PIN चालणार नाहीत. |  |
@@ -349,7 +349,7 @@ stored, how long, and the right to delete). Please read them first.
 | `score.check.content_time` | Main content appears quickly | मुख्य जानकारी जल्दी दिखती है | मुख्य माहिती लवकर दिसते |  |
 | `score.check.page_weight` | Page is light | पेज हल्का है | पान हलके आहे |  |
 | `score.check.cta_above_fold` | Order button visible on a phone | फ़ोन पर ऑर्डर बटन दिखता है | फोनवर ऑर्डर बटण दिसते |  |
-| `score.check.tap_targets` | Buttons are easy to tap | बटन आसानी से दबते हैं | बटणे सहज दाबता येतात |  |
+| `score.check.tap_targets` | Buttons are easy to tap | बटन आसानी से दबते हैं | बटणे सहज टॅप करता येतात |  |
 | `score.check.no_sideways_scroll` | No sideways scrolling on a phone | फ़ोन पर दाएँ-बाएँ स्क्रॉल नहीं | फोनवर आडवे स्क्रोल नाही |  |
 | `score.check.laptop_no_overflow` | Fits a laptop screen | लैपटॉप स्क्रीन में ठीक आता है | लॅपटॉप स्क्रीनमध्ये नीट बसते |  |
 | `score.check.language_clarity` | Price, delivery, contact and ordering are clear | दाम, डिलीवरी, संपर्क और ऑर्डर साफ़ हैं | दर, डिलिव्हरी, संपर्क आणि ऑर्डर स्पष्ट आहेत |  |
@@ -365,7 +365,7 @@ stored, how long, and the right to delete). Please read them first.
 | `score.reason.cta_visible` | On a phone, the order button is visible without scrolling. | फ़ोन पर ऑर्डर बटन बिना स्क्रॉल किए दिखता है। | फोनवर ऑर्डर बटण स्क्रोल न करता दिसते. |  |
 | `score.reason.cta_below_fold` | On a phone, customers have to scroll to see the order button. | फ़ोन पर ऑर्डर बटन देखने के लिए ग्राहकों को स्क्रॉल करना पड़ता है। | फोनवर ऑर्डर बटण पाहण्यासाठी ग्राहकांना स्क्रोल करावे लागते. |  |
 | `score.reason.cta_missing` | There is no order button. | कोई ऑर्डर बटन नहीं है। | ऑर्डर बटण नाही. |  |
-| `score.reason.tap_targets_ok` | Every button and link is big enough to tap. | हर बटन और लिंक दबाने लायक बड़ा है। | प्रत्येक बटण आणि लिंक दाबण्याइतके मोठे आहे. |  |
+| `score.reason.tap_targets_ok` | Every button and link is big enough to tap. | हर बटन और लिंक टैप करने लायक बड़ा है। | प्रत्येक बटण आणि लिंक टॅप करण्याइतके मोठे आहे. |  |
 | `score.reason.tap_targets_small` | {count} buttons or links are smaller than 44 pixels. | {count} बटन या लिंक 44 पिक्सेल से छोटे हैं। | {count} बटणे किंवा लिंक 44 पिक्सेलपेक्षा लहान आहेत. |  |
 | `score.reason.sideways_ok` | The page does not scroll sideways on a phone. | फ़ोन पर पेज दाएँ-बाएँ स्क्रॉल नहीं होता। | फोनवर पान आडवे स्क्रोल होत नाही. |  |
 | `score.reason.sideways_bad` | The page scrolls sideways on a phone. | फ़ोन पर पेज दाएँ-बाएँ स्क्रॉल होता है। | फोनवर पान आडवे स्क्रोल होते. |  |
@@ -399,7 +399,7 @@ stored, how long, and the right to delete). Please read them first.
 | `fix.content_time` | Lighter photos help your page open faster. Toran can do this for you. | हल्की फ़ोटो से पेज जल्दी खुलता है। Toran यह आपके लिए कर सकता है। | हलक्या फोटोंमुळे पान लवकर उघडते. Toran हे तुमच्यासाठी करू शकतो. |  |
 | `fix.page_weight` | Lighter photos make your page smaller. Toran can do this for you. | हल्की फ़ोटो से पेज छोटा होता है। Toran यह आपके लिए कर सकता है। | हलक्या फोटोंमुळे पान लहान होते. Toran हे तुमच्यासाठी करू शकतो. |  |
 | `fix.cta_above_fold` | Move the order button higher so customers see it first. Toran can do this for you. | ऑर्डर बटन ऊपर रखिए, ताकि ग्राहक उसे सबसे पहले देखें। Toran यह आपके लिए कर सकता है। | ऑर्डर बटण वर ठेवा म्हणजे ग्राहकांना ते आधी दिसेल. Toran हे तुमच्यासाठी करू शकतो. |  |
-| `fix.tap_targets` | Bigger buttons are easier to tap. Toran can do this for you. | बड़े बटन दबाने में आसान होते हैं। Toran यह आपके लिए कर सकता है। | मोठी बटणे दाबायला सोपी असतात. Toran हे तुमच्यासाठी करू शकतो. |  |
+| `fix.tap_targets` | Bigger buttons are easier to tap. Toran can do this for you. | बड़े बटन टैप करने में आसान होते हैं। Toran यह आपके लिए कर सकता है। | मोठी बटणे टॅप करायला सोपी असतात. Toran हे तुमच्यासाठी करू शकतो. |  |
 | `fix.no_sideways_scroll` | The page should fit the phone screen. Toran can adjust the layout. | पेज फ़ोन की स्क्रीन में आना चाहिए। Toran लेआउट ठीक कर सकता है। | पान फोनच्या स्क्रीनमध्ये बसायला हवे. Toran मांडणी दुरुस्त करू शकतो. |  |
 | `fix.laptop_no_overflow` | The page should fit a laptop screen. Toran can adjust the layout. | पेज लैपटॉप की स्क्रीन में आना चाहिए। Toran लेआउट ठीक कर सकता है। | पान लॅपटॉपच्या स्क्रीनमध्ये बसायला हवे. Toran मांडणी दुरुस्त करू शकतो. |  |
 | `fix.language_clarity` | Show your product names in each page's language. Toran can add translations for you to approve. | हर पेज की भाषा में अपने सामान के नाम दिखाइए। Toran अनुवाद जोड़ सकता है, जिन्हें आप मंज़ूर करेंगे। | प्रत्येक पानाच्या भाषेत तुमच्या उत्पादनांची नावे दाखवा. Toran भाषांतरे जोडू शकतो, ती तुम्ही मंजूर कराल. |  |
@@ -422,7 +422,7 @@ stored, how long, and the right to delete). Please read them first.
 | `agent.failed` | Toran could not finish this time. Your draft and your live site are safe. Please try again later. | Toran इस बार काम पूरा नहीं कर पाया। आपका ड्राफ्ट और लाइव साइट सुरक्षित हैं। थोड़ी देर बाद फिर कोशिश कीजिए। | Toran या वेळी पूर्ण करू शकला नाही. तुमचा ड्राफ्ट आणि लाइव्ह साइट सुरक्षित आहेत. कृपया नंतर पुन्हा प्रयत्न करा. |  |
 | `agent.busy` | Toran is already working on your draft. | Toran पहले से आपके ड्राफ्ट पर काम कर रहा है। | Toran आधीच तुमच्या ड्राफ्टवर काम करत आहे. |  |
 | `agent.daily_limit` | Toran has worked on your draft a few times today. Please try again tomorrow. | Toran आज कुछ बार आपके ड्राफ्ट पर काम कर चुका है। कल फिर कोशिश कीजिए। | Toran ने आज काही वेळा तुमच्या ड्राफ्टवर काम केले आहे. कृपया उद्या पुन्हा प्रयत्न करा. |  |
-| `agent.already_live` | These changes are already on your live site. Use undo on your site instead. | ये बदलाव पहले से आपकी लाइव साइट पर हैं। इन्हें हटाने के लिए साइट पर 'पिछली बार लाइव किया हुआ वापस लें' दबाइए। | हे बदल आधीच तुमच्या लाइव्ह साइटवर आहेत. ते काढण्यासाठी साइटवर 'मागच्या वेळी लाइव्ह केलेलं मागे घ्या' दाबा. |  |
+| `agent.already_live` | These changes are already on your live site. Use undo on your site instead. | ये बदलाव पहले से आपकी लाइव साइट पर हैं। इन्हें हटाने के लिए साइट पर 'पिछली बार लाइव किया हुआ वापस लें' पर टैप कीजिए। | हे बदल आधीच तुमच्या लाइव्ह साइटवर आहेत. ते काढण्यासाठी साइटवर 'मागच्या वेळी लाइव्ह केलेलं मागे घ्या' वर टॅप करा. |  |
 | `agent.see_thinking` | See how Toran thinks | देखें Toran कैसे सोचता है | Toran कसा विचार करतो ते पाहा |  |
 | `agent.panel_title` | How Toran improved your draft | Toran ने आपका ड्राफ्ट कैसे बेहतर किया | Toran ने तुमचा ड्राफ्ट कसा सुधारला |  |
 | `agent.before` | Before | पहले | आधी |  |
@@ -463,7 +463,7 @@ stored, how long, and the right to delete). Please read them first.
 | `agent.did.layout.photo_after_text` | Put your photo below your name and order button on phones | फ़ोन पर आपकी फ़ोटो नाम और ऑर्डर बटन के नीचे रखी | फोनवर तुमचा फोटो नाव आणि ऑर्डर बटणाच्या खाली ठेवला |  |
 | `agent.why.layout.photo_after_text` | So the order button is the first thing a phone shows. | ताकि फ़ोन पर सबसे पहले ऑर्डर बटन दिखे। | म्हणजे फोनवर सर्वात आधी ऑर्डर बटण दिसेल. |  |
 | `agent.did.layout.large_buttons` | Made the buttons bigger | बटन बड़े किए | बटणे मोठी केली |  |
-| `agent.why.layout.large_buttons` | So they are easy to tap on any phone. | ताकि किसी भी फ़ोन पर उन्हें दबाना आसान हो। | म्हणजे कोणत्याही फोनवर ती दाबणे सोपे जाईल. |  |
+| `agent.why.layout.large_buttons` | So they are easy to tap on any phone. | ताकि किसी भी फ़ोन पर उन्हें टैप करना आसान हो। | म्हणजे कोणत्याही फोनवर ती टॅप करणे सोपे जाईल. |  |
 | `agent.did.layout.section_order` | Changed the order of the sections | हिस्सों का क्रम बदला | विभागांचा क्रम बदलला |  |
 | `agent.why.layout.section_order` | So the most useful information comes first. | ताकि सबसे काम की जानकारी पहले आए। | म्हणजे सर्वात उपयोगी माहिती आधी येईल. |  |
 | `agent.did.images` | Made your photos lighter | आपकी फ़ोटो हल्की कीं | तुमचे फोटो हलके केले |  |
