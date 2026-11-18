@@ -52,6 +52,7 @@ CACHE = timedelta(hours=1)
 CLI_TIMEOUT_SECONDS = 20
 PARALLEL_LOOKUPS = 4
 JOB_TIMEOUT_SECONDS = 180
+STUCK_GRACE_SECONDS = 30  # time for a finishing job to write its result after the timeout
 USD_INR = 84.0  # a rough rate, shown only as "about ₹"
 MAX_TOKENS = 400
 GDDY_FIXTURES = FIXTURE_DIR.parent / "gddy"
@@ -268,12 +269,13 @@ def latest_lookup(session: Session, business_id: int) -> DomainLookup | None:
         .order_by(col(DomainLookup.id).desc())
     ).first()
     if lookup is not None and _stuck(lookup):
-        lookup.status = "unavailable"
+        # Shown as the friendly "not available right now" note, never "Checking..." for ever;
+        # "timed_out" (not reused) lets a new lookup start when she tries again.
+        lookup.status = "timed_out"
         session.add(lookup)
         session.commit()
         session.refresh(lookup)
         logger.warning("domain_lookup_closed", extra={"business_id": business_id})
-        return None
     return lookup
 
 
@@ -283,7 +285,7 @@ def _stuck(lookup: DomainLookup) -> bool:
         return False
     created = lookup.created_at
     created = created if created.tzinfo else created.replace(tzinfo=UTC)
-    return utcnow() - created > timedelta(seconds=JOB_TIMEOUT_SECONDS * 2)
+    return utcnow() - created > timedelta(seconds=JOB_TIMEOUT_SECONDS + STUCK_GRACE_SECONDS)
 
 
 def fresh(lookup: DomainLookup | None) -> bool:
@@ -305,7 +307,7 @@ def start_lookup(engine: Engine, business_id: int) -> int:
         if business is None or business.deleted_at is not None:
             raise AppError("error.not_found", status_code=404)
         current = latest_lookup(session, business_id)
-        if current is not None and fresh(current):
+        if current is not None and current.status != "timed_out" and fresh(current):
             assert current.id is not None  # noqa: S101
             return current.id
         lookup = DomainLookup(business_id=business_id, status="running")

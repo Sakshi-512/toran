@@ -1,5 +1,6 @@
 {% extends "app/base.html" %}
-{% block head %}{% if job.status in ('queued', 'running') %}<meta http-equiv="refresh" content="3">{% endif %}{% endblock %}
+{% from "app/_auto_refresh.html" import auto_refresh with context %}
+{% block head %}{% if job.status in ('queued', 'running') %}{{ auto_refresh(3) }}{% endif %}{% endblock %}
 {% block title %}{{ t('score.title', lang) }} · {{ app_name }}{% endblock %}
 {% block content %}
 <h1>{{ t('score.title', lang) }}</h1>

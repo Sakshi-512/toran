@@ -345,7 +345,7 @@ def test_stuck_domain_lookup_does_not_block(engine: Engine) -> None:
         stuck_id = stuck.id
     assert godaddy.start_lookup(engine, business_id) != stuck_id
     with Session(engine) as session:
-        assert session.get(DomainLookup, stuck_id).status == "unavailable"  # type: ignore[union-attr]
+        assert session.get(DomainLookup, stuck_id).status == "timed_out"  # type: ignore[union-attr]
 
 
 # --- 7: a starting worker never puts another worker's running job back in the queue ---

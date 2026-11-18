@@ -1,5 +1,6 @@
 {% extends "app/base.html" %}
-{% block head %}{% if agent.state in ('queued', 'running') %}<meta http-equiv="refresh" content="5">{% endif %}{% endblock %}
+{% from "app/_auto_refresh.html" import auto_refresh with context %}
+{% block head %}{% if agent.state in ('queued', 'running') %}{{ auto_refresh(5) }}{% endif %}{% endblock %}
 {% block title %}{{ t('agent.panel_title', lang) }} · {{ business.display_name }}{% endblock %}
 {% block content %}
 <p><a class="text-link" href="{{ '/' if public else '/owner' }}">{{ t('home.back' if public else 'owner.back', lang) }}</a></p>

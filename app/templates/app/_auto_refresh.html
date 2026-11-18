@@ -1,0 +1,7 @@
+{# Reload while a background job runs. The script works with a #fragment in the address;
+   without JavaScript, the fallback refreshes to the address without the fragment. #}
+{% macro auto_refresh(seconds=5) -%}
+<meta name="auto-refresh" content="{{ seconds }}">
+<noscript><meta http-equiv="refresh" content="{{ seconds }}; url={{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}"></noscript>
+<script src="{{ static_url('autorefresh.js') }}" defer></script>
+{%- endmacro %}

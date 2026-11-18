@@ -1,5 +1,6 @@
 {% extends "app/base.html" %}
-{% block head %}{% if (scoring and scoring.state != "failed") or (agent and agent.state in ('queued', 'running')) or (domains_lookup and domains_lookup.status == 'running') %}<meta http-equiv="refresh" content="5">{% endif %}{% endblock %}
+{% from "app/_auto_refresh.html" import auto_refresh with context %}
+{% block head %}{% if (scoring and scoring.state != "failed") or (agent and agent.state in ('queued', 'running')) or (domains_lookup and domains_lookup.status == 'running') %}{{ auto_refresh(5) }}{% endif %}{% endblock %}
 {% block title %}{{ business.display_name }} · {{ app_name }}{% endblock %}
 {% block content %}
 <h1>{{ business.display_name }} <span class="status status-{{ business.status }}">{{ t('owner.status.' ~ business.status, lang) }}</span></h1>
@@ -141,8 +142,11 @@
   <p class="muted">{{ t('domains.unavailable', lang) }}</p>
   {% elif domains_lookup and domains_lookup.status == 'running' %}
   <p class="progress" role="status" aria-live="polite">{{ t('domains.checking', lang) }}</p>
-  {% elif domains_lookup and domains_lookup.status == 'unavailable' %}
+  {% elif domains_lookup and domains_lookup.status in ('unavailable', 'timed_out') %}
   <p class="muted">{{ t('domains.unavailable', lang) }}</p>
+  {% if domains_lookup.status == 'timed_out' %}
+  <form method="post" action="/owner/domains"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('domains.find', lang) }}</button></form>
+  {% endif %}
   {% elif domains_lookup %}
   {% if domains_offers %}
   <p>{{ t('domains.intro_found', lang) }}</p>
