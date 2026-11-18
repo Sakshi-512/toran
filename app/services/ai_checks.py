@@ -110,7 +110,7 @@ class AIResult:
 
 
 SYSTEM_PROMPT = """You review small business websites in India the way their customers would.
-Many owners are women running a business from home; customers read the site on a phone in
+Many owners run a small business from home; customers read the site on a phone in
 English, Hindi or Marathi.
 
 You receive the visible text of the site's English, Hindi and Marathi pages, a phone screenshot

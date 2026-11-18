@@ -1,12 +1,14 @@
 """Web address suggestions: Claude proposes names, GoDaddy checks them (gddy CLI).
 
-Claude Haiku suggests SUGGESTIONS short Latin-letter names from her confirmed profile (her text
+Claude Haiku suggests SUGGESTIONS short Latin-letter names from the owner's confirmed profile (the
+owner's text
 is data, never instructions). Each name is checked for .in and .com with
 `gddy domain available <domain> --check-type full --json` (first-year price, before tax).
 On the server the CLI authenticates with GDDY_PAT; locally it uses the existing login.
 
-Nothing is bought here. Her "I want this one" records a DomainRequest and emails the team, who
-buy it on godaddy.com and point DNS at her site (rule 2). Lookups run as background jobs and
+Nothing is bought here. The owner's "I want this one" records a DomainRequest and emails the team,
+who
+buy it on godaddy.com and point DNS at the owner's site (rule 2). Lookups run as background jobs and
 are cached for an hour per business, so a business makes at most one lookup an hour (the
 routes are rate limited too). Every step goes to the action log as a tool call.
 Names come from saved Claude answers when CLAUDE_MOCK=1, and lookups from saved GoDaddy answers
@@ -229,7 +231,7 @@ def log_gddy_status(settings: Settings) -> GddyStatus:
 
 
 def suggest_names(client: ClaudeClient, business: Business, profile: BusinessProfile) -> list[str]:
-    """Claude Haiku's names for her business (validated)."""
+    """Claude Haiku's names for the owner's business (validated)."""
     details = {
         "name": profile.business_name or business.display_name,
         "type": profile.business_type,
@@ -270,7 +272,7 @@ def latest_lookup(session: Session, business_id: int) -> DomainLookup | None:
     ).first()
     if lookup is not None and _stuck(lookup):
         # Shown as the friendly "not available right now" note, never "Checking..." for ever;
-        # "timed_out" (not reused) lets a new lookup start when she tries again.
+        # "timed_out" (not reused) lets a new lookup start when the owner tries again.
         lookup.status = "timed_out"
         session.add(lookup)
         session.commit()
@@ -301,7 +303,7 @@ def fresh(lookup: DomainLookup | None) -> bool:
 
 
 def start_lookup(engine: Engine, business_id: int) -> int:
-    """Her "Show me web addresses" button: reuse a fresh lookup or queue a new one."""
+    """The owner's "Show me web addresses" button: reuse a fresh lookup or queue a new one."""
     with Session(engine) as session:
         business = session.get(Business, business_id)
         if business is None or business.deleted_at is not None:
@@ -431,12 +433,12 @@ def domains_runner(engine: Engine, settings: Settings) -> Runner:
     return runner
 
 
-# --- what her page shows, and her request ---
+# --- what the owner's page shows, and the owner's request ---
 
 
 @dataclass(frozen=True)
 class Offer:
-    """One available web address, as shown to her."""
+    """One available web address, as shown to the owner."""
 
     domain: str
     price_usd: float
@@ -456,7 +458,7 @@ def offers(lookup: DomainLookup | None) -> list[Offer]:
 
 
 def tool_calls(session: Session, lookup_id: int) -> list[ActionLog]:
-    """The lookup's steps, for her "how Toran found these" view."""
+    """The lookup's steps, for the owner's "how Toran found these" view."""
     return list(
         session.exec(
             select(ActionLog)
@@ -467,7 +469,7 @@ def tool_calls(session: Session, lookup_id: int) -> list[ActionLog]:
 
 
 def open_request(session: Session, business_id: int) -> DomainRequest | None:
-    """Her web address request that the team has not finished yet."""
+    """The owner's web address request that the team has not finished yet."""
     return session.exec(
         select(DomainRequest).where(
             DomainRequest.business_id == business_id, DomainRequest.status == "requested"
@@ -476,7 +478,7 @@ def open_request(session: Session, business_id: int) -> DomainRequest | None:
 
 
 def request_domain(engine: Engine, business_id: int, domain: str) -> int:
-    """Her "I want this one": record it and email the team. Nothing is bought here."""
+    """The owner's "I want this one": record it and email the team. Nothing is bought here."""
     from app.services.mail_jobs import queue_team_email
 
     with Session(engine) as session:
@@ -500,7 +502,7 @@ def request_domain(engine: Engine, business_id: int, domain: str) -> int:
 
 
 def domains_context(session: Session, settings: Settings, business_id: int) -> dict[str, Any]:
-    """The "Get your own web address" card on her page."""
+    """The "Get your own web address" card on the owner's page."""
     lookup = latest_lookup(session, business_id)
     usable = gddy_status(settings) != "missing"
     return {

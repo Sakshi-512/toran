@@ -202,7 +202,7 @@ def test_gallery_needs_her_separate_yes_and_samples_are_labelled(
     demo_id, _, _ = _business(engine, slug="demo-bakery", is_sample=True, source="seed")
     _set(engine, demo_id, status="live", display_name="Demo Bakery")
     page = client.get("/").text
-    assert "Meera Tiffins" not in page  # live, but she has not said yes
+    assert "Meera Tiffins" not in page  # live, but the owner has not said yes
     assert "Demo businesses" in page and "Demo Bakery" in page
     assert client.get("/gallery/meera-tiffins.webp").status_code == 404
     _set(engine, real_id, gallery_opt_in=True)
@@ -217,7 +217,7 @@ def test_gallery_needs_her_separate_yes_and_samples_are_labelled(
 
 
 def test_gallery_choice_on_her_owner_page(client: TestClient, engine: Engine) -> None:
-    business_id, token, pin = _business(engine, slug="her-shop")
+    business_id, token, pin = _business(engine, slug="owner-shop")
     link = f"/o/{token}"
     csrf = re.search(rf'name="{CSRF_FIELD}" value="([^"]+)"', client.get(link).text).group(1)  # type: ignore[union-attr]
     client.post(link, data={CSRF_FIELD: csrf, "pin": pin})

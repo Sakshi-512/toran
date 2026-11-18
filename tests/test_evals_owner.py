@@ -81,7 +81,7 @@ def test_prices_checked_exactly(engine: Engine) -> None:
         ]
     )
     result = score_case(CASE, wrong, "Chocolate cake 1250", stt_used=False, client=client)
-    failed = [c for c in result.checks if not c.ok]
+    failed = [c for c in result.checks if not c.ok and c.name.startswith("products")]
     assert [c.name for c in failed] == ["products[Chocolate cake].options[].price"]
     assert failed[0].cause == "Claude"
 
@@ -205,3 +205,89 @@ def test_eval_cases_are_valid_json() -> None:
     for path in CASES.glob("*.json"):
         case = json.loads(path.read_text("utf-8"))
         assert {"id", "reviewed", "input", "expected"} <= set(case)
+
+
+# --- alternative answer keys (products_any_of) ----------------------------------------------------
+
+
+def _beauty(products: list[dict[str, object]]) -> BusinessProfile:
+    return BusinessProfile.model_validate(
+        {"business_name": "Sunita", "business_type": "beauty", "products": products}
+    )
+
+
+def _service(name: str, *options: tuple[str, int]) -> dict[str, object]:
+    return {
+        "name": name,
+        "unit": "service",
+        "options": [{"label": label, "price": price} for label, price in options],
+    }
+
+
+BEAUTY = json.loads((CASES / "beauty-mr-codemix.json").read_text(encoding="utf-8"))
+BRIDAL = _service("Bridal makeup", ("", 8000))
+
+
+@pytest.mark.parametrize(
+    "products",
+    [
+        [
+            _service("Threading", ("", 40)),
+            _service("Facial", ("Fruit facial", 600), ("Gold facial", 1200)),
+            BRIDAL,
+        ],
+        [
+            _service("Threading", ("", 40)),
+            _service("Fruit facial", ("", 600)),
+            _service("Gold facial", ("", 1200)),
+            BRIDAL,
+        ],
+    ],
+)
+def test_either_grouping_of_the_facials_passes(
+    engine: Engine, products: list[dict[str, object]]
+) -> None:
+    from app.services.claude_client import ClaudeClient
+
+    result = score_case(
+        BEAUTY, _beauty(products), None, stt_used=False, client=ClaudeClient(get_settings(), engine)
+    )
+    assert [c.name for c in result.checks if not c.ok and c.name.startswith("products")] == []
+
+
+@pytest.mark.parametrize(
+    "products",
+    [
+        [
+            _service("Threading", ("", 40)),
+            _service("Facial", ("Fruit facial", 650), ("Gold facial", 1200)),
+            BRIDAL,
+        ],
+        [
+            _service("Threading", ("", 40)),
+            _service("Fruit facial", ("", 600)),
+            _service("Gold facial", ("", 1100)),
+            BRIDAL,
+        ],
+    ],
+)
+def test_a_wrong_price_fails_in_either_grouping(
+    engine: Engine, products: list[dict[str, object]]
+) -> None:
+    from app.services.claude_client import ClaudeClient
+
+    result = score_case(
+        BEAUTY, _beauty(products), None, stt_used=False, client=ClaudeClient(get_settings(), engine)
+    )
+    failed = [c for c in result.checks if not c.ok and c.name.startswith("products")]
+    assert len(failed) == 1 and failed[0].name.endswith(".price")
+
+
+def test_a_missing_facial_is_not_hidden_by_the_other_grouping(engine: Engine) -> None:
+    from app.services.claude_client import ClaudeClient
+
+    products = [_service("Threading", ("", 40)), _service("Fruit facial", ("", 600)), BRIDAL]
+    result = score_case(
+        BEAUTY, _beauty(products), None, stt_used=False, client=ClaudeClient(get_settings(), engine)
+    )
+    assert any(not c.ok and "Gold facial" in c.name for c in result.checks)

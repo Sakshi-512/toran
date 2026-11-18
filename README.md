@@ -1,96 +1,185 @@
 # Toran
 
-Toran is a voice-first agent that takes a small business owner from idea to launch. She describes her business by voice (Marathi, Hindi or English) or sends a photo of her price list. Claude builds a confirmed business profile and publishes a mobile-first website. A real browser then tests the site the way her customers would.
+**Speak your business. Get your website.** A home baker, tailor or beauty parlour owner describes the business by voice in Marathi, Hindi or English, and Toran builds a mobile-first website, tests it like a customer would, and improves it before the owner says yes.
 
-> Status: intake, site builder, customer tests, Readiness Score, publishing with undo and the agent fix loop work. GoDaddy domain suggestions come next.
+**Try it, no sign-up:** https://gettoran.com → tap one of the three sample voice notes.
 
-## Who it's for
+**Headline:** a voice note becomes a tested draft website in minutes, and in a real run (real Claude, real browser) Toran's agent raised a demo draft's Readiness Score from 85 to 87 on its own, for about $0.24. Real-world accuracy: <!-- TODO(Sakshi): fill in --> **[to be filled in]**.
 
-Women running businesses from home in India: home bakers, beauty parlours, tailors and tutors. It works for any small business.
+---
 
-## What it does
+## What it is and who it's for
 
-See `CLAUDE.md` for the full flow. Built so far:
+Toran is a voice-first agent that takes a small business owner from idea to launch. It is for small business owners in India who find websites and technology a barrier, starting with home-based businesses: home bakers, beauty parlours, tailors and tutors. If you can describe your business in Marathi, Hindi or English, Toran can put it online. Our first real users are women running businesses from home in Pune.
 
-- **Website builder** (`app/services/sitegen.py`): a confirmed `BusinessProfile` plus one of three themes (warm, elegant, simple) becomes a static, mobile-first site with separate English, Hindi and Marathi pages (`/`, `/hi/`, `/mr/`). Business text comes only from the profile. Prices are formatted in code, never translated. Anything that looks like a home address is left off and returned as a warning for the owner.
-- **Business sites** are served at `https://<slug>.BASE_DOMAIN` (or `http://<slug>.localhost:8000` in development). They load no JavaScript and no external files, use self-hosted Mukta and Rozha One fonts, and stay under 500 KB per page.
-- **Enquiry form** on every site posts to `/api/enquiry/<slug>` and is saved as an `Enquiry`. It is protected by an exact Origin check, a spam trap and a rate limit. Email delivery comes later.
-- **Privacy page** at `/privacy` in all three languages.
-- **Intake** (`/start`, `app/services/intake.py`, `app/services/extract.py`): she records a voice note (up to 2 minutes), uploads one, sends a photo of her price list, or types. Speech-to-text and extraction run as a background job. Claude Sonnet turns the transcript or photo into a draft profile; code then removes any price or phone number she never said (Devanagari digits and Indian comma formats are normalised first), clears anything that looks like a home address, and turns both into questions. Photo prices are kept but marked "please check" on the cards. She edits one card per detail, picks a readable web address (Devanagari names are transliterated, for example `sunita-beauty-parlour`), adds photos if she likes, and confirms. That creates the business (draft), profile version 1 and her consent record, and shows her private link and 4-digit PIN once (both stored only as hashes; 5 wrong PINs lock the link for 15 minutes).
-- **Draft, score, publish** (`app/services/publish.py`, owner page): confirming builds a draft site (warm style; she can compare all three styles with her own details), which only she can preview. The draft is tested and scored in the background; her page shows her place in the queue, then the Readiness Score report in her language. "Make my site live" leads to a confirmation screen; only her yes publishes. Every publish is saved as a version: "Undo last publish" restores the previous one (undoing the first returns to draft), and she can take the site offline. The live site is tested too, and her page keeps the score history. The time from voice note to draft scored (system time) and to live site (including her decisions) is stored per intake and reported by `make accuracy`. Businesses made from the sample voice notes are marked Sample and deleted with all their data after 7 days.
-- **Accuracy**: each intake stores Claude's first guess, the transcript and every correction. `make accuracy` reports field and price accuracy and the correction rate across real businesses (samples excluded). `make eval` reruns extraction on reviewed cases in `evals/` and checks prices and numbers exactly in code; see `evals/README.md`.
-- **Speech-to-text** (`app/services/stt.py`): Sarvam AI through its official `sarvamai` SDK, using Saaras v4 in codemix mode (native script, English words kept in English, numbers as digits), with optional key terms such as product names. Short notes use the REST endpoint; notes it turns away as too long (voice notes are usually 1 to 2 minutes) go to Sarvam's batch API. Audio is never logged, and is only written to a temporary folder for the batch upload, then deleted. Duration and an **estimated** cost (₹0.49 per minute) are stored per business. `STT_PROVIDER=mock` uses saved transcripts; `none` turns voice off and owners type. Try it at `/dev/stt` (development only).
-- **Email** (`app/services/mailer.py`): our GoDaddy mailbox over SMTP (SSL on port 465). The home page contact form (CSRF, spam trap, 5 per minute and 20 per hour) and every business enquiry are saved first, then emailed to `CONTACT_TO_EMAIL` by a background job. A contact form message with an email address sets it as Reply-To. Errors send at most one alert email per error type per hour. Without SMTP settings, mail goes to an in-memory outbox, so tests never send real email.
-- **Customer tests and Readiness Score** (`app/services/customer_tests.py`, `app/services/score.py`): real Chromium visits a site as a customer would: a phone at 360 px, a laptop at 1280 px, and a slow network (1.5 Mbps, 300 ms latency). Each check runs three times and the middle result counts. The score follows `docs/score.md`. Every item records whether it was measured or AI-assessed, and AI-assessed items show as pending until the AI checks exist, so the report reads "X of Y possible so far". Runs happen as background jobs (at most 2 Chromium instances, a 180 s timeout, one retry), and each run is stored with the profile version and a hash of the exact site files tested.
-- **Agent fix loop and "how it thinks"** (`app/services/agent.py`, `agent_tools.py`, `site_extras.py`; details in `docs/agent.md`): her "Let Toran improve my draft" button starts a background job. Each round, Claude Sonnet reads the latest score items and calls tools: `add_translation` (her confirmed product names, notes and size labels into English, Hindi or Marathi; numbers must match exactly, no prices, currency, phone numbers or links), `edit_layout` (main button first, photo after text, larger buttons, section order), `compress_images`, `ask_owner` (policy, notice needed, delivery areas, photos), `rebuild_draft` and `run_tests`. Every call is checked in code, and anything that would change a fact is rejected. Translations and layout are stored apart from her profile. The draft is rebuilt and re-tested after each round. The loop stops at 90, when a round brings no improvement (that round is rolled back), when only she can help, or after 5 rounds. Her page shows the score before and after and the main fixes, with "Approve these changes" leading to the publish confirmation and "Undo these changes". The panel (`/owner/agent/<id>`) shows each round in her language, with a detailed view for judges (Claude's reason, exact tool input, rejected calls, tokens, cost). Her answers to its questions are shown back to her and saved to her profile only after she confirms, then the draft is re-tested.
-- **Home page and /start** (`app/services/showcase.py`): the home page explains the product in one line, shows a real sample site in a phone frame (made by `make shots` from the bakery sample, with its Sample banner), and offers one-tap sample voice notes in three languages. Its numbers (AI cost of one full check, voice note to tested draft, accuracy on real voice notes with the sample size, from 2 real businesses) come only from real, non-mock data and are hidden until measured. "Before and after" shows the latest real agent run on a demo business, linking to a read-only public panel at `/demo/agent/<id>` (demo businesses only), and stays hidden until such a run exists. The gallery shows real businesses only when they are live and the owner said yes on her page (off by default); demo businesses are listed separately and labelled. `/start` puts the samples first, then four cards (record, upload a voice note, photo of a price list, type) where only the chosen one opens, with no new JavaScript.
-- **Web address suggestions** (`app/services/godaddy.py`): on her page, Claude Haiku suggests 6 short Latin-letter names from her profile, and each is checked for .in and .com with `gddy domain available <domain> --check-type full --json` (GDDY_PAT on the server, the existing login locally). Only available names are shown, with the first-year price in USD, about ₹ at a fixed rate, labelled "price before tax". Lookups run in the background, are cached for an hour per business, and every Claude and GoDaddy call is in the action log and her "How Toran found these" view. Nothing is bought in the app: "I want this one" records a request and emails the team, who buy it on godaddy.com and point DNS at her site. If the CLI is missing or fails, the section shows a friendly note. The Docker image installs a pinned gddy release (checksum verified) and `/health` reports whether it is installed. `GDDY_MOCK=1` uses saved GoDaddy answers, separately from `CLAUDE_MOCK`.
-- **Delete my site and data**: a confirmation screen with a permanent-deletion warning first, the full list of what goes, her PIN again, and a final button. It uses `delete_business_data`, takes the site offline at once, signs her out, shows a goodbye page and emails the team a note with no personal details.
-- **Translations**: every owner- and visitor-facing string is in `app/i18n/{en,hi,mr}.json`, written to address the owner as "you" with no gendered verb forms, in a friendly spoken Hindi and Marathi. `make i18n-sheet` writes `docs/translation-review.md` (key, English, Hindi, Marathi and a Fix column, in screen order) for a native speaker; `make i18n-apply file=<filled copy>` applies their fixes and refuses any that change a `{placeholder}` or number. Tests keep the three files' keys and placeholders identical.
-- **Sample businesses** use free Unsplash stock photos, always labelled "Sample photo" (credits in `docs/photo-credits.md`). Screenshots of each theme are in `docs/screenshots/`.
+1. The owner describes the business by voice (or sends a photo of the price list, or types).
+2. Claude turns it into a business profile. The owner checks each detail on simple cards; anything unclear becomes a question, never a guess.
+3. Toran builds a fast, three-language website (English, Hindi, Marathi) on `<business-name>.gettoran.com`.
+4. A real browser tests the site like a customer on a slow phone and gives a **Customer Readiness Score** (0 to 100).
+5. An agent improves a draft copy, re-tests it, and shows the owner the score before and after. Nothing goes live until the owner approves.
+6. Toran can suggest a web address with real GoDaddy prices; the team buys it only after the owner asks.
 
-## Dependencies
+## What to try (about 5 minutes)
 
-Direct dependencies are listed in `requirements.in` and `requirements-dev.in`. `make lock` compiles them with pip-tools into `requirements.txt` and `requirements-dev.txt`, which pin every package (including indirect ones) with hashes. Installs use `--require-hashes`.
+1. **Tap a sample voice note** on https://gettoran.com ("Try it in 3 languages"). No microphone or sign-up needed.
+2. **Confirm the cards**: check the details Toran heard, then press "Confirm my details". Save the private link and PIN it shows once.
+3. **Open the owner page** with that link and PIN, and look at the **draft score** and "See the full report" (each item says how to fix it).
+4. **Press "Let Toran improve my draft"**, wait for it to finish, then open **"See how Toran thinks"**: before and after first, then every round, tool call and score change, with "Details for judges".
+5. **Open a live demo site in another language**, for example https://asha-home-bakery.gettoran.com/mr/ or https://savitri-gruh-udyog.gettoran.com/hi/.
+
+## How it maps to the judging criteria
+
+| Criterion | Evidence | Where |
+| --- | --- | --- |
+| **Impact (35%)** | Built for small business owners in India who find technology a barrier, starting with home-based businesses (first real users: women running businesses from home in Pune); voice in Marathi, Hindi and English; sites readable in all three; real vs sample businesses tracked; accuracy measured on real voice notes; cost per business measured | `app/services/accuracy.py`, `scripts/accuracy_report.py`, `app/services/showcase.py` ("Measured on the live system"), real-world results below |
+| **Demo (35%)** | One-tap samples, no sign-up; the score improves visibly; "How Toran thinks" panel; friendly messages instead of errors (spend cap, Claude down, stuck jobs); works at 360 px to 1280 px | `app/templates/app/home.html`, `app/templates/app/owner_agent.html`, `tests/test_layout.py` |
+| **Tech Usage (15%)** | Claude agent loop with six guarded tools, vision (price-list photos), structured outputs, prompt caching, cost logging and a daily cap; GoDaddy CLI for live domain availability and prices, DNS, VPS and mailbox | "How it uses Claude" and "How it uses GoDaddy" below |
+| **Execution (15%)** | Layered FastAPI app (thin routes, services, swappable providers), Alembic migrations, 737 tests including real-Chromium layout and end-to-end checks, ruff, mypy, gitleaks, pip-audit, CI on every push, an independent code review with fixes | `docs/review.md`, `.github/workflows/ci.yml`, `tests/` |
 
 ## Architecture
 
-- FastAPI with thin routes in `app/routes/`; logic lives in `app/services/`.
-- SQLModel on SQLite (WAL mode), with Alembic migrations in `migrations/`.
-- All Claude calls go through `app/services/claude_client.py`, which handles mock mode, retries, prompt caching, cost logging and the daily spend cap (Asia/Kolkata days).
-- Owner-facing text is in `app/i18n/{en,hi,mr}.json`.
-- Security: signed sessions, CSRF tokens, rate limits by real client IP, security headers, upload checks that strip EXIF and GPS.
-- Logs are JSON lines with request IDs. Secrets are redacted and phone numbers show only the last 4 digits.
-- Deployment: Docker Compose (the app on the Playwright image, running as non-root) plus Caddy with on-demand TLS for business subdomains.
+```mermaid
+flowchart LR
+  phone["Owner's phone<br/>(and their customers)"] -->|HTTPS| caddy["Caddy<br/>HTTPS, on-demand TLS<br/>for business subdomains"]
+  caddy --> app["FastAPI app<br/>owner pages, intake,<br/>business sites"]
+  app --> db[("SQLite (WAL)<br/>profiles, versions,<br/>scores, action log")]
+  app --> files[("Site files<br/>draft / live / versions")]
+  app --> jobs["Background job workers<br/>intake · scoring · agent ·<br/>web addresses · email"]
+  jobs --> stt["Sarvam<br/>speech-to-text"]
+  jobs --> claude["Claude API"]
+  claude --> extract["Profile extraction<br/>(text and photo)"]
+  claude --> checks["AI-assessed checks<br/>(with screenshot)"]
+  claude --> agent["Agent loop: run_tests, compress_images,<br/>add_translation, edit_layout,<br/>ask_owner, rebuild_draft"]
+  jobs --> pw["Playwright + Chromium<br/>customer tests"]
+  pw -->|tests the draft or live site| app
+  jobs --> gddy["gddy CLI"]
+  gddy --> godaddy["GoDaddy<br/>domain availability and prices"]
+  app -->|SMTP| mail["GoDaddy mailbox<br/>contact form, enquiries,<br/>team notes"]
+  subgraph GoDaddy services
+    godaddy
+    mail
+    vps["Docker VPS<br/>(runs Caddy and the app)"]
+    dns["Domain and DNS<br/>gettoran.com, *.gettoran.com"]
+  end
+```
+
+- Routes stay thin (`app/routes/`); logic lives in `app/services/`; providers (Claude, speech-to-text, GoDaddy CLI, SMTP) sit behind interfaces with mock versions.
+- Browser tests and the agent run as background jobs (`app/services/jobs.py`); pages refresh themselves while they wait.
+- Business sites are static files built from the confirmed profile (`app/services/sitegen.py`) and served on their own subdomain.
+
+## How it uses Claude
+
+Every call goes through `ClaudeClient` (`app/services/claude_client.py`): `max_tokens`, a timeout, retries with backoff, prompt caching of the system prompt (and tools), token and cost logging per business, and a daily spend cap (`check_spend_cap`, with 30% reserved for existing businesses, `RESERVED_SHARE`). Mock mode (`CLAUDE_MOCK=1`) answers from `tests/fixtures/claude/`.
+
+| Use | Model | Where |
+| --- | --- | --- |
+| Voice transcript or price-list photo (vision) → business profile, as validated JSON | Sonnet | `extract_profile` in `app/services/extract.py` |
+| AI-assessed score items (language clarity, policy, customer questions), judged with the phone screenshot | Sonnet | `run_ai_checks` in `app/services/ai_checks.py` |
+| Agent fix loop with tool use: reads score items, calls tools, re-tests, up to 5 rounds | Sonnet | `AgentLoop` in `app/services/agent.py` |
+| The six tools, each checked in code before anything changes (a price or fact change is rejected) | — | `TOOL_DEFINITIONS`, `apply_tool`, `translation_problem` in `app/services/agent_tools.py` |
+| Web address name suggestions | Haiku | `suggest_names` in `app/services/godaddy.py` |
+| Eval name judge | Haiku | `app/services/evals.py` |
+
+Text from voice notes, photos, websites and forms is passed to Claude as data inside tagged blocks (angle brackets neutralised), never as instructions.
+
+## How it uses GoDaddy
+
+| Use | Where |
+| --- | --- |
+| **Domain availability and first-year prices** inside the product: 6 suggested names × `.in` and `.com`, each checked with `gddy domain available <domain> --check-type full --json`, shown as tool calls in the owner's view | `GddyCli`, `command_for`, `run_lookup` in `app/services/godaddy.py` |
+| **Nothing bought from the app**: "I want this one" records the request and emails the team, who buy it on godaddy.com and point DNS | `request_domain` in `app/services/godaddy.py`, `app/services/mail_jobs.py` |
+| **Pinned, checksum-verified gddy CLI** in the Docker image; `/health` reports it; authenticates with `GDDY_PAT` | `scripts/install_gddy.py`, `Dockerfile` |
+| **Domain and DNS**: gettoran.com, with `A` records for `@`, `www` and `*` (every business subdomain) | `docs/deploy.md` |
+| **Docker VPS** running Caddy and the app | `docker-compose.yml`, `Caddyfile`, `docs/deploy.md` |
+| **Mailbox** on our domain over SMTP: contact form, enquiry notifications, team notes, error alerts | `send_mail` in `app/services/mailer.py` |
+
+## Safety and privacy
+
+- **Nothing goes live without the owner's approval.** The agent works on a draft only; publishing is a separate confirmation screen. A real business can't go live without a phone number unless the owner explicitly chooses no order button.
+- **Facts only from the owner's confirmed details.** Prices and numbers are inserted from the profile, never written or translated by Claude; agent tools that try to change a fact are rejected and logged.
+- **No home address.** Anything that looks like an address is left off the site and turned into a question.
+- **Owner access:** an unguessable private link plus a hashed 4-digit PIN, lockout after 5 wrong tries, the PIN again to change the phone number or delete the site, remembered devices revocable, and a team-only reissue after checking the owner's identity (`make server-access`).
+- **Retention:** voice notes and price-list photos deleted right after processing (30 days if the owner chose to keep them); unconfirmed starts after 7 days; sample businesses after 7 days; enquiries after 90 days; logs after 30 days; backups kept 7 days. See `/privacy` in all three languages.
+- **One-action deletion** of the owner's site and all data, with a permanent-deletion warning and the PIN.
+- **Security patterns:** CSRF on every form (Origin check for the cross-site enquiry form), rate limits, upload checks (re-encoded images, location data stripped), security headers, non-root container, secrets only in `.env` (never in the repo or its history; gitleaks in pre-commit).
+
+## Measured vs AI-assessed
+
+Each score item records whether it is `measured` or `ai_assessed` (`app/services/score.py`, `docs/score.md`).
+
+- **Measured** by real Chromium (median of three runs): time to main content on slow internet, page weight, order button visible on a phone, tap targets at least 44 px, no sideways scrolling, nothing overflowing on a laptop, phone number shown, delivery area shown with no address, HTTPS (live site).
+- **AI-assessed** by one Claude call per test run: language clarity on each language page, real photos, ordering policy, customer questions answered (`docs/checklists.md`). Points come from fixed verdicts (yes, partly, no), so repeated runs stay close.
+
+## Cost per business (measured)
+
+- **One full check** (customer tests plus the AI checks): about **$0.05** in Claude cost.
+- **One agent run**: **$0.05 to $0.17** in Claude cost, plus the AI checks of each re-test.
+- Every call's tokens and estimated cost are stored per business (`claudeusage` table); speech-to-text minutes and estimated cost in `sttusage`. The home page shows measured medians with their sample size and date.
+
+## Real-world results
+
+<!-- TODO(Sakshi): fill in the real-world numbers below. -->
+
+| Measure | Result |
+| --- | --- |
+| Real businesses onboarded | **[to be filled in]** |
+| Field accuracy on real voice notes | **[to be filled in]** |
+| Price accuracy on real voice notes | **[to be filled in]** |
+| Median time from voice note to a tested draft | **[to be filled in]** |
+| Pune audit (small, non-random sample) | **[to be filled in]** |
+
+`make accuracy` prints the accuracy and timing report from real (non-sample) businesses.
 
 ## Setup on a new machine
 
 ```bash
-make setup                 # venv, hashed dependencies, pre-commit hooks
+make setup                 # virtualenv, pinned and hashed dependencies, pre-commit hooks
 cp .env.example .env       # fill in values; APP_ENV=development locally
 make migrate
+make seed                  # six demo businesses, marked Sample
 make dev                   # http://localhost:8000
-make lint && make test
 ```
 
-## How judges can test it
+Everything works in mock mode (`CLAUDE_MOCK=1`, `GDDY_MOCK=1`, `STT_PROVIDER=mock`) without spending credits.
 
-_The full judge flow comes with intake._ For now:
+## Tests and checks
 
 ```bash
-make migrate && make seed   # 5 sample businesses (marked Sample)
-make dev
+make lint      # ruff, formatting, mypy, gitleaks, private-files hook, whitespace (pre-commit)
+make test      # 737 tests, mock mode, including real-Chromium end-to-end and layout checks
+make eval      # extraction evals (evals/), checked in code
 ```
 
-Start an intake at `http://localhost:8000/start` (the sample voice notes in English, Hindi and Marathi work without a microphone or credits), or open `http://asha-home-bakery.localhost:8000/` (also `/hi/` and `/mr/`), the theme gallery at `http://localhost:8000/dev/themes`, or run the customer tests at `http://localhost:8000/dev/score` (development only; `make score slug=asha-home-bakery` does the same from the command line).
+- **Layout check** (`tests/test_layout.py`): every owner page in every state, the home page, `/start` and live business sites, at 360, 768, 1024 and 1280 px; fails if any element sticks out of its card or is wider than the screen. `LAYOUT_SHOTS=<folder>` saves screenshots.
+- **CI** (`.github/workflows/ci.yml`) runs the hooks, the tests and `pip-audit` on every push.
+- **Translations:** `make i18n-sheet` writes `docs/translation-review.md` for native speakers; `make i18n-apply file=<filled copy>` applies their fixes and refuses any that change a placeholder or number.
 
-To see the agent fix loop: finish an intake (or sign in to a business), then press "Let Toran improve my draft" on the owner page and open "See how Toran thinks". From the command line, `make agent slug=<slug>` runs one loop and prints each round. In mock mode (`CLAUDE_MOCK=1`) the tool calls are saved fixtures; the `agent-demo-foods` fixtures take the home-foods sample from about 72 to about 87, then ask for her ordering policy.
+## Production deployment
 
-## Measured vs AI-assessed
-
-Measured today (median of three Chromium runs): time to main content on a slow network, page weight, order button visible on a phone, tap targets of at least 44 px, no sideways scrolling, nothing overflowing on a laptop, phone number shown, delivery area shown with no address, HTTPS (live site only). AI-assessed by one Claude call per test run (claude-sonnet-5-5 with the phone screenshot): language clarity on each language page, real photos (not applicable for samples), ordering or refund policy, and customer questions answered from `docs/checklists.md`. The report shows which model answered and the estimated cost. If the AI check cannot run, those items stay pending with a friendly reason. Checks that do not apply (the phone number on sample sites, HTTPS locally) give their points to the other checks in the same part.
-
-Every score item records whether it is `measured` (by the browser) or `ai_assessed` (by Claude). See `docs/score.md`.
-
-## Cost per business
-
-Each Claude call is logged with input, output and cache tokens and an **estimated** USD cost per business (table `claudeusage`). Prices per million tokens, from the hackathon deck: Haiku $0.10 in / $0.50 out, Sonnet $2 / $10, Opus $4 / $20. Reports come later.
-
-Each agent fix loop stores its total estimated cost (Claude decisions plus the AI checks of every re-test) on the run, logs it as `agent_run_done`, and shows it in the panel's detailed view. Its system prompt and tools are cached. One business can start at most 3 loops a day, and the daily spend cap stops a loop early while keeping the best draft so far.
-
-Each speech-to-text call is logged with its audio duration and an **estimated** cost of ₹0.49 per minute (Sarvam's published pay-as-you-go rate), per business (table `sttusage`).
-
-Spending limits: the daily Claude cap (`CLAUDE_DAILY_SPEND_CAP_USD`) keeps 30% for businesses that already exist, so anonymous intakes can never use it all; speech-to-text stops at `STT_DAILY_MINUTES_CAP` minutes a day (owners are asked to type); and one address can start at most 30 intakes a day.
-
-## Privacy of real data
-
-The repository is public. Real voice notes, transcripts, photos and answer keys live only in git-ignored folders (`data/`, `voice_notes/`, `evals/private/`, `evals/reports/`), and a pre-commit hook refuses audio files, images outside the asset and sample folders, and anything under those folders. Voice notes and price-list photos are deleted after processing unless the owner agreed to keep them (leftovers are removed after a day, kept ones after 30 days). Intakes never confirmed are deleted after 7 days. Logs never contain audio, transcripts or extracted details.
+Docker Compose on the GoDaddy VPS: the app (non-root, `init`, 1 GB shared memory for Chromium) and Caddy (HTTPS, on-demand certificates for business subdomains, allowed only for real businesses). Migrations run on start, the app makes a daily backup, and tagged images allow a one-command rollback. The step-by-step server checklist, the spend-cap behaviour and how to give an owner a new link and PIN are in [docs/deploy.md](docs/deploy.md).
 
 ## Known limitations
 
-- Rate limits are kept in memory, which suits a single app process.
-- Buying a web address and pointing its DNS is done by the team on godaddy.com after her request; the app never buys anything. The rupee figure uses a fixed rate and is only a rough guide.
-- Business text appears exactly as the owner gave it, unless the agent added a translation for a page's language; then her original is shown under it. Translation checks catch changed numbers, prices, currency, phone numbers, links, the wrong script and addresses, but not a reworded claim (for example a translation that adds "eggless"). She sees every translation in the change list before approving.
-- In mock mode the AI checks after an agent round come from saved variants (`ai_checks_<slug>+translated+policy`), so mock scores follow the agent's changes only for fixtures that have them.
-- Business sites are served by the app (Caddy compresses them); serving them straight from Caddy is a later step.
-- Retention cleanup (enquiries 90 days, log files 30 days, inputs and unconfirmed intakes) and the daily backup run inside the app every hour; Docker's own console buffer is size-capped (2 x 1 MB), not time-capped.
+- **Owners can't edit prices or menu items from their page yet.** They can edit their phone number, area and ordering policy ("My details"); the Toran team updates prices on request. Price updates by voice are not built.
+- **Owners are not notified by WhatsApp or email when a customer's form message arrives.** It appears in the enquiries inbox on the owner page and is emailed to the Toran team.
+- **One agent run per draft at a time.**
+- **The Pune audit is a small, non-random sample**, so its numbers show direction, not a population estimate.
+- **Speech-to-text can mishear**, especially names and numbers, which is why the owner confirms every detail before anything is built.
+- **AI-assessed score items can vary by a point or two** between runs of the same site.
+- **Hindi and Marathi wording was written by AI** and is being reviewed by native speakers (`docs/translation-review.md`).
+- Rate limits are kept in memory (one app process), and the rupee figure for domain prices uses a fixed rate.
+
+## Next steps
+
+- Price and menu updates by voice, with undo (every profile version is already kept).
+- Notify owners on WhatsApp when a customer sends an enquiry.
+- Finish the native-speaker review of Hindi and Marathi, then add more Indian languages.
+- Automate buying and DNS setup for a requested web address, still only after the owner's approval.
+- A larger, random sample of real businesses for the accuracy audit.
+
+## Repository
+
+- `app/`: FastAPI app (`routes/`, `services/`, `templates/`, `i18n/`, `static/`)
+- `migrations/`: Alembic migrations · `scripts/`: operations scripts · `tests/`: test suite
+- `docs/`: score rules, checklists, deployment, review, translation review
+- `evals/cases/`: fake sample cases only; real cases live in git-ignored `evals/private/`

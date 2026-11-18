@@ -19,7 +19,7 @@ from tests.test_publish import _business
 def _ready(client: TestClient, engine: Engine) -> tuple[str, dict[str, Any]]:
     token = _start(client, engine, source="text", text=TEXT)
     _, fields = _cards(client, token)
-    fields.update(phone="9822012345", web_address="priya-cakes")
+    fields.update(phone="9000012345", web_address="priya-cakes")
     return token, fields
 
 

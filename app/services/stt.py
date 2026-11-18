@@ -401,7 +401,7 @@ def transcribe_note(
 ) -> Transcript:
     """Check the upload, transcribe it, and log duration and estimated cost (never the audio).
 
-    Real transcription stops for the day once STT_DAILY_MINUTES_CAP is used; she is asked to
+    Real transcription stops for the day once STT_DAILY_MINUTES_CAP is used; the owner is asked to
     type instead.
     """
     checked = check_audio(audio)

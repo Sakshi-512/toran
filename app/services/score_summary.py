@@ -56,8 +56,8 @@ def owner_summary(run: TestRun, items: list[ScoreItem]) -> OwnerSummary:
     )
 
 
-# How she can fix each item: a plain sentence (i18n "fix.<key>") and, when she can do it
-# herself, where to go and the link's label key.
+# How the owner can fix each item: a plain sentence (i18n "fix.<key>") and, when the owner can do it
+# themselves, where to go and the link's label key.
 FIX_LINKS: dict[str, tuple[str, str]] = {
     "phone_visible": ("/owner/details#phone", "fix.link.details"),
     "area_shown": ("/owner/details#area", "fix.link.details"),

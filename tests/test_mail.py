@@ -193,13 +193,13 @@ def test_password_subject_and_body_never_logged(capsys: pytest.CaptureFixture[st
         to=TEAM,
         subject="Secret subject Kavita",
         kind="test",
-        body="private body text 9822012345",
+        body="private body text 9000012345",
         transport=transport,
         sleep=lambda _s: None,
     )
     logged = "".join(capsys.readouterr())
     assert "mail_sent" in logged
-    for leaked in (password, "Secret subject", "private body text", "9822012345"):
+    for leaked in (password, "Secret subject", "private body text", "9000012345"):
         assert leaked not in logged
 
 
@@ -253,11 +253,11 @@ def test_contact_form_saves_and_emails_team(client: TestClient, engine: Engine) 
 
 
 def test_contact_with_phone_has_no_reply_to(client: TestClient, engine: Engine) -> None:
-    _contact(client, contact="98220 12345")
+    _contact(client, contact="90000 12345")
     _drain(engine)
     [message] = _wait_for_outbox(1)
     assert message["Reply-To"] is None
-    assert "+919822012345" in message.get_content()
+    assert "+919000012345" in message.get_content()
 
 
 def test_thank_you_message_in_owner_language(client: TestClient) -> None:
@@ -323,7 +323,7 @@ def test_enquiry_notification_email(
         "/api/enquiry/sunita-beauty-parlour",
         data={
             "name": "Kavita",
-            "phone": "98220 12345",
+            "phone": "90000 12345",
             "message": "Is Sunday free?",
             "lang": "en",
             "website": "",
@@ -336,7 +336,7 @@ def test_enquiry_notification_email(
     assert message["Subject"] == "[Sample] New enquiry for Sunita Beauty Parlour"
     body = message.get_content()
     assert "Sunita Beauty Parlour" in body and "Is Sunday free?" in body
-    assert "+919822012345" in body and "Kavita" in body
+    assert "+919000012345" in body and "Kavita" in body
     with Session(engine) as session:
         assert session.exec(select(Enquiry)).one().notified_at is not None
 
@@ -378,9 +378,9 @@ def test_alerts_once_per_error_type_per_hour() -> None:
 
 def test_alert_body_is_redacted() -> None:
     handler = AlertHandler(get_settings(), synchronous=True)
-    handler.emit(_error("app.request", "failed for 9822012345"))
+    handler.emit(_error("app.request", "failed for 9000012345"))
     [alert] = mailer.outbox.outbox
-    assert "9822012345" not in alert.get_content()
+    assert "9000012345" not in alert.get_content()
     assert "******2345" in alert.get_content()
 
 

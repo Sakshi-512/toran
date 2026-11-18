@@ -13,7 +13,7 @@ SLUG = "sunita-beauty-parlour"
 ORIGIN = f"https://{SLUG}.example.test"
 FORM = {
     "name": "Kavita",
-    "phone": "98220 12345",
+    "phone": "90000 12345",
     "message": "Is Sunday free?",
     "lang": "hi",
     "website": "",
@@ -48,7 +48,7 @@ def test_valid_enquiry_saved_and_redirected(
     rows = _enquiries(engine)
     assert len(rows) == 1
     assert rows[0].business_id == seeded.id
-    assert rows[0].phone == "+919822012345"  # full number kept for the owner to call back
+    assert rows[0].phone == "+919000012345"  # full number kept for the owner to call back
     assert rows[0].message == "Is Sunday free?"
 
 
@@ -141,5 +141,5 @@ def test_enquiry_phone_redacted_in_logs(
 ) -> None:
     _post(client, ORIGIN)
     out = capsys.readouterr()
-    assert "9822012345" not in out.out + out.err
-    assert "98220 12345" not in out.out + out.err
+    assert "9000012345" not in out.out + out.err
+    assert "90000 12345" not in out.out + out.err

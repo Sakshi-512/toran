@@ -87,7 +87,7 @@ def test_publishing_needs_a_phone_or_her_choice(client: TestClient, engine: Engi
         latest = pub.latest_profile(session, business_id)
         assert latest is not None and latest.profile["order_methods"] == []
     assert 'action="/owner/publish"' in client.get("/owner/publish").text
-    pub.publish(engine, get_settings(), business_id)  # her explicit choice: allowed
+    pub.publish(engine, get_settings(), business_id)  # the owner's explicit choice: allowed
 
 
 def test_adding_a_phone_unblocks_publishing(client: TestClient, engine: Engine) -> None:
@@ -96,7 +96,7 @@ def test_adding_a_phone_unblocks_publishing(client: TestClient, engine: Engine) 
     csrf = _csrf(client, "/owner/details")
     client.post(
         "/owner/details",
-        data={CSRF_FIELD: csrf, "phone": "98220 12345", "area": "Kothrud", "policy": ""},
+        data={CSRF_FIELD: csrf, "phone": "90000 12345", "area": "Kothrud", "policy": ""},
     )
     pub.publish(engine, get_settings(), business_id)
     with Session(engine) as session:
@@ -162,7 +162,7 @@ def test_my_details_saves_a_new_version_and_retests(client: TestClient, engine: 
         "/owner/details",
         data={
             CSRF_FIELD: csrf,
-            "phone": "+91 98220 12345",
+            "phone": "+91 90000 12345",
             "area": "Karve Nagar",
             "policy": "50% advance.",
         },
@@ -244,7 +244,7 @@ def test_report_says_how_to_fix_with_a_link(
     page = client.get(f"/owner/score/{run_id}?lang={lang}").text
     assert page.count(how) == 2 and link in page and 'href="/owner/details#phone"' in page
     https_item = page.split("score-item")[-1]
-    assert 'href="/owner' not in https_item.split("</li>")[0]  # nothing she can do herself
+    assert 'href="/owner' not in https_item.split("</li>")[0]  # nothing the owner can do themselves
 
 
 # --- home cards ---

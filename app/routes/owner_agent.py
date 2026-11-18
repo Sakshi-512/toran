@@ -26,7 +26,7 @@ START_ERRORS = {"agent.busy": "busy", "agent.daily_limit": "limit", "publish.no_
 
 @router.post("/agent", include_in_schema=False, dependencies=[Depends(verify_csrf)])
 def start(business_id: int = Depends(require_owner)) -> RedirectResponse:
-    """Her "Let Toran improve my draft" button."""
+    """The owner's "Let Toran improve my draft" button."""
     try:
         start_agent(get_engine(), get_settings(), business_id)
     except AppError as exc:
@@ -56,7 +56,7 @@ def panel(run_id: str, request: Request, business_id: int = Depends(require_owne
 
 @router.post("/agent/{run_id}/undo", include_in_schema=False, dependencies=[Depends(verify_csrf)])
 def undo(run_id: str, business_id: int = Depends(require_owner)) -> RedirectResponse:
-    """Her "Undo these changes"."""
+    """The owner's "Undo these changes"."""
     undo_changes(get_engine(), get_settings(), business_id, run_id)
     return RedirectResponse("/owner#site", status_code=303)
 
@@ -67,7 +67,8 @@ def undo(run_id: str, business_id: int = Depends(require_owner)) -> RedirectResp
 async def answer(
     question_id: int, request: Request, business_id: int = Depends(require_owner)
 ) -> Response:
-    """Check her answer and show it back to her exactly as it will appear, to confirm."""
+    """Check the owner's answer and show it back to the owner exactly as it will appear, to
+    confirm."""
     form = await request.form()
     raw = str(form.get("answer", ""))
     with Session(get_engine()) as session:
@@ -89,7 +90,7 @@ async def answer(
 async def confirm(
     question_id: int, request: Request, business_id: int = Depends(require_owner)
 ) -> Response:
-    """She confirmed: add it to her profile, rebuild and re-test the draft."""
+    """The owner confirmed: add it to the owner's profile, rebuild and re-test the draft."""
     form = await request.form()
     questions.apply_answer(
         get_engine(), get_settings(), business_id, question_id, str(form.get("answer", ""))
@@ -103,6 +104,6 @@ async def confirm(
     dependencies=[Depends(verify_csrf)],
 )
 def dismiss(question_id: int, business_id: int = Depends(require_owner)) -> RedirectResponse:
-    """She chose not to answer."""
+    """The owner chose not to answer."""
     questions.dismiss(get_engine(), business_id, question_id)
     return RedirectResponse("/owner#questions", status_code=303)

@@ -1,14 +1,14 @@
 """Agent improvements to a site, kept apart from the owner's confirmed profile.
 
 Two kinds, both checked before they are saved (app/services/agent_tools.py):
-- translations of her confirmed text (product names, notes and option labels) into en, hi or
-  mr, keyed by a hash of the original, so a translation disappears by itself if she edits the
+- translations of the owner's confirmed text (product names, notes and option labels) into en, hi or
+  mr, keyed by a hash of the original, so a translation disappears by itself if the owner edits the
   original text. Prices and numbers are never translated: they still come from the profile.
 - layout choices from a fixed list (main button first, photo after text, large buttons, section
   order, lighter photos). None of them can change a fact.
 
 Every change is a new SiteExtras version. The newest version that is not discarded is used for
-every draft build; publishing that draft is her approval (rule 2).
+every draft build; publishing that draft is the owner's approval (rule 2).
 """
 
 import hashlib
@@ -65,7 +65,7 @@ class Layout:
 
 @dataclass(frozen=True)
 class Translation:
-    """One translation of her confirmed text into one site language."""
+    """One translation of the owner's confirmed text into one site language."""
 
     field: str
     source: str
@@ -90,7 +90,7 @@ class Extras:
     layout: Layout = field(default_factory=Layout)
 
     def translate(self, text: str, lang: str) -> str | None:
-        """Her text on a page in `lang`, if the agent added a translation for it."""
+        """The owner's text on a page in `lang`, if the agent added a translation for it."""
         wanted = (source_key(text), lang)
         for item in reversed(self.translations):
             if item.key == wanted:
@@ -184,7 +184,7 @@ def discard_after(session: Session, business_id: int, version: int | None) -> in
 
 
 def approve_current(session: Session, business_id: int) -> None:
-    """She published the draft: every proposed version is approved (the caller commits)."""
+    """The owner published the draft: every proposed version is approved (the caller commits)."""
     rows = session.exec(
         select(SiteExtras).where(
             SiteExtras.business_id == business_id, SiteExtras.status == "proposed"
@@ -196,7 +196,7 @@ def approve_current(session: Session, business_id: int) -> None:
 
 
 def discard_run(session: Session, business_id: int, agent_run_id: str) -> int:
-    """She undid an agent run: discard every version it made. Returns how many."""
+    """The owner undid an agent run: discard every version it made. Returns how many."""
     rows = session.exec(
         select(SiteExtras).where(
             SiteExtras.business_id == business_id,

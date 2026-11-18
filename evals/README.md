@@ -20,7 +20,7 @@ checks the answers in code. In mock mode (`CLAUDE_MOCK=1`) it uses saved answers
   "input": {"type": "transcript", "transcript": "..."},
   "expected": {
     "business_type": "bakery",
-    "phone": "9822012345",
+    "phone": "9000012345",
     "area": "Kothrud, Pune",
     "delivery_areas": ["Kothrud"],
     "lead_time_numbers": ["2"],
@@ -29,6 +29,10 @@ checks the answers in code. In mock mode (`CLAUDE_MOCK=1`) it uses saved answers
   }
 }
 ```
+
+When the same items can fairly be grouped in more than one way, use `"products_any_of"` instead
+of `"products"`: a list of alternative product lists. Each alternative is checked with the same
+strict name and price checks, and the best-scoring one counts, so every price must still match.
 
 `input.type` is `transcript`, `photo` (with `file`, relative to the case) or `audio` (with
 `file` and the reference `transcript`). Audio goes through speech-to-text only when

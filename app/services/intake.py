@@ -1,10 +1,10 @@
-"""Voice, photo and typed intake: from her words to a confirmed business with owner access.
+"""Voice, photo and typed intake: from the owner's words to a confirmed business with owner access.
 
 1. start_intake saves the input (audio or a re-encoded photo, or typed text) and queues a job.
 2. run_intake (background job) transcribes voice notes, runs extraction, stores Claude's first
    guess and the checked draft, and deletes the input unless the owner agreed to keep it.
 3. The confirmation cards edit the draft (draft_from_form).
-4. confirm_intake creates the Business, profile version 1, her consent record and photos,
+4. confirm_intake creates the Business, profile version 1, the owner's consent record and photos,
    records every correction for accuracy measurement, and issues the private link and PIN.
 """
 
@@ -382,7 +382,7 @@ def _product_from_form(
             price = _price(raw)
         except ValueError:
             errors.add(key, "intake.price_invalid")
-            options.append({"label": label, "price": raw})  # keep what she typed
+            options.append({"label": label, "price": raw})  # keep what the owner typed
             continue
         if price is None:
             errors.add(key, "intake.price_needed")
@@ -456,7 +456,7 @@ def confirm_intake(
 
     The intake is claimed first (ready -> confirming in one statement), so a double tap creates
     one business; the second gets "already confirmed". If another business took the web
-    address meanwhile, the intake goes back to ready and she is asked for another address.
+    address meanwhile, the intake goes back to ready and the owner is asked for another address.
     """
     with Session(engine) as session:
         claimed = session.exec(

@@ -66,7 +66,7 @@ def test_question_in_owner_language() -> None:
 def test_phone_not_said_is_removed() -> None:
     data, removed = apply_checks(_extraction(), "text", "Chocolate cake 1250, cupcakes 300", "en")
     assert data["phone"] == "" and "phone: What is your WhatsApp number?" in data["missing"]
-    assert removed == ["phone (not in what she said)"]
+    assert removed == ["phone (not in what the owner said)"]
 
 
 def test_photo_prices_skip_transcript_check() -> None:

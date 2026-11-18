@@ -291,7 +291,7 @@ def test_publish_refused_when_the_draft_changed_since_she_saw_it(
         assert session.get(Business, business_id).status == "draft"  # type: ignore[union-attr]
 
 
-# --- 6: a crashed or timed-out agent run or lookup never blocks her for good ---
+# --- 6: a crashed or timed-out agent run or lookup never blocks the owner for good ---
 
 
 def test_crashed_agent_run_is_closed_and_she_can_try_again(
@@ -389,7 +389,7 @@ def test_delete_waits_for_a_running_job_then_wipes_everything(engine: Engine) ->
         assert active_business(session, SLUG) is None  # the site stops at once
         assert web_address.is_taken(session, SLUG)  # but the address is not free yet
     late = pub.folders(settings, SLUG).draft / "late.html"
-    late.write_text("written by the job after she pressed delete")
+    late.write_text("written by the job after the owner pressed delete")
     assert pub.purge_deleted(engine, settings) == 0  # the job is still running
     with Session(engine) as session:
         job = session.get(Job, job_id)
@@ -414,7 +414,7 @@ def test_delete_without_running_jobs_is_immediate_and_drops_queued_jobs(engine: 
         ).one()
         folder = settings.uploads_dir / "intake" / str(intake.id)
     folder.mkdir(parents=True)
-    (folder / "input.ogg").write_bytes(b"OggS kept by her choice")
+    (folder / "input.ogg").write_bytes(b"OggS kept by the owner's choice")
     assert pub.delete_business(engine, settings, business_id) is True
     assert get_job(engine, queued) is None
     assert not folder.exists()
@@ -621,11 +621,11 @@ def test_gddy_installer_checks_the_pinned_checksum(
         install_gddy.asset_for("sparc")
 
 
-# --- 12: a new phone number needs her PIN ---
+# --- 12: a new phone number needs the owner's PIN ---
 
 
 def _remembered_device(client: TestClient, engine: Engine) -> tuple[int, str]:
-    """Signed in by her remembered phone only, so no PIN was entered in this session."""
+    """Signed in by the owner's remembered phone only, so no PIN was entered in this session."""
     from app.services.security import SESSION_COOKIE
 
     business_id, token, pin = _business(engine)
@@ -647,18 +647,18 @@ def _phone(engine: Engine, business_id: int) -> str:
 def test_phone_change_needs_the_pin(client: TestClient, engine: Engine) -> None:
     business_id, pin = _remembered_device(client, engine)
     before = _phone(engine, business_id)
-    refused = _details(client, phone="9822012345", area="Kothrud, Pune")
+    refused = _details(client, phone="9000012345", area="Kothrud, Pune")
     assert refused.status_code == 401 and "please enter your PIN" in refused.text
     wrong = _details(
-        client, phone="9822012345", area="Kothrud, Pune", pin="0000" if pin != "0000" else "1111"
+        client, phone="9000012345", area="Kothrud, Pune", pin="0000" if pin != "0000" else "1111"
     )
     assert wrong.status_code == 401
     with Session(engine) as session:
         assert session.get(Business, business_id).pin_failures == 1  # type: ignore[union-attr]
     assert _phone(engine, business_id) == before
-    saved = _details(client, phone="9822012345", area="Kothrud, Pune", pin=pin)
+    saved = _details(client, phone="9000012345", area="Kothrud, Pune", pin=pin)
     assert saved.status_code == 303
-    assert _phone(engine, business_id).endswith("9822012345")
+    assert _phone(engine, business_id).endswith("9000012345")
 
 
 def test_area_and_policy_changes_need_no_pin(client: TestClient, engine: Engine) -> None:

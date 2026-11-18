@@ -604,5 +604,8 @@
   "site.enquiry_note": "तुमचा संदेश {app_name} मार्फत या व्यवसायाला पाठवला जातो.",
   "home.measured_title": "चालू प्रणालीवर मोजलेले",
   "home.measured_intro": "खऱ्या वापरातून आलेले खरे आकडे, लोक {app_name} वापरतात तसे अपडेट होतात.",
-  "home.measured_on": "शेवटचे {date} रोजी मोजले"
+  "home.measured_on": "शेवटचे {date} रोजी मोजले",
+  "home.stat_cost_note_one": "1 खऱ्या तपासणीवरून",
+  "home.stat_time_note_one": "1 खऱ्या वेळेवरून",
+  "home.stat_accuracy_note_one": "दर {prices}% · 1 खऱ्या व्यवसायावर आधारित"
 }

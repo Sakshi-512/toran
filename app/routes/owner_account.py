@@ -1,9 +1,10 @@
-"""Owner account actions that need her PIN again: deleting her site and data.
+"""Owner account actions that need the owner's PIN again: deleting the owner's site and data.
 
-Deleting is permanent. She sees a warning and the full list of what goes, enters her PIN again
-(require_recent_pin), and presses a final button. The site stops being served at once, she is
+Deleting is permanent. The owner sees a warning and the full list of what goes, enters the PIN again
+(require_recent_pin), and presses a final button. The site stops being served at once, the owner is
 signed out everywhere, and the team mailbox gets a note with no personal details. The data is
-wiped at once, or within the hour if a test of her site is still running (publish.delete_business).
+wiped at once, or within the hour if a test of the owner's site is still running
+(publish.delete_business).
 """
 
 from fastapi import APIRouter, Depends, Request
@@ -63,7 +64,7 @@ def pin_again(request: Request, business_id: int = Depends(require_owner)) -> Re
 
 @router.post("/pin", include_in_schema=False, dependencies=[Depends(verify_csrf)])
 async def pin_again_submit(request: Request, business_id: int = Depends(require_owner)) -> Response:
-    """Check the PIN (same lockout as sign-in), then continue to the change she asked for."""
+    """Check the PIN (same lockout as sign-in), then continue to the change the owner asked for."""
     form = await request.form()
     after = str(form.get("next", "delete"))
     after = after if after in NEXT_PAGES else "delete"
@@ -102,7 +103,7 @@ def delete_page(request: Request, business_id: int = Depends(require_owner)) -> 
 
 @router.post("/delete", include_in_schema=False, dependencies=[Depends(verify_csrf)])
 def delete_confirmed(request: Request) -> Response:
-    """Her final yes: delete everything now, sign her out and say goodbye."""
+    """The owner's final yes: delete everything now, sign the owner out and say goodbye."""
     business_id = require_recent_pin(request)
     pub.delete_business(get_engine(), get_settings(), business_id)
     queue_team_email(

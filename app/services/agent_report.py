@@ -1,7 +1,7 @@
 """The "how it thinks" panel, built from the action log, in the owner's language.
 
 First the before and after (score and the main fixes), then each round: what was wrong, what
-the agent did and why (one short sentence from our own templates, so it is always in her
+the agent did and why (one short sentence from our own templates, so it is always in the owner
 language), which tool it used and how the score changed. A detailed view for judges adds
 Claude's own reason, the exact tool input, rejected calls, tokens and cost.
 """
@@ -85,7 +85,7 @@ class AgentView:
 
     @property
     def awaiting_approval(self) -> bool:
-        """Kept changes she has neither published nor undone."""
+        """Kept changes the owner has neither published nor undone."""
         return (
             self.state == "done"
             and self.improved
@@ -99,7 +99,7 @@ def _lang_name(code: str, lang: str) -> str:
 
 
 def describe(change: dict[str, Any], lang: str) -> tuple[str, str]:
-    """(what the agent did, why) for one accepted change, in her language."""
+    """(what the agent did, why) for one accepted change, in the owner's language."""
     kind = change.get("kind")
     if kind == "translation":
         language = _lang_name(str(change.get("lang")), lang)
@@ -209,7 +209,7 @@ def agent_view(session: Session, run: AgentRun, lang: str) -> AgentView:
     if state == "queued":
         progress = t("agent.queued", lang)
         place, wait = queue_position(session.get_bind(), run.job_id) if run.job_id else (0, 0)  # type: ignore[arg-type]
-        if place > 1:  # more than one run is ahead: say where she is in line
+        if place > 1:  # more than one run is ahead: say where the owner is in line
             progress = f"{progress} {queue_text(place, wait, lang)}"
     elif state == "running":
         current = max([r.number for r in rounds], default=0) or 1
@@ -233,7 +233,7 @@ def agent_view(session: Session, run: AgentRun, lang: str) -> AgentView:
 
 
 def open_questions(session: Session, business_id: int) -> list[OwnerQuestion]:
-    """Questions from the agent still waiting for her, oldest first."""
+    """Questions from the agent still waiting for the owner, oldest first."""
     return list(
         session.exec(
             select(OwnerQuestion)
@@ -244,7 +244,7 @@ def open_questions(session: Session, business_id: int) -> list[OwnerQuestion]:
 
 
 def pending_changes(session: Session, business_id: int, lang: str) -> list[str]:
-    """Fixes in the draft she has not approved yet (shown on the publish confirmation)."""
+    """Fixes in the draft the owner has not approved yet (shown on the publish confirmation)."""
     runs = session.exec(
         select(AgentRun)
         .where(
@@ -264,7 +264,7 @@ def pending_changes(session: Session, business_id: int, lang: str) -> list[str]:
 
 
 def agent_context(session: Session, business_id: int, lang: str, has_draft: bool) -> dict[str, Any]:
-    """The agent card and her open questions, for the owner page."""
+    """The agent card and the owner's open questions, for the owner page."""
     from app.services.agent import latest_run
 
     run = latest_run(session, business_id)

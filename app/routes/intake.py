@@ -84,7 +84,8 @@ async def start_submit(request: Request) -> Response:
     sample = str(form.get("sample", ""))
     picked = str(form.get("language", ""))
     language = picked or pick_language(request)
-    # Only a language she chose is kept for the rest of her journey. A browser guess or a
+    # Only a language the owner chose is kept for the rest of the owner's journey. A browser guess
+    # or a
     # sample's language (a judge may try the Marathi sample from the English page) is not.
     chosen = normalise_language(picked)
     if chosen:
@@ -130,7 +131,7 @@ def wait_page(token: str, request: Request) -> Response:
 
 
 def _already_created(request: Request) -> Response:
-    """A second Confirm (a double tap, or the back button): the business exists and her link
+    """A second Confirm (a double tap, or the back button): the business exists and the owner's link
     and PIN were shown once. Explain that, and how to get new ones from the team."""
     response = render(request, "app/intake_already.html", {}, status_code=409)
     response.headers["Cache-Control"] = "no-store"
@@ -165,7 +166,7 @@ def _cards(
 
 @router.get("/{token}/confirm", include_in_schema=False)
 def confirm_page(token: str, request: Request) -> Response:
-    """One card per detail, plus her questions."""
+    """One card per detail, plus the owner's questions."""
     with Session(get_engine()) as session:
         intake = svc.intake_for_token(session, token)
         if intake.status != "ready" or intake.draft is None:

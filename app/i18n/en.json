@@ -604,5 +604,8 @@
   "site.enquiry_note": "Your message is sent to the business through {app_name}.",
   "home.measured_title": "Measured on the live system",
   "home.measured_intro": "Real numbers from real use, updated as people use {app_name}.",
-  "home.measured_on": "last measured {date}"
+  "home.measured_on": "last measured {date}",
+  "home.stat_cost_note_one": "median of 1 real check",
+  "home.stat_time_note_one": "median of 1 real run",
+  "home.stat_accuracy_note_one": "prices {prices}% · based on 1 real business"
 }

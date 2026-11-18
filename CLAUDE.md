@@ -4,15 +4,15 @@ Read this fully at the start of every session. It is the single source of truth 
 
 ## What we're building
 
-A voice-first agent that takes a small business owner from idea to launch. Built first for women running businesses from home in India (home bakers, beauty parlours, tailors, tutors), and works for any small business.
+A voice-first agent that takes a small business owner from idea to launch. It is for small business owners in India who find websites and technology a barrier, starting with home-based businesses: home bakers, beauty parlours, tailors and tutors. If you can describe your business in Marathi, Hindi or English, Toran can put it online. Our first real users are women running businesses from home in Pune.
 
-1. She describes her business by voice (Marathi, Hindi or English) or snaps a photo of her price list or rate card.
-2. Claude extracts a structured business profile. She confirms or fixes each detail on confirmation cards. Anything unclear becomes a question to her, never a guess.
-3. She picks one of three styles. The app builds a mobile-first website and publishes it on a subdomain of our domain.
-4. A real browser (Playwright) tests the live site as her customers would, and computes a Customer Readiness Score (0 to 100).
-5. An agent fix loop improves a DRAFT copy, re-tests, and shows her the changes and the score before and after. She approves before anything goes live.
-6. She can update prices or services later by voice, with undo.
-7. The agent can suggest domain names with real prices through GoDaddy. Nothing is bought without her approval.
+1. The owner describes the business by voice (Marathi, Hindi or English) or snaps a photo of the price list or rate card.
+2. Claude extracts a structured business profile. The owner confirms or fixes each detail on confirmation cards. Anything unclear becomes a question to the owner, never a guess.
+3. The owner picks one of three styles. The app builds a mobile-first website and publishes it on a subdomain of our domain.
+4. A real browser (Playwright) tests the live site as the owner's customers would, and computes a Customer Readiness Score (0 to 100).
+5. An agent fix loop improves a DRAFT copy, re-tests, and shows the owner the changes and the score before and after. The owner approves before anything goes live.
+6. The owner can update prices or services later by voice, with undo.
+7. The agent can suggest domain names with real prices through GoDaddy. Nothing is bought without the owner's approval.
 
 ## How we're judged
 
@@ -180,7 +180,7 @@ json
   "policy": ""
 }
 
-policy is optional: the owner's own short ordering terms (advance payment, cancellation, delivery charges). When present, the site shows an "Ordering policy" section with her text exactly as given.
+policy is optional: the owner's own short ordering terms (advance payment, cancellation, delivery charges). When present, the site shows an "Ordering policy" section with the owner's text exactly as given.
 
 Service businesses (beauty, mehendi, tuition) show "Book on WhatsApp"; product businesses show "Order on WhatsApp".
 

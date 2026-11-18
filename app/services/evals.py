@@ -169,6 +169,43 @@ def _match_products(
     return matched
 
 
+def _product_checks(
+    expected: list[dict[str, Any]],
+    got: list[dict[str, Any]],
+    transcript: str | None,
+    stt_used: bool,
+    client: ClaudeClient,
+) -> tuple[list[Check], list[dict[str, Any]]]:
+    """Name and price checks for one expected product list (prices must match exactly)."""
+    checks: list[Check] = []
+    decisions: list[dict[str, Any]] = []
+
+    def add(name: str, want: Any, have: Any, ok: bool) -> None:
+        checks.append(
+            Check(name, want, have, ok, "-" if ok else _cause(want, transcript, stt_used))
+        )
+
+    matched = _match_products(expected, got, client, decisions)
+    for i, item in enumerate(expected):
+        found = matched[i]
+        add(
+            f"products[{item['name']}]", item["name"], found["name"] if found else None, bool(found)
+        )
+        for option in item.get("options", []):
+            prices = [
+                o["price"]
+                for o in (found or {}).get("options", [])
+                if "label" not in option or norm(o["label"]) == norm(option["label"])
+            ]
+            add(
+                f"products[{item['name']}].options[{option.get('label', '')}].price",
+                option["price"],
+                prices,
+                option["price"] in prices,
+            )
+    return checks, decisions
+
+
 def _norm_set(value: str | list[str]) -> set[str]:
     return {norm(a) for a in ([value] if isinstance(value, str) else value) if a}
 
@@ -209,29 +246,17 @@ def score_case(
         want_numbers = set(expected["lead_time_numbers"])
         have_numbers = numbers_in(got["lead_time"])
         add("lead_time", sorted(want_numbers), sorted(have_numbers), want_numbers == have_numbers)
-    matched = _match_products(
-        expected.get("products", []), got["products"], client, result.name_decisions
-    )
-    for i, item in enumerate(expected.get("products", [])):
-        found = matched[i]
-        add(
-            f"products[{item['name']}]",
-            item["name"],
-            found["name"] if found else None,
-            found is not None,
-        )
-        for option in item.get("options", []):
-            prices = [
-                o["price"]
-                for o in (found or {}).get("options", [])
-                if "label" not in option or norm(o["label"]) == norm(option["label"])
-            ]
-            add(
-                f"products[{item['name']}].options[{option.get('label', '')}].price",
-                option["price"],
-                prices,
-                option["price"] in prices,
-            )
+    # "products_any_of" lists alternative answer keys (for example two ways of grouping the same
+    # items); each is checked strictly and the best-scoring one counts. "products" is one key.
+    alternatives = expected.get("products_any_of") or [expected.get("products", [])]
+    best: tuple[list[Check], list[dict[str, Any]]] | None = None
+    for products in alternatives:
+        checks, decisions = _product_checks(products, got["products"], transcript, stt_used, client)
+        if best is None or sum(c.ok for c in checks) > sum(c.ok for c in best[0]):
+            best = (checks, decisions)
+    if best is not None:
+        result.checks.extend(best[0])
+        result.name_decisions.extend(best[1])
     for field_name in expected.get("questions", []):
         asked = [m for m in got["missing"] if m.split(":", 1)[0].strip() == field_name]
         add(f"question:{field_name}", True, bool(asked), bool(asked))

@@ -1,6 +1,6 @@
 """My details page: phone, area and ordering policy (no products or prices).
 
-Changing the phone number needs her PIN, like other sensitive changes.
+Changing the phone number needs the owner's PIN, like other sensitive changes.
 """
 
 from fastapi import APIRouter, Depends, Request
@@ -32,7 +32,7 @@ def _page(request: Request, business_id: int, **extra: object) -> dict[str, obje
 
 
 def _pin_problem(request: Request, business_id: int, pin: str) -> str | None:
-    """None if her PIN allows a phone change (entered now, or in the last few minutes)."""
+    """None if the owner's PIN allows a phone change (entered now, or in the last few minutes)."""
     try:
         require_recent_pin(request)
         return None
@@ -54,7 +54,7 @@ def _pin_problem(request: Request, business_id: int, pin: str) -> str | None:
 
 @router.get("/details", include_in_schema=False)
 def details_page(request: Request, business_id: int = Depends(require_owner)) -> Response:
-    """Her phone, area and ordering policy."""
+    """The owner's phone, area and ordering policy."""
     saved = request.query_params.get("saved") == "1"
     return render(request, "app/owner_details.html", _page(request, business_id, saved=saved))
 

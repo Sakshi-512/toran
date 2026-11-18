@@ -1,11 +1,12 @@
 """Draft and live versions of business sites, publishing with the owner's approval, and undo.
 
 Folders under SITES_DIR/<slug>/:
-- draft/ the site built from her latest confirmed profile, photos and theme (never public)
+- draft/ the site built from the owner's latest confirmed profile, photos and theme (never public)
 - live/ what customers see at <slug>.BASE_DOMAIN while the business is live
 - versions/<n>/ every published version, kept for undo
 
-Nothing is published without her explicit approval (rule 2): publish() is only called from the
+Nothing is published without the owner's explicit approval (rule 2): publish() is only called from
+the
 owner's confirmation screen.
 """
 
@@ -95,7 +96,7 @@ def latest_profile(session: Session, business_id: int) -> ProfileVersion | None:
 
 
 def site_photos(session: Session, settings: Settings, business_id: int) -> tuple[SitePhoto, ...]:
-    """Her photos for the site: the main photo as the hero, product photos in their cards."""
+    """The owner's photos for the site: the main photo as hero, product photos in their cards."""
     photos = []
     for photo in list_photos(session, business_id):
         path = photo_path(settings, photo)
@@ -111,8 +112,8 @@ def site_photos(session: Session, settings: Settings, business_id: int) -> tuple
 def build_for(
     session: Session, settings: Settings, business: Business, theme: str | None = None
 ) -> SiteBuild:
-    """Build (in memory) the site from her latest profile and photos, plus the agent's current
-    translations and layout (never facts)."""
+    """Build (in memory) the site from the owner's latest profile and photos, plus the agent's
+    current translations and layout (never facts)."""
     assert business.id is not None  # noqa: S101
     version = latest_profile(session, business.id)
     if version is None:
@@ -182,7 +183,7 @@ def _copy(source: Path, target: Path) -> None:
 
 
 def needs_phone(business: Business, profile: BusinessProfile | None) -> bool:
-    """A real business needs a phone number (or her choice of no order button) to go live."""
+    """A real business needs a phone number (or the choice of no order button) to publish."""
     if business.is_sample or profile is None:
         return False
     return not profile.phone and bool(profile.order_methods)
@@ -205,10 +206,10 @@ def business_lock(business_id: int) -> Iterator[None]:
 def publish(
     engine: Engine, settings: Settings, business_id: int, approved_hash: str | None = None
 ) -> SiteVersion:
-    """Make the current draft the live site (after her approval) and save it as a version.
+    """Make the current draft the live site (after the owner's approval) and save it as a version.
 
     Refused while the agent is changing the draft, and, when approved_hash is given (the draft
-    she saw on the confirmation screen), if the draft has changed since (rule 2). The version
+    the owner saw on the confirmation screen), if the draft has changed since (rule 2). The version
     folder is written first, then the database, and only then is the live folder replaced, so a
     failed save never changes what customers see.
     """
@@ -274,7 +275,7 @@ def _publish(
 
 
 def _approve_agent_changes(session: Session, business_id: int, now: datetime) -> None:
-    """Publishing the draft is her approval of the agent's changes in it (rule 2)."""
+    """Publishing the draft is the owner's approval of the agent's changes in it (rule 2)."""
     pending = session.exec(
         select(AgentRun).where(
             AgentRun.business_id == business_id,
@@ -356,7 +357,7 @@ def set_offline(engine: Engine, business_id: int, offline: bool) -> None:
 
 
 def delete_business(engine: Engine, settings: Settings, business_id: int) -> bool:
-    """Her "delete everything": stop the site and every session now, then wipe all data.
+    """The owner's "delete everything": stop the site and every session now, then wipe all data.
 
     Step one happens at once: the business is marked deleted (no site, no link, no sessions,
     no enquiries) and its queued jobs are dropped. The wipe follows straight away, unless a

@@ -102,7 +102,7 @@ def test_facts_publishing_and_spending_are_out_of_reach(tool: str, raw: dict[str
         ("Goda masala", "Goda masala", "mr", False),
         ("Goda masala", "Goda masala powder", "hi", False),  # wrong script
         ("मसाले", "मसाले", "en", False),
-        ("Papad", "Papad, call +91 98220 12345", "hi", False),
+        ("Papad", "Papad, call +91 90000 12345", "hi", False),
         ("Papad", "पापड www.example.com", "hi", False),
     ],
 )
@@ -118,7 +118,7 @@ def test_translations_and_layout_never_touch_the_profile() -> None:
         state,
     )
     assert outcome.ok and outcome.extras is not None
-    assert state.profile == PROFILE  # her profile is unchanged; the translation is separate
+    assert state.profile == PROFILE  # the owner's profile is unchanged; the translation is separate
     assert outcome.extras.translate("Goda masala", "mr") == "गोडा मसाला"
     layout = apply_tool("edit_layout", {"change": "large_buttons", "why": "y"}, state)
     assert layout.ok and layout.extras is not None and layout.extras.layout.large_buttons
@@ -421,7 +421,7 @@ def test_one_run_at_a_time_and_a_daily_limit(engine: Engine) -> None:
         start_agent(engine, get_settings(), business_id)
 
 
-# --- her page: start, approval, questions and the panel ---
+# --- the owner's page: start, approval, questions and the panel ---
 
 
 def _signed_in_home_foods(client: TestClient, engine: Engine) -> int:
@@ -510,7 +510,7 @@ def test_owner_question_answer_confirm_and_retest(
         f"/owner/questions/{question.id}", data={CSRF_FIELD: csrf, "answer": policy}
     )
     assert "Add this to your site?" in shown.text and "50% advance." in shown.text
-    with Session(engine) as session:  # nothing saved until she confirms
+    with Session(engine) as session:  # nothing saved until the owner confirms
         assert len(session.exec(select(ProfileVersion)).all()) == 1
     client.post(
         f"/owner/questions/{question.id}/confirm", data={CSRF_FIELD: csrf, "answer": policy}

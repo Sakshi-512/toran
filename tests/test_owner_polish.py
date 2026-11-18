@@ -283,17 +283,17 @@ def test_enquiries_inbox_newest_first_and_only_hers(client: TestClient, engine: 
             Enquiry(
                 business_id=business_id,
                 name="Kavita",
-                phone="+919822012345",
+                phone="+919000012345",
                 message="Is Sunday free?",
                 created_at=utcnow() - timedelta(days=1),
             )
         )
         session.add(Enquiry(business_id=business_id, name="Meera", message="Eggless cake?"))
-        session.add(Enquiry(business_id=other, name="Secret", message="Not hers"))
+        session.add(Enquiry(business_id=other, name="Secret", message="Not the owner's"))
         session.commit()
     page = client.get("/owner").text
     assert page.index("Meera") < page.index("Kavita")
-    assert 'href="tel:+919822012345"' in page and "Is Sunday free?" in page
+    assert 'href="tel:+919000012345"' in page and "Is Sunday free?" in page
     assert "Secret" not in page
 
 

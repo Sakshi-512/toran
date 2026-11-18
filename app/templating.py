@@ -54,7 +54,9 @@ def render(
     settings = get_settings()
     chosen = normalise_language(request.query_params.get("lang"))
     if chosen and "session" in request.scope:
-        request.session["lang"] = chosen  # her choice from the language links stays on every page
+        request.session["lang"] = (
+            chosen  # the owner's choice from the language links stays on every page
+        )
     base = {
         "lang": pick_language(request),
         "app_name": settings.app_name,

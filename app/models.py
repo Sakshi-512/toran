@@ -39,7 +39,7 @@ class Business(SQLModel, table=True):
     consent_given_at: datetime | None = None
     consent_method: str | None = Field(default=None, max_length=20)
     consent_text: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
-    gallery_opt_in: bool = False  # her separate yes to appear in the public gallery
+    gallery_opt_in: bool = False  # the owner's separate yes to appear in the public gallery
     owner_link_hash: str | None = Field(default=None, unique=True, max_length=128)
     pin_hash: str | None = Field(default=None, max_length=256)
     pin_failures: int = 0
@@ -65,7 +65,7 @@ class ProfileVersion(SQLModel, table=True):
 
 
 class IntakeSession(SQLModel, table=True):
-    """One intake: what Claude first guessed, what the owner said, and what she corrected.
+    """One intake: what Claude first guessed, what the owner said, and what the owner corrected.
 
     first_guess is Claude's validated answer before the code-side checks; draft is what the
     confirmation cards start from. The transcript is kept here for accuracy measurement only
@@ -87,7 +87,9 @@ class IntakeSession(SQLModel, table=True):
     transcript: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
     stt_route: str | None = Field(default=None, max_length=10)
     seconds_to_draft_scored: int | None = None  # system time: submit -> first draft scored
-    seconds_to_live: int | None = None  # submit -> first publish (includes her decision time)
+    seconds_to_live: int | None = (
+        None  # submit -> first publish (includes the owner's decision time)
+    )
     first_guess: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
     draft: dict[str, Any] | None = Field(default=None, sa_column=Column(JSON, nullable=True))
     web_address: str | None = Field(default=None, max_length=63)
@@ -285,10 +287,10 @@ class AgentRun(SQLModel, table=True):
 
 
 class SiteExtras(SQLModel, table=True):
-    """Agent improvements kept apart from her confirmed profile: translations and layout.
+    """Agent improvements kept apart from the owner's confirmed profile: translations and layout.
 
     Every version is kept. status is proposed (made by the agent, not yet approved), approved
-    (she published it) or discarded (rolled back by the agent or undone by her).
+    (the owner published it) or discarded (rolled back by the agent or undone by the owner).
     """
 
     __table_args__ = (UniqueConstraint("business_id", "version"),)
@@ -336,7 +338,8 @@ class DomainLookup(SQLModel, table=True):
 
 
 class DomainRequest(SQLModel, table=True):
-    """Her "I want this one": the team buys it on godaddy.com and points DNS at her site."""
+    """The owner's "I want this one": the team buys it on godaddy.com and points DNS at the owner's
+    site."""
 
     id: int | None = Field(default=None, primary_key=True)
     business_id: int = Field(foreign_key="business.id", index=True)

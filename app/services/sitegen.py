@@ -418,7 +418,7 @@ def _product(
     lang: str = "en",
 ) -> dict[str, Any]:
     """One menu item. Names, notes and labels may use an agent translation for this page's
-    language (her original name is shown under it); prices always come from the profile."""
+    language (the owner's original name is shown under it); prices always come from the profile."""
     unit = tr(f"site.unit.{product.unit}")
     options = product.options
     name = extras.translate(product.name, lang)

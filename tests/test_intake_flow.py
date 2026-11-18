@@ -106,7 +106,7 @@ def test_typed_intake_to_business_with_owner_access(client: TestClient, engine: 
     page, fields = _cards(client, token)
     assert fields["web_address"] == "priya-cakes" and fields["business_name"] == "Priya Cakes"
     assert "Read from your photo" not in page
-    fields["p0_o0_price"] = "1,300"  # she corrects a price, with a comma
+    fields["p0_o0_price"] = "1,300"  # the owner corrects a price, with a comma
     done = _confirm(client, token, fields)
     assert done.status_code == 200
     assert done.headers["cache-control"] == "no-store"
@@ -127,7 +127,7 @@ def test_typed_intake_to_business_with_owner_access(client: TestClient, engine: 
         "after": 1300,
     } in (intake.corrections or [])
     assert all(u.business_id == business.id for u in usage)
-    # PIN entry signs her in
+    # PIN entry signs the owner in
     path = link.replace("http://localhost:8000", "")
     pin_page = client.get(path)
     assert "Enter your PIN" in pin_page.text
@@ -146,7 +146,7 @@ def test_sample_voice_note_creates_a_sample_business(client: TestClient, engine:
     token = response.headers["location"].split("/")[2]
     page, fields = _cards(client, token)
     assert "तुमचा WhatsApp नंबर काय आहे?" in page
-    fields["phone"] = "९८२२० १२३४५"
+    fields["phone"] = "९०००० १२३४५"
     assert _confirm(client, token, fields).status_code == 200
     with Session(engine) as session:
         business = session.exec(select(Business)).one()

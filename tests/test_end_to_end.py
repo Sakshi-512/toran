@@ -51,7 +51,8 @@ def test_voice_note_to_live_site_and_undo(client: TestClient, engine: Engine) ->
     )
     token = started.headers["location"].split("/")[2]
     _run(engine, INTAKE_JOB)
-    # 2. She confirms her details (adds her phone number, which the voice note lacked).
+    # 2. The owner confirms the owner's details (adds the owner's phone number, which the voice note
+    # lacked).
     page = client.get(f"/start/{token}/confirm").text
     fields = {
         k: v
@@ -59,7 +60,7 @@ def test_voice_note_to_live_site_and_undo(client: TestClient, engine: Engine) ->
         if not k.endswith("_remove") and k not in ("languages", "order_methods", "action")
     }
     fields.update(
-        phone="9822012345",
+        phone="9000012345",
         business_type="bakery",
         action="confirm",
         order_methods="whatsapp",
@@ -77,7 +78,7 @@ def test_voice_note_to_live_site_and_undo(client: TestClient, engine: Engine) ->
         # 3. The draft is tested on the internal address and scored.
         _point_jobs_at(engine, f"http://127.0.0.1:{port}/internal/draft/{slug}/")
         _run(engine, SCORE_JOB)
-        # 4. She signs in, sees the score and publishes.
+        # 4. The owner signs in, sees the score and publishes.
         client.post(link, data={CSRF_FIELD: _csrf(client, link), "pin": pin})
         home = client.get("/owner").text
         assert "status-draft" in home and "Make my site live" in home

@@ -12,7 +12,7 @@
    "name": "ask_owner",
    "input": {
     "topic": "policy",
-    "why": "Customers ask about advance payment and cancellation; only she knows her terms."
+    "why": "Customers ask about advance payment and cancellation; only the owner knows the owner's terms."
    }
   }
  ]

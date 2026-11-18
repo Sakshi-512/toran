@@ -97,6 +97,9 @@ stored, how long, and the right to delete). Please read them first.
 | `home.measured_title` | Measured on the live system | चालू सिस्टम पर मापा गया | चालू प्रणालीवर मोजलेले |  |
 | `home.measured_intro` | Real numbers from real use, updated as people use {app_name}. | असली इस्तेमाल से आए असली आँकड़े, जो लोगों के {app_name} इस्तेमाल करने के साथ अपडेट होते हैं। | खऱ्या वापरातून आलेले खरे आकडे, लोक {app_name} वापरतात तसे अपडेट होतात. |  |
 | `home.measured_on` | last measured {date} | आख़िरी बार {date} को मापा गया | शेवटचे {date} रोजी मोजले |  |
+| `home.stat_cost_note_one` | median of 1 real check | 1 असली जाँच से | 1 खऱ्या तपासणीवरून |  |
+| `home.stat_time_note_one` | median of 1 real run | 1 असली बार से | 1 खऱ्या वेळेवरून |  |
+| `home.stat_accuracy_note_one` | prices {prices}% · based on 1 real business | दाम {prices}% · 1 असली व्यवसाय पर आधारित | दर {prices}% · 1 खऱ्या व्यवसायावर आधारित |  |
 
 ## Start page
 

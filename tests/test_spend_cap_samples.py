@@ -40,7 +40,9 @@ def test_samples_still_work_at_the_cap(
 ) -> None:
     token = _start(client, engine, sample=sample)
     page = client.get(f"/start/{token}/confirm")
-    assert page.status_code == 200 and "Kothrud" in page.text  # her details, ready to confirm
+    assert (
+        page.status_code == 200 and "Kothrud" in page.text
+    )  # the owner's details, ready to confirm
 
 
 def test_new_claude_calls_get_the_friendly_message(

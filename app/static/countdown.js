@@ -1,4 +1,4 @@
-// Counts down the seconds until she can try again (the page shows the number without JS too).
+// Counts down the seconds until the owner can try again (the page shows the number without JS too).
 (function () {
   "use strict";
   document.querySelectorAll(".countdown[data-seconds]").forEach(function (el) {

@@ -68,7 +68,7 @@ agent: ## Run the agent fix loop on a draft: make agent slug=<slug> [url=<draft 
 shots: ## Remake the home page's phone screenshot from a real sample site
 	$(PY) -m scripts.home_shots
 
-access: ## New private link and PIN after the team confirms it's her: make access slug=<slug>
+access: ## New private link and PIN after the team confirms it's the owner: make access slug=<slug>
 	$(PY) -m scripts.new_access $(slug)
 
 i18n-sheet: ## Write docs/translation-review.md for a native speaker to check
@@ -94,7 +94,7 @@ server-seed: ## Server: create the sample businesses and build their sites
 server-agent: ## Server: run the agent fix loop once: make server-agent slug=savitri-gruh-udyog
 	docker compose exec app python -m scripts.agent_run $(slug)
 
-server-access: ## Server: new link and PIN after the team confirms it's her: make server-access slug=<slug>
+server-access: ## Server: new link and PIN after the team confirms it's the owner: make server-access slug=<slug>
 	docker compose exec app python -m scripts.new_access $(slug)
 
 server-backup: ## Server: back up the database now

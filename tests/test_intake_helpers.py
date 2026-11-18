@@ -25,7 +25,7 @@ def test_devanagari_digits_and_indian_formats() -> None:
     assert ascii_digits("४५० रुपये") == "450 रुपये"
     assert numbers_in("केक ४५० आणि १,२०० रुपये") == {"450", "1200"}
     assert numbers_in("1,500 or 1500 or ₹1,25,000") == {"1500", "125000"}
-    assert digits_only("९८२२० १२३४५") == "9822012345"
+    assert digits_only("९०००० १२३४५") == "9000012345"
     assert numbers_in("0450") == {"450"}
 
 
@@ -138,7 +138,7 @@ GUESS = {
 }
 FINAL = {
     **GUESS,
-    "phone": "+919822012345",
+    "phone": "+919000012345",
     "products": [
         {"name": "Chocolate Cake", "unit": "kg", "options": [{"label": "1 KG", "price": 900}]},
         {"name": "Modak", "unit": "box", "options": [{"label": "", "price": 330}]},
@@ -152,7 +152,7 @@ def test_flatten_matches_products_by_normalised_name() -> None:
 
 def test_corrections_list_each_changed_field() -> None:
     changed = {c["field"]: (c["before"], c["after"]) for c in corrections(GUESS, FINAL)}
-    assert changed["phone"] == (None, "+919822012345")
+    assert changed["phone"] == (None, "+919000012345")
     assert changed["products[chocolate cake].options[1 kg].price"] == (850, 900)
     assert "products[brownie].unit" in changed and "products[modak].unit" in changed
     assert "business_name" not in changed
@@ -173,8 +173,8 @@ def test_accuracy_and_correction_rate() -> None:
 @pytest.mark.parametrize(
     "path",
     [
-        "voice_notes/aunt.ogg",
-        "evals/private/aunt.json",
+        "voice_notes/real-owner.ogg",
+        "evals/private/real-case.json",
         "notes/recording.m4a",
         "photos/menu.jpg",
         "data/app.db",

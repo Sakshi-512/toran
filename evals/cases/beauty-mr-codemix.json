@@ -1,7 +1,7 @@
 {
   "id": "beauty-mr-codemix",
   "reviewed": true,
-  "note": "Marathi codemix with Devanagari digits (fake business).",
+  "note": "Marathi codemix with Devanagari digits (fake business). The voice note says only \"Threading\"; the two facials may be one product with two options or two products. Every price must match.",
   "language": "mr",
   "input": {
     "type": "transcript",
@@ -11,36 +11,72 @@
     "business_type": "beauty",
     "phone": "9000000005",
     "area": "Sinhagad Road",
-    "products": [
-      {
-        "name": "Eyebrow threading",
-        "options": [
-          {
-            "price": 40
-          }
-        ]
-      },
-      {
-        "name": "Facial",
-        "options": [
-          {
-            "label": "Fruit facial",
-            "price": 600
-          },
-          {
-            "label": "Gold facial",
-            "price": 1200
-          }
-        ]
-      },
-      {
-        "name": "Bridal makeup",
-        "options": [
-          {
-            "price": 8000
-          }
-        ]
-      }
+    "products_any_of": [
+      [
+        {
+          "name": "Threading",
+          "options": [
+            {
+              "price": 40
+            }
+          ]
+        },
+        {
+          "name": "Facial",
+          "options": [
+            {
+              "label": "Fruit facial",
+              "price": 600
+            },
+            {
+              "label": "Gold facial",
+              "price": 1200
+            }
+          ]
+        },
+        {
+          "name": "Bridal makeup",
+          "options": [
+            {
+              "price": 8000
+            }
+          ]
+        }
+      ],
+      [
+        {
+          "name": "Threading",
+          "options": [
+            {
+              "price": 40
+            }
+          ]
+        },
+        {
+          "name": "Fruit facial",
+          "options": [
+            {
+              "price": 600
+            }
+          ]
+        },
+        {
+          "name": "Gold facial",
+          "options": [
+            {
+              "price": 1200
+            }
+          ]
+        },
+        {
+          "name": "Bridal makeup",
+          "options": [
+            {
+              "price": 8000
+            }
+          ]
+        }
+      ]
     ]
   }
 }

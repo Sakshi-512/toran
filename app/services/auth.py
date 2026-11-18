@@ -1,8 +1,10 @@
 """Owner access: an unguessable private link plus a 4-digit PIN, both stored only as hashes.
 
 Five wrong PINs lock the link for 15 minutes. A correct PIN signs the owner in with the session
-cookie and remembers her device for 30 days (a separate secure, HTTP-only cookie whose token is
-stored only as a hash, so it can be revoked). A remembered device signs her in again, but never
+cookie and remembers the owner's device for 30 days (a separate secure, HTTP-only cookie whose token
+is
+stored only as a hash, so it can be revoked). A remembered device signs the owner in again, but
+never
 counts as a recent PIN: payment details and deleting the site need the PIN again
 (require_recent_pin).
 
@@ -265,7 +267,7 @@ def require_recent_pin(request: Request) -> int:
 
 
 def reissue_access(engine: Engine, business_id: int) -> OwnerAccess:
-    """Team-only: a new private link and PIN after the team has confirmed it is her.
+    """Team-only: a new private link and PIN after the team has confirmed it is the owner.
 
     The old link stops working at once (new hash), every session ends (new session epoch) and
     every remembered device is revoked. The log records only that it happened, never the

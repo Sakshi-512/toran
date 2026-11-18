@@ -84,7 +84,8 @@ def _csrf(client: TestClient, path: str = "/owner") -> str:
 
 
 def publish_form(client: TestClient) -> dict[str, str]:
-    """The publish screen's form as she would send it: CSRF token and the draft she saw."""
+    """The publish screen's form as the owner would send it: CSRF token and the draft the owner
+    saw."""
     page = client.get("/owner/publish").text
     fields = dict(re.findall(r'name="([a-z_]+)" value="([^"]*)"', page))
     return {CSRF_FIELD: fields[CSRF_FIELD], "draft_hash": fields["draft_hash"]}
@@ -242,7 +243,7 @@ def test_queue_position_in_her_language(client: TestClient, engine: Engine, owne
     assert "आप लाइन में 4 नंबर पर हैं, लगभग 2 मिनट।" in client.get("/owner?lang=hi").text
 
 
-def test_reports_are_hers_only(client: TestClient, engine: Engine, owner: int) -> None:
+def test_reports_belong_to_their_owner_only(client: TestClient, engine: Engine, owner: int) -> None:
     other = _business(engine, slug="someone-else")[0]
     with Session(engine) as session:
         mine = TestRun(
@@ -328,7 +329,10 @@ def test_accuracy_report_shows_both_medians(
     main()
     out = capsys.readouterr().out
     assert "System time, voice note to draft scored: median 3.0 minutes" in out
-    assert "Voice note to live website (includes her decision time): median 15.0 minutes" in out
+    assert (
+        "Voice note to live website (includes the owner's decision time): median 15.0 minutes"
+        in out
+    )
     assert business_id
 
 

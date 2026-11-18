@@ -3,11 +3,11 @@
 Only six tools exist (CLAUDE.md rule 9): run_tests, compress_images, add_translation,
 edit_layout, ask_owner and rebuild_draft. Each call is validated here before anything changes:
 - inputs are strict (unknown fields such as "price" or "phone" are rejected),
-- a translation may only carry her confirmed text into another language: the same numbers,
+- a translation may only carry the owner's confirmed text into another language: the same numbers,
   no prices or currency, no phone numbers or links, the right script, and a sensible length,
 - layout choices come from a fixed list and can never touch a fact,
-- questions are fixed profile topics, worded by our own templates in her language.
-Nothing here can change her profile, publish, or spend money.
+- questions are fixed profile topics, worded by our own templates in the owner's language.
+Nothing here can change the owner's profile, publish, or spend money.
 """
 
 import re
@@ -60,7 +60,7 @@ class RunTests(_Input):
 
 
 class RebuildDraft(_Input):
-    """Rebuild the draft from her profile plus the current improvements."""
+    """Rebuild the draft from the owner's profile plus the current improvements."""
 
 
 class CompressImages(_Input):
@@ -68,7 +68,7 @@ class CompressImages(_Input):
 
 
 class AddTranslation(_Input):
-    """Show her confirmed text in another site language."""
+    """Show the owner's confirmed text in another site language."""
 
     target: Literal["product_name", "product_notes", "option_label"]
     product: int = Field(ge=1, le=100)
@@ -85,7 +85,7 @@ class EditLayout(_Input):
 
 
 class AskOwner(_Input):
-    """Save a question only she can answer."""
+    """Save a question only the owner can answer."""
 
     topic: Literal["policy", "lead_time", "delivery_areas", "photos"]
 
@@ -99,7 +99,10 @@ INPUT_MODELS: dict[str, type[_Input]] = {
     "ask_owner": AskOwner,
 }
 
-_WHY = {"type": "string", "description": "One short sentence: why this helps her customers."}
+_WHY = {
+    "type": "string",
+    "description": "One short sentence: why this helps the owner's customers.",
+}
 
 
 def _tool(
@@ -120,9 +123,9 @@ def _tool(
 TOOL_DEFINITIONS: list[dict[str, Any]] = [
     _tool(
         "add_translation",
-        "Show one piece of her confirmed text (a product name, its notes, or a price option "
-        "label) in another site language. Translate only; never add, drop or change numbers, "
-        "prices, sizes, ingredients or claims. Prices are added by the site, not by you.",
+        "Show one piece of the owner's confirmed text (a product name, its notes, or a price "
+        "option label) in another site language. Translate only; never add, drop or change "
+        "numbers, prices, sizes, ingredients or claims. Prices are added by the site, not by you.",
         {
             "target": {"type": "string", "enum": ["product_name", "product_notes", "option_label"]},
             "product": {"type": "integer", "minimum": 1, "description": "Product number, from 1"},
@@ -160,9 +163,10 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
     ),
     _tool(
         "ask_owner",
-        "Save a question for the owner when only she knows the answer: her ordering policy "
-        "(advance, cancellation, delivery charges), how much notice she needs (lead_time), "
-        "where she delivers (delivery_areas), or real photos of her products (photos).",
+        "Save a question for the owner when only the owner knows the answer: their ordering "
+        "policy (advance, cancellation, delivery charges), how much notice they need "
+        "(lead_time), where they deliver (delivery_areas), or real photos of their products "
+        "(photos).",
         {"topic": {"type": "string", "enum": list(QUESTION_TOPICS)}},
         ["topic"],
     ),
@@ -197,7 +201,7 @@ class ToolOutcome:
 
 @dataclass(frozen=True)
 class SiteState:
-    """What the tools may look at: her confirmed profile and the site's current state."""
+    """What the tools may look at: the owner's confirmed profile and the site's current state."""
 
     profile: BusinessProfile
     extras: Extras
@@ -220,13 +224,20 @@ def _is_devanagari(text: str) -> bool:
 def translation_problem(source: str, text: str, lang: str) -> str | None:
     """Why a translation is not allowed, or None if it is fine."""
     if text.strip() == source.strip():
-        return "The text is the same as her original."
+        return "The text is the same as the owner's original."
     if _numbers(text) != _numbers(source):
-        return "Numbers must stay exactly as in her text. Never add, drop or change a number."
+        return (
+            "Numbers must stay exactly as in the owner's text. Never add, drop or change a number."
+        )
     if _FORBIDDEN.search(text):
-        return "No prices, currency, phone numbers or links. The site adds prices from her profile."
+        return (
+            "No prices, currency, phone numbers or links. "
+            "The site adds prices from the owner's profile."
+        )
     if len(text) > max(60, 3 * len(source)):
-        return "Too long for a translation of her text. Translate only what she wrote."
+        return (
+            "Too long for a translation of the owner's text. Translate only what the owner wrote."
+        )
     if lang == "en" and _DEVANAGARI.search(text):
         return "An English translation must be in English letters."
     if lang in ("hi", "mr") and not _is_devanagari(text):
@@ -256,7 +267,7 @@ def _rejected(tool: str, message: str, raw: dict[str, Any], why: str = "") -> To
 
 
 def apply_tool(name: str, raw: dict[str, Any], state: SiteState) -> ToolOutcome:
-    """Validate one tool call and work out its effect. Never changes her profile."""
+    """Validate one tool call and work out its effect. Never changes the owner's profile."""
     raw = raw if isinstance(raw, dict) else {}
     model = INPUT_MODELS.get(name)
     if model is None:
@@ -341,7 +352,9 @@ def _switch_on(layout: Layout, change: str) -> Layout:
 def _compress(call: CompressImages, state: SiteState, raw: dict[str, Any]) -> ToolOutcome:
     layout = state.extras.layout
     if state.photo_count == 0:
-        return _rejected("compress_images", "This site has no photos of hers.", raw, call.why)
+        return _rejected(
+            "compress_images", "This site has no photos from the owner.", raw, call.why
+        )
     if layout.small_images:
         return _rejected("compress_images", "Photos are already compressed.", raw, call.why)
     new = replace(layout, small_images=True)
@@ -365,13 +378,16 @@ def _ask(call: AskOwner, state: SiteState, raw: dict[str, Any]) -> ToolOutcome:
         "photos": False,
     }
     if already[call.topic]:
-        return _rejected("ask_owner", "She has already given this.", raw, call.why)
+        return _rejected("ask_owner", "The owner has already given this.", raw, call.why)
     if call.topic in state.open_topics:
-        return _rejected("ask_owner", "This question is already waiting for her.", raw, call.why)
+        return _rejected(
+            "ask_owner", "This question is already waiting for the owner.", raw, call.why
+        )
     return ToolOutcome(
         "ask_owner",
         True,
-        "Saved. She will see the question on her page; the site will not change until she answers.",
+        "Saved. The owner will see the question on their page; the site will not change until "
+        "they answer.",
         why=call.why,
         change={"kind": "question", "topic": call.topic},
         question=call.topic,

@@ -14,11 +14,11 @@ items 1 to 7 the test was written first and seen to fail before the fix.
 | 2 | Critical | Business ids were reused after a delete, so an old session could open a new business | `AUTOINCREMENT` ids (migration 0013) and a per-business session epoch checked on every request |
 | 3 | Critical | The agent loop called Claude on the event loop, freezing every request while it waited | Claude decisions run in a worker thread |
 | 4 | Critical | Upload size was checked only after the whole body was read | 70 MiB limit in Caddy and in an app middleware (declared or streamed), at most 12 files per form |
-| 5 | Important | Publishing during an agent run could make unseen changes live (rule 2) | Publish is refused while the agent works, and if the draft changed since she saw it |
+| 5 | Important | Publishing during an agent run could make unseen changes live (rule 2) | Publish is refused while the agent works, and if the draft changed since the owner saw it |
 | 6 | Important | A crashed or timed-out agent run or domain lookup blocked the owner for good | Runs always end with a reason; stale runs and lookups are closed |
 | 7 | Important | Each job worker requeued every running job at startup, so jobs could run twice | Stale jobs are requeued once, before any worker starts |
 | 8 | Important | Deleting during a running job left files that a new business could inherit | Two-step delete: everything stops at once; the wipe waits until no job is running, and the web address stays taken until then |
-| 9 | Important | A double tap on Confirm could crash or create a second business | The intake is claimed in one statement; a taken address sends her back to the cards |
+| 9 | Important | A double tap on Confirm could crash or create a second business | The intake is claimed in one statement; a taken address sends the owner back to the cards |
 | 10 | Important | No init process or shared memory for Chromium; root-owned backup folder; backups only by hand | `init: true`, `shm_size: 1gb`, the app makes the daily backup, deploy step for the folder |
 | 11 | Important | The gddy CLI was not in the image, and GoDaddy mocking was tied to `CLAUDE_MOCK` | Pinned gddy 0.2.37 with SHA-256 checks for both Linux builds, `/health` reports it, and `GDDY_MOCK` is its own switch |
 | 12 | Important | A phone number change (where orders go) needed no PIN | The PIN is needed whenever the phone number changes |
@@ -37,7 +37,7 @@ items 1 to 7 the test was written first and seen to fail before the fix.
 | # | Finding | Why it waits |
 | --- | --- | --- |
 | 18 | The PIN lockout never gets stricter | Both the secret link and the PIN are needed, and the link is the strong secret; an increasing lockout comes with the next auth change |
-| 22 | The style preview can be out of date after agent changes | Only her private preview is affected, never the draft or the live site; it fixes itself on the next profile or photo change |
+| 22 | The style preview can be out of date after agent changes | Only the owner's private preview is affected, never the draft or the live site; it fixes itself on the next profile or photo change |
 | 23 | Logout cannot revoke a copied session cookie | The session epoch from item 2 now ends every session on delete or new access; a per-session revoke list is not worth the cost yet |
 | 25 | Chromium runs without its sandbox | It only opens our own generated sites inside the non-root container; documented in `docs/deploy.md` |
 | 26 | Duplicated helpers (get business or 404, latest profile, timezone fixes, IST) | Code quality only; to be merged in one refactor, not mixed with security fixes |

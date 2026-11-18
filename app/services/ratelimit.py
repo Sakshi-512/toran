@@ -9,7 +9,7 @@ Two global limits:
   session (the owner's business, or the IP before sign-in). Normal use, including previews and
   auto-refresh, never comes close; it still stops a misused session.
 - everything else that is public: DEFAULT_LIMIT per IP.
-Forms add their own tighter limits (rate_limit). Every limit reports when she can try again.
+Forms add their own tighter limits (rate_limit). Every limit reports when the owner can try again.
 """
 
 import math
@@ -39,7 +39,7 @@ _limiter = MovingWindowRateLimiter(_storage)
 
 
 class RateLimited(AppError):
-    """Too many requests in the window; retry_after says when she can try again."""
+    """Too many requests in the window; retry_after says when the owner can try again."""
 
     def __init__(self, retry_after: int = 60) -> None:
         super().__init__("error.rate_limited", status_code=429)

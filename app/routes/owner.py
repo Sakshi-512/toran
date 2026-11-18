@@ -1,4 +1,4 @@
-"""Owner pages: PIN entry for the private link, her business page, enquiries and photos."""
+"""Owner pages: PIN entry for the private link, the owner's business page, enquiries and photos."""
 
 from datetime import UTC
 from zoneinfo import ZoneInfo
@@ -126,7 +126,7 @@ def owner_home(request: Request, business_id: int = Depends(require_owner)) -> R
 
 
 def enquiries_for(session: Session, business_id: int, limit: int) -> list[dict[str, object]]:
-    """Her customers' enquiries, newest first, with times in IST (only her own)."""
+    """The owner's customers' enquiries, newest first, with times in IST (only the owner's own)."""
     rows = session.exec(
         select(Enquiry)
         .where(Enquiry.business_id == business_id)

@@ -168,7 +168,7 @@ async def score_business(
         version = _latest_profile(session, business_id)
         if business is None or version is None:
             raise LookupError("business has no profile yet")
-        if business.deleted_at is not None:  # she deleted it: test nothing, write nothing
+        if business.deleted_at is not None:  # the owner deleted it: test nothing, write nothing
             raise LookupError("business deleted")
         target = _target(session, business, payload, settings)
         session.expunge(business)
@@ -224,7 +224,8 @@ async def score_business(
 
 
 def _record_time_to_draft_scored(engine: Engine, business: Business) -> None:
-    """System time from voice-note submission to the first draft score (excludes her decisions)."""
+    """System time from voice-note submission to the first draft score (excludes the owner's
+    decisions)."""
     with Session(engine) as session:
         intake = session.exec(
             select(IntakeSession).where(IntakeSession.business_id == business.id)

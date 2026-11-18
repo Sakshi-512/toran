@@ -129,7 +129,7 @@ def test_cli_failures_never_raise(monkeypatch: pytest.MonkeyPatch, problem: str)
     assert result.error and not result.available
 
 
-# --- her page ---
+# --- the owner's page ---
 
 
 def test_suggestions_show_only_free_names_with_prices(client: TestClient, engine: Engine) -> None:
@@ -298,7 +298,7 @@ def _full_business(engine: Engine, slug: str) -> int:
 def test_delete_needs_the_pin_again(client: TestClient, engine: Engine) -> None:
     business_id, pin = _signed_in(client, engine)
     csrf = _csrf(client, "/owner")
-    with Session(engine) as session:  # her PIN was entered more than 5 minutes ago
+    with Session(engine) as session:  # the owner's PIN was entered more than 5 minutes ago
         pass
     client.cookies.delete("vsa_session")
     client.get("/owner")  # signed in again from the remembered device: no recent PIN
@@ -393,7 +393,7 @@ def test_goodbye_in_three_languages(
     client: TestClient, engine: Engine, lang: str, goodbye: str
 ) -> None:
     _signed_in(client, engine)
-    client.get(f"/owner?lang={lang}")  # she switched language on her page earlier
+    client.get(f"/owner?lang={lang}")  # the owner switched language on the owner's page earlier
     page = client.post("/owner/delete", data={CSRF_FIELD: _csrf(client, "/owner")})
     assert goodbye in page.text
 

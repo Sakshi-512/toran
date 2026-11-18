@@ -26,7 +26,7 @@ def _back(problem: str | None = None) -> RedirectResponse:
 
 @router.post("/domains", include_in_schema=False, dependencies=[Depends(verify_csrf)])
 def find(request: Request, business_id: int = Depends(require_owner)) -> Response:
-    """Her "Show me web addresses" button: a background lookup (cached for an hour)."""
+    """The owner's "Show me web addresses" button: a background lookup (cached for an hour)."""
     try:
         check(request, FORM_LIMIT)
         godaddy.start_lookup(get_engine(), business_id)
@@ -41,7 +41,7 @@ def find(request: Request, business_id: int = Depends(require_owner)) -> Respons
 
 @router.post("/domains/request", include_in_schema=False, dependencies=[Depends(verify_csrf)])
 async def want(request: Request, business_id: int = Depends(require_owner)) -> Response:
-    """Her "I want this one": recorded and emailed to the team, who buy it for her."""
+    """The owner's "I want this one": recorded and emailed to the team, who buy it for the owner."""
     form = await request.form()
     try:
         check(request, FORM_LIMIT)

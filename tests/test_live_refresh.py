@@ -90,8 +90,9 @@ def test_finished_lookup_shows_results_not_checking(client: TestClient, engine: 
 def test_waiting_pages_refresh_without_relying_on_the_url(
     client: TestClient, engine: Engine
 ) -> None:
-    """While a lookup runs, the page reloads itself with a script (keeps her place, works with
-    a #fragment) and, without JavaScript, with a refresh to the address without the fragment."""
+    """While a lookup runs, the page reloads itself with a script (keeps the owner's place, works
+    with a #fragment) and, without JavaScript, with a refresh to the address without the
+    fragment."""
     business_id, token, pin = _business(engine)
     link = f"/o/{token}"
     csrf = re.search(rf'name="{CSRF_FIELD}" value="([^"]+)"', client.get(link).text).group(1)  # type: ignore[union-attr]
@@ -121,7 +122,7 @@ def test_a_stuck_lookup_shows_the_unavailable_note(client: TestClient, engine: E
     card = client.get("/owner").text.split('id="domains"')[1].split("</section>")[0]
     assert "Checking web addresses" not in card
     assert "not available right now" in card
-    assert "Show me web addresses" in card  # she can try again
+    assert "Show me web addresses" in card  # the owner can try again
     client.post("/owner/domains", data={CSRF_FIELD: csrf})
     with Session(engine) as session:
         statuses = [row.status for row in session.exec(select(DomainLookup)).all()]

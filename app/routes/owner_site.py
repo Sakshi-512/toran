@@ -96,14 +96,14 @@ def _rebuild_and_score(business_id: int, theme: str | None = None) -> None:
 
 @router.post("/draft", include_in_schema=False, dependencies=[Depends(verify_csrf)])
 def rebuild(business_id: int = Depends(require_owner)) -> RedirectResponse:
-    """Rebuild the draft from her latest details and photos, then test it again."""
+    """Rebuild the draft from the owner's latest details and photos, then test it again."""
     _rebuild_and_score(business_id)
     return RedirectResponse("/owner#site", status_code=303)
 
 
 @router.get("/styles", include_in_schema=False)
 def styles(request: Request, business_id: int = Depends(require_owner)) -> Response:
-    """The three styles, previewed with her own details."""
+    """The three styles, previewed with the owner's own details."""
     with Session(get_engine()) as session:
         business = _business(session, business_id)
         return render(
@@ -161,7 +161,7 @@ def _media_type(path: str) -> str:
 def style_preview(
     theme: str, path: str, request: Request, business_id: int = Depends(require_owner)
 ) -> Response:
-    """Her site in one style, built in memory (shown in a frame on the styles page)."""
+    """The owner's site in one style, built in memory (shown in a frame on the styles page)."""
     if theme not in THEMES:
         raise AppError("error.not_found", status_code=404)
     with Session(get_engine()) as session:
@@ -181,7 +181,8 @@ def style_preview(
 
 @router.get("/preview/{path:path}", include_in_schema=False)
 def preview(path: str, request: Request, business_id: int = Depends(require_owner)) -> Response:
-    """Her private draft preview: only she can open it, and search engines never index it."""
+    """The owner's private draft preview: only the owner can open it, and search engines never index
+    it."""
     settings = get_settings()
     with Session(get_engine()) as session:
         business = _business(session, business_id)
@@ -199,7 +200,7 @@ def preview(path: str, request: Request, business_id: int = Depends(require_owne
 
 @router.get("/score/{run_id}", include_in_schema=False)
 def report(run_id: int, request: Request, business_id: int = Depends(require_owner)) -> Response:
-    """A Readiness Score report for one of her runs, in her language."""
+    """A Readiness Score report for one of the owner's runs, in the owner's language."""
     with Session(get_engine()) as session:
         run, parts = _own_run(session, run_id, business_id)
         business = _business(session, business_id)
@@ -226,7 +227,7 @@ def _own_run(
 
 @router.get("/score/{run_id}/screenshot.png", include_in_schema=False)
 def report_screenshot(run_id: int, business_id: int = Depends(require_owner)) -> FileResponse:
-    """The phone screenshot of one of her runs."""
+    """The phone screenshot of one of the owner's runs."""
     settings = get_settings()
     with Session(get_engine()) as session:
         run, _ = _own_run(session, run_id, business_id)
@@ -244,7 +245,7 @@ def report_screenshot(run_id: int, business_id: int = Depends(require_owner)) ->
 
 @router.get("/publish", include_in_schema=False)
 def publish_page(request: Request, business_id: int = Depends(require_owner)) -> Response:
-    """The confirmation screen: nothing goes live without her saying yes here (rule 2)."""
+    """The confirmation screen: nothing goes live without the owner saying yes here (rule 2)."""
     with Session(get_engine()) as session:
         business = _business(session, business_id)
         lang = pick_language(request)
@@ -252,7 +253,8 @@ def publish_page(request: Request, business_id: int = Depends(require_owner)) ->
         context["agent_changes"] = pending_changes(session, business_id, lang)
     if not context["has_draft"]:
         raise AppError("publish.no_draft", status_code=409)
-    # The exact draft she is approving; publishing refuses if it changes before she says yes.
+    # The exact draft the owner is approving; publishing refuses if it changes before the owner says
+    # yes.
     context["draft_hash"] = site_hash(pub.folders(get_settings(), business.slug).draft)
     return render(request, "app/owner_publish.html", {"business": business, **context})
 
@@ -261,7 +263,7 @@ def publish_page(request: Request, business_id: int = Depends(require_owner)) ->
 async def publish_confirmed(
     request: Request, business_id: int = Depends(require_owner)
 ) -> RedirectResponse:
-    """She said yes to the draft she saw: publish it and test the live site."""
+    """The owner said yes to the draft the owner saw: publish it and test the live site."""
     approved = str((await request.form()).get("draft_hash", ""))
     pub.publish(get_engine(), get_settings(), business_id, approved)
     queue_score(get_engine(), business_id, "live")
@@ -291,7 +293,7 @@ def online(business_id: int = Depends(require_owner)) -> RedirectResponse:
 
 @router.post("/gallery", include_in_schema=False, dependencies=[Depends(verify_csrf)])
 async def gallery_choice(request: Request, business_id: int = Depends(require_owner)) -> Response:
-    """Her separate yes (or no) to showing her live site in the public gallery."""
+    """The owner's separate yes (or no) to showing the owner's live site in the public gallery."""
     form = await request.form()
     with Session(get_engine()) as session:
         business = _business(session, business_id)

@@ -46,7 +46,7 @@ def main() -> int:
         "System time, voice note to draft scored", [i.seconds_to_draft_scored for i in intakes]
     )
     _median_minutes(
-        "Voice note to live website (includes her decision time)",
+        "Voice note to live website (includes the owner's decision time)",
         [i.seconds_to_live for i in intakes],
     )
     return 0

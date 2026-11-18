@@ -54,7 +54,7 @@ def team_email(
         when = str(payload.get("at", ""))
         return (
             f"{settings.app_name}: a business deleted its site and data",
-            "A business owner deleted her website and all her data from the owner page.\n"
+            "A business owner deleted their website and all their data from the owner page.\n"
             f"Time (UTC): {when}\n"
             "No personal details are included in this message.\n",
         )
@@ -70,10 +70,11 @@ def team_email(
                 f"{business.display_name} asked for a web address in the owner app.\n\n"
                 f"Domain: {request.domain}\n"
                 f"First-year price shown (before tax): {request.price_usd:.2f} {request.currency}\n"
-                f"She approved it: {approved.astimezone(IST):%d/%m/%Y %H:%M} IST\n"
-                f"Her site: {site_origin(business.slug, settings)}/\n\n"
+                f"The owner approved it: {approved.astimezone(IST):%d/%m/%Y %H:%M} IST\n"
+                f"The owner's site: {site_origin(business.slug, settings)}/\n\n"
                 "To do: buy it on godaddy.com with the hackathon credit, point its DNS at the "
-                "server (gddy CLI), then tell her it is ready. Nothing was bought by the app.\n"
+                "server (gddy CLI), then tell the owner it is ready. "
+                "Nothing was bought by the app.\n"
             )
             domain = request.domain
             request.notified_at = utcnow()

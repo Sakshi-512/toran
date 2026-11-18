@@ -1,8 +1,9 @@
-"""My details: the owner changes her phone, area or ordering policy after confirming.
+"""My details: the owner changes the phone number, area or ordering policy after confirming.
 
 Only these three fields (never products or prices). Each save is a new profile version, so
 undo still works, and the draft is rebuilt and tested again. A new phone number decides where
-her customers' orders go, so changing it needs her PIN (checked by the route). Her text is
+customers' orders go, so changing it needs the owner's PIN (checked by the route). The owner's text
+is
 data: it only fills these fields, and the same checks as the confirmation cards apply (phone
 format, no address).
 """
@@ -36,7 +37,7 @@ class Details:
 
 
 def current(session: Session, business_id: int) -> BusinessProfile:
-    """Her latest confirmed profile."""
+    """The owner's latest confirmed profile."""
     version = pub.latest_profile(session, business_id)
     if version is None:
         raise AppError("error.not_found", status_code=404)
@@ -61,7 +62,7 @@ def check(details: Details) -> dict[str, str]:
 
 
 def phone_changes(engine: Engine, business_id: int, phone: str) -> bool:
-    """True if saving this phone number would change where her customers' orders go."""
+    """True if saving this phone number would change where the owner's customers' orders go."""
     with Session(engine) as session:
         old = current(session, business_id).phone
     return _comparable(phone) != _comparable(old)

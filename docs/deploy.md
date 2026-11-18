@@ -94,14 +94,14 @@ exist (their agent runs, AI checks and web addresses). When the cap is reached:
 
 ## Giving an owner a new link and PIN
 
-Her link and PIN are shown once, when she confirms. If she lost them:
+The owner's link and PIN are shown once, when the owner confirms. If the owner lost them:
 
-1. Confirm it is her: call or WhatsApp the phone number on her live site (never a number given in
-   the request). If her site has no number, use the email thread from her contact form message.
-2. `make server-access slug=<her web address>` asks you to type `confirmed`, then prints a new
-   link and PIN once. The old link stops working at once, she is signed out everywhere, and
+1. Confirm it is the owner: call or WhatsApp the phone number on the owner's live site (never a number given in
+   the request). If the owner's site has no number, use the email thread from the owner's contact form message.
+2. `make server-access slug=<web address>` asks you to type `confirmed`, then prints a new
+   link and PIN once. The old link stops working at once, the owner is signed out everywhere, and
    remembered devices are revoked. The log records only that access was reissued.
-3. Give them to her directly. Do not store them anywhere.
+3. Give them to the owner directly. Do not store them anywhere.
 
 ## Release with a tagged image
 
