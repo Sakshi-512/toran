@@ -336,7 +336,7 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
 .home .how-step::before { content: counter(step); counter-increment: step; font-family: var(--display);
   font-size: 44px; line-height: 1; color: var(--terracotta); }
 .home .how-step p { color: var(--home-muted); }
-.home .how-icon { background: var(--sand); color: var(--ink); }
+.home .how-icon { background: var(--pill); color: var(--ink); }
 .home .how-step:last-child { background: var(--ink); color: var(--cream); }
 .home .how-step:last-child::before, .home .how-step:last-child p { color: var(--cream); }
 .home .how-step:last-child h3 { color: var(--figure); }
