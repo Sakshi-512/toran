@@ -11,6 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 from starlette.responses import Response
 
 from app.config import get_settings
+from app.services import field_rules, web_address
 from app.services.i18n import SUPPORTED, normalise_language, pick_language, t
 from app.services.security import CSRF_FIELD, SPAM_TRAP_FIELD, csrf_token
 
@@ -39,6 +40,8 @@ def _build() -> Jinja2Templates:
         CSRF_FIELD=CSRF_FIELD,
         SPAM_TRAP_FIELD=SPAM_TRAP_FIELD,
         LANGUAGES=SUPPORTED,
+        NAME_MAX=field_rules.NAME_MAX,
+        ADDRESS_MAX=web_address.MAX_LENGTH,
         static_url=static_url,
     )
     return Jinja2Templates(env=env)

@@ -30,6 +30,7 @@ from app.services.address_guard import looks_like_address
 from app.services.auth import OwnerAccess, hash_token, issue_access
 from app.services.errors import AppError
 from app.services.extract import FIELDS, ExtractResult, extract_profile
+from app.services.field_rules import business_name_problem
 from app.services.i18n import normalise_language, t
 from app.services.jobs import Runner, enqueue
 from app.services.numbers import ascii_digits
@@ -407,6 +408,8 @@ def validate_draft(
     """Final checks before confirming: required name, phone, no addresses, free web address."""
     if not draft["business_name"]:
         errors.add("business_name", "intake.name_needed")
+    elif problem := business_name_problem(draft["business_name"]):
+        errors.add("business_name", problem)
     if draft["phone"]:
         try:
             draft["phone"] = normalise_phone(draft["phone"])

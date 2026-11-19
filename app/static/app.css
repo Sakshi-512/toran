@@ -365,3 +365,9 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
   font-size: 24px; margin: 0; }
 .home .proof-band > .facts-group:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .home .proof-band .stat strong.fact-words { font-size: clamp(28px, 4vw, 36px); line-height: 1.2; overflow-wrap: anywhere; }
+
+/* Back links, required markers. */
+.back { margin: 0 0 4px; }
+.back-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 700; }
+.req { color: var(--accent); font-weight: 700; }
+.req-legend { margin: 0; color: var(--muted); }

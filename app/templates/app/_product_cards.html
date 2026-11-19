@@ -2,14 +2,14 @@
   {% for p in draft.products %}{% set i = loop.index0 %}
   <section class="card product"{% if new_row == "p" ~ i %} id="new"{% endif %}>
     <label for="p{{ i }}-name">{{ t('confirm.product_name', lang) }}</label>
-    <input id="p{{ i }}-name" name="p{{ i }}_name" value="{{ p.name }}" maxlength="120">{{ err('p' ~ i ~ '_name') }}
+    <input id="p{{ i }}-name" name="p{{ i }}_name" value="{{ p.name }}" maxlength="120" enterkeyhint="next">{{ err('p' ~ i ~ '_name') }}
     <label for="p{{ i }}-unit">{{ t('confirm.unit', lang) }}</label>
     <select id="p{{ i }}-unit" name="p{{ i }}_unit">{% for u in ('piece','box','kg','month','hand','service') %}<option value="{{ u }}"{% if p.unit == u %} selected{% endif %}>{{ t('site.unit.' ~ u, lang) }}</option>{% endfor %}</select>
     <input type="hidden" name="p{{ i }}_option_count" value="{{ p.options|length }}">
     {% for o in p.options %}{% set j = loop.index0 %}
     <div class="option-row"{% if new_row == "p" ~ i ~ "_o" ~ j %} id="new"{% endif %}>
-      <input name="p{{ i }}_o{{ j }}_label" value="{{ o.label }}" maxlength="80" aria-label="{{ t('confirm.option_label', lang) }}" placeholder="{{ t('confirm.option_label', lang) }}">{{ err('p' ~ i ~ '_o' ~ j ~ '_label') }}
-      <input name="p{{ i }}_o{{ j }}_price" value="{{ o.price }}" inputmode="numeric" maxlength="12" aria-label="{{ t('confirm.option_price', lang) }}" placeholder="{{ t('confirm.option_price', lang) }}">
+      <input name="p{{ i }}_o{{ j }}_label" value="{{ o.label }}" maxlength="80" enterkeyhint="next" aria-label="{{ t('confirm.option_label', lang) }}" placeholder="{{ t('confirm.option_label', lang) }}">{{ err('p' ~ i ~ '_o' ~ j ~ '_label') }}
+      <input name="p{{ i }}_o{{ j }}_price" value="{{ o.price }}" inputmode="numeric" maxlength="12" enterkeyhint="next" aria-label="{{ t('confirm.option_price', lang) }}" placeholder="{{ t('confirm.option_price', lang) }}">
     </div>
     {% if from_photo and o.price != '' %}<p class="from-photo">{{ t('confirm.from_photo', lang) }}</p>{% endif %}
     {{ err('p' ~ i ~ '_o' ~ j ~ '_price') }}

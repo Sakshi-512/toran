@@ -3,11 +3,13 @@
 {% endblock %}
 {% macro err(name) %}{% if errors.get(name) %}<p class="field-error" role="alert">{{ t(errors[name], lang) }}</p>{% endif %}{% endmacro %}
 {% block content %}
+<p class="back"><a class="back-link" href="/start"><span aria-hidden="true">←</span> {{ t('nav.back', lang) }}</a></p>
 <h1>{{ t('confirm.title', lang) }}</h1>
 <p>{{ t('confirm.intro', lang) }}</p>
 {% if errors %}<p class="notice-error" role="alert">{{ t('confirm.fix_errors', lang) }}</p>{% endif %}
 <form class="form cards" method="post" action="/start/{{ token }}/confirm" enctype="multipart/form-data">
   <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
+  <p class="req-legend"><span class="req" aria-hidden="true">*</span> {{ t('form.required', lang) }}</p>
 
   {% if draft.missing %}
   <section class="card questions" aria-labelledby="q-title">
@@ -17,18 +19,18 @@
   </section>
   {% endif %}
 
-  <section class="card"><label for="f-name">{{ t('confirm.name', lang) }}</label>
-    <input id="f-name" name="business_name" value="{{ draft.business_name }}" maxlength="120">{{ err('business_name') }}</section>
+  <section class="card"><label for="f-name">{{ t('confirm.name', lang) }} <span class="req" aria-hidden="true">*</span></label>
+    <input id="f-name" name="business_name" value="{{ draft.business_name }}" maxlength="{{ NAME_MAX }}" aria-required="true" enterkeyhint="next">{{ err('business_name') }}</section>
 
-  <section class="card"><label for="f-address">{{ t('confirm.web_address', lang) }}</label>
-    <div class="address field-group"><input id="f-address" name="web_address" value="{{ address }}" maxlength="40" pattern="[a-z0-9-]+" autocapitalize="none" spellcheck="false"><span class="field-suffix">.{{ base_domain }}</span></div>
+  <section class="card"><label for="f-address">{{ t('confirm.web_address', lang) }} <span class="req" aria-hidden="true">*</span></label>
+    <div class="address field-group"><input id="f-address" name="web_address" value="{{ address }}" maxlength="{{ ADDRESS_MAX }}" aria-required="true" enterkeyhint="next" pattern="[a-z0-9-]+" autocapitalize="none" spellcheck="false"><span class="field-suffix">.{{ base_domain }}</span></div>
     <p class="muted">{{ t('confirm.web_address_hint', lang) }}</p>{{ err('web_address') }}</section>
 
   <section class="card"><label for="f-type">{{ t('confirm.type', lang) }}</label>
     <select id="f-type" name="business_type">{% for k in ('bakery','tailoring','tuition','mehendi','beauty','other') %}<option value="{{ k }}"{% if draft.business_type == k %} selected{% endif %}>{{ t('confirm.type.' ~ k, lang) }}</option>{% endfor %}</select></section>
 
   <section class="card"><label for="f-phone">{{ t('confirm.phone', lang) }}</label>
-    <input id="f-phone" name="phone" value="{{ draft.phone }}" inputmode="tel" maxlength="20">{{ err('phone') }}
+    <input id="f-phone" name="phone" value="{{ draft.phone }}" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" enterkeyhint="next">{{ err('phone') }}
     {% if not draft.phone %}
     {% if sample %}<p class="muted">{{ t('phone.sample_note', lang) }}</p>
     {% else %}
@@ -37,7 +39,7 @@
     {% endif %}{% endif %}</section>
 
   <section class="card"><label for="f-area">{{ t('confirm.area', lang) }}</label>
-    <input id="f-area" name="area" value="{{ draft.area }}" maxlength="120">{{ err('area') }}
+    <input id="f-area" name="area" value="{{ draft.area }}" maxlength="120" enterkeyhint="next">{{ err('area') }}
     <label for="f-delivery">{{ t('confirm.delivery', lang) }}</label>
     <textarea id="f-delivery" name="delivery_areas" rows="2">{{ draft.delivery_areas|join(', ') }}</textarea>{{ err('delivery_areas') }}</section>
 
@@ -50,7 +52,7 @@
   {% set cards_action = "/start/" ~ token ~ "/confirm" %}{% include "app/_product_cards.html" %}
 
   <section class="card"><label for="f-lead">{{ t('confirm.lead_time', lang) }}</label>
-    <input id="f-lead" name="lead_time" value="{{ draft.lead_time }}" maxlength="120">
+    <input id="f-lead" name="lead_time" value="{{ draft.lead_time }}" maxlength="120" enterkeyhint="next">
     <label for="f-policy">{{ t('confirm.policy', lang) }}</label>
     <textarea id="f-policy" name="policy" rows="3" maxlength="500">{{ draft.policy }}</textarea></section>
 

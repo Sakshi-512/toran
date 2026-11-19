@@ -208,6 +208,9 @@ stored, how long, and the right to delete). Please read them first.
 | `confirm.fix_errors` | Please fix the highlighted details. | निशान लगी जानकारी ठीक कर दीजिए। | कृपया ठळक केलेली माहिती दुरुस्त करा. |  |
 | `intake.price_invalid` | Please write the price as a number, for example 450. | दाम अंकों में लिखिए, जैसे 450। | कृपया दर अंकांमध्ये लिहा, उदा. 450. |  |
 | `intake.price_needed` | Please add a price, or remove this row. | दाम लिखिए, या यह लाइन हटा दीजिए। | कृपया दर लिहा, किंवा ही ओळ काढा. |  |
+| `intake.name_length` | Business name: please use 2 to 120 characters. | व्यवसाय का नाम: 2 से 120 अक्षर रखिए। | व्यवसायाचे नाव: 2 ते 120 अक्षरे ठेवा. |  |
+| `intake.name_chars` | Business name: please use only letters, numbers, spaces and & ' - . , ( ) / | व्यवसाय का नाम: सिर्फ़ अक्षर, अंक, स्पेस और & ' - . , ( ) / इस्तेमाल कीजिए। | व्यवसायाचे नाव: फक्त अक्षरे, अंक, स्पेस आणि & ' - . , ( ) / वापरा. |  |
+| `intake.name_letter` | Business name: please include at least one letter. | व्यवसाय का नाम: कम से कम एक अक्षर होना चाहिए। | व्यवसायाचे नाव: किमान एक अक्षर असायला हवे. |  |
 | `intake.name_needed` | Please write a name. | नाम लिखिए। | कृपया नाव लिहा. |  |
 | `intake.phone_invalid` | Please check this phone number. | यह फ़ोन नंबर एक बार जाँच लीजिए। | कृपया हा फोन नंबर तपासा. |  |
 | `intake.address_not_allowed` | Please write your area name only, not your full address. | सिर्फ़ इलाके का नाम लिखिए, पूरा पता नहीं। | कृपया फक्त भागाचे नाव लिहा, पूर्ण पत्ता नाही. |  |
@@ -701,6 +704,8 @@ stored, how long, and the right to delete). Please read them first.
 
 | Key | English | Hindi | Marathi | Fix |
 | --- | --- | --- | --- | --- |
+| `nav.back` | Back | वापस | मागे |  |
+| `form.required` | Required | ज़रूरी | आवश्यक |  |
 | `menu.title` | Edit my menu and prices | मेरा मेन्यू और दाम बदलें | माझा मेन्यू आणि दर बदला |  |
 | `menu.intro` | Change your products, options and prices. Prices are whole rupees. Your draft is rebuilt and tested again after you save. | अपने प्रोडक्ट, विकल्प और दाम बदलें। दाम पूरे रुपयों में लिखें। सेव करने के बाद आपका ड्राफ़्ट फिर से बनेगा और जाँचा जाएगा। | तुमची उत्पादने, पर्याय आणि दर बदला. दर पूर्ण रुपयांत लिहा. सेव्ह केल्यावर तुमचा ड्राफ्ट पुन्हा तयार होईल आणि तपासला जाईल. |  |
 | `menu.save` | Save my menu | मेन्यू सेव करें | मेन्यू सेव्ह करा |  |

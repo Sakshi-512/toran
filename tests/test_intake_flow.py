@@ -1,4 +1,5 @@
 import asyncio
+import html
 import re
 from pathlib import Path
 from typing import Any
@@ -57,7 +58,7 @@ def _cards(client: TestClient, token: str) -> tuple[str, dict[str, str]]:
     page = client.get(f"/start/{token}/confirm").text
     # Text and hidden inputs only: checkboxes such as "Remove this" are not ticked.
     fields = {
-        k: v
+        k: html.unescape(v)  # what a browser would send
         for k, v in re.findall(r'name="([^"]+)" value="([^"]*)"', page)
         if not k.endswith("_remove") and k not in ("languages", "order_methods", "action")
     }

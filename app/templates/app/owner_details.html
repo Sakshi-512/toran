@@ -2,7 +2,7 @@
 {% block title %}{{ t('details.title', lang) }} · {{ business.display_name }}{% endblock %}
 {% macro err(name) %}{% if errors.get(name) %}<p class="field-error" role="alert">{{ t(errors[name], lang) }}</p>{% endif %}{% endmacro %}
 {% block content %}
-<p><a class="text-link" href="/owner">{{ t('owner.back', lang) }}</a></p>
+<p class="back"><a class="back-link" href="/owner"><span aria-hidden="true">←</span> {{ t('owner.back', lang) }}</a></p>
 <h1>{{ t('details.title', lang) }}</h1>
 <p>{{ t('details.intro', lang) }}</p>
 {% if saved %}<p class="notice-ok" role="status">{{ t('details.saved', lang) }}</p>{% endif %}
@@ -11,7 +11,7 @@
   <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
   <section class="card" id="phone">
     <label for="d-phone">{{ t('confirm.phone', lang) }}</label>
-    <input id="d-phone" name="phone" value="{{ v.phone }}" inputmode="tel" maxlength="20" autocomplete="tel">
+    <input id="d-phone" name="phone" value="{{ v.phone }}" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" enterkeyhint="next">
     {{ err('phone') }}
     <label for="d-pin">{{ t('details.pin_label', lang) }}</label>
     <input id="d-pin" name="pin" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="one-time-code" class="pin-input">
@@ -24,7 +24,7 @@
   <section class="card" id="area">
     <label for="d-area">{{ t('details.area', lang) }}</label>
     <p class="muted">{{ t('details.area_hint', lang) }}</p>
-    <input id="d-area" name="area" value="{{ v.area }}" maxlength="120">
+    <input id="d-area" name="area" value="{{ v.area }}" maxlength="120" enterkeyhint="next">
     {{ err('area') }}
   </section>
   <section class="card" id="policy">
