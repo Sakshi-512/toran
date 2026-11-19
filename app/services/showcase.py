@@ -5,6 +5,7 @@ Anything produced in mock mode is excluded: a Claude call counts only if it was 
 """
 
 import io
+import logging
 import statistics
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
@@ -13,6 +14,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from PIL import Image
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 from sqlalchemy import exists
 from sqlmodel import Session, col, select
 
@@ -20,6 +22,7 @@ from app.config import Settings
 from app.models import AgentRun, Business, ClaudeUsage, IntakeSession, TestRun
 from app.services.accuracy import accuracy
 from app.services.address_guard import looks_like_address
+from app.services.i18n import SUPPORTED
 from app.services.publish import latest_profile
 
 MIN_REAL_FOR_ACCURACY = 2
@@ -27,6 +30,40 @@ IST = ZoneInfo("Asia/Kolkata")
 THUMB_WIDTH = 240
 THUMB_HEIGHT = 400
 THUMB_QUALITY = 70
+# The latest real eval run, copied by hand from evals/reports/ (see evals/README.md).
+EVAL_SUMMARY = Path(__file__).resolve().parents[2] / "evals" / "latest.json"
+
+logger = logging.getLogger(__name__)
+
+
+class EvalSummary(BaseModel):
+    """Totals of the latest real eval run on the reviewed test cases (not live traffic)."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    checks_passed: int = Field(ge=0)
+    checks_total: int = Field(gt=0)
+    cases: int = Field(gt=0)
+    prices_exact: bool
+    run_date: date
+
+    @model_validator(mode="after")
+    def _passed_within_total(self) -> "EvalSummary":
+        if self.checks_passed > self.checks_total:
+            raise ValueError("checks_passed is more than checks_total")
+        return self
+
+
+def load_eval_summary(path: Path | None = None) -> EvalSummary | None:
+    """The eval summary, or None if the file is missing or not valid (the figure is hidden)."""
+    path = path or EVAL_SUMMARY
+    try:
+        return EvalSummary.model_validate_json(path.read_bytes())
+    except FileNotFoundError:
+        return None
+    except (OSError, ValidationError, ValueError) as error:
+        logger.warning("eval_summary_invalid", extra={"error_type": type(error).__name__})
+        return None
 
 
 @dataclass(frozen=True)
@@ -44,14 +81,22 @@ class Stats:
     check_date: date | None = None
     draft_date: date | None = None
     accuracy_date: date | None = None
+    # Facts and test results, shown in their own group (not live measurements).
+    languages: int = len(SUPPORTED)
+    eval: EvalSummary | None = None
 
     @property
     def any(self) -> bool:
-        """True if at least one number is measured."""
+        """True if at least one live number is measured."""
         return any(
             v is not None
             for v in (self.check_cost_usd, self.minutes_to_tested_draft, self.field_accuracy)
         )
+
+    @property
+    def facts_any(self) -> bool:
+        """True if the facts and test results group has something to show."""
+        return self.languages > 0 or self.eval is not None
 
 
 def _real_intake_ids(session: Session) -> set[int]:
@@ -101,6 +146,7 @@ def home_stats(session: Session) -> Stats:
         check_date=_newest([when for _, when in checks]),
         draft_date=_newest([i.created_at for i in timed]),
         accuracy_date=_newest([i.created_at for i in real_voice]) if enough else None,
+        eval=load_eval_summary(),
     )
 
 

@@ -357,3 +357,7 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
   .home .hero-copy, .home .phone-figure { animation: home-rise .4s ease-out both; }
   @keyframes home-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 }
+.home .facts-group { margin-top: 32px; padding-top: 28px; border-top: 1px solid rgba(251, 247, 243, .25); }
+.home .proof-band .facts-group > :is(h2, h3) { color: var(--cream); font-family: var(--display); font-weight: 400;
+  font-size: 24px; margin: 0; }
+.home .proof-band > .facts-group:first-child { margin-top: 0; padding-top: 0; border-top: 0; }

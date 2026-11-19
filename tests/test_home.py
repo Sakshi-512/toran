@@ -3,6 +3,7 @@ one-tap samples, option cards, three languages and the page weight budget."""
 
 import asyncio
 import io
+import json
 import re
 from datetime import timedelta
 from pathlib import Path
@@ -24,7 +25,8 @@ from app.models import (
     utcnow,
 )
 from app.routes.intake import _first_file
-from app.services.i18n import t
+from app.services import showcase
+from app.services.i18n import SUPPORTED, t
 from app.services.security import CSRF_FIELD
 from tests.test_publish import _business
 
@@ -340,3 +342,89 @@ def test_headline_highlight_handles_one_word_and_empty(headline: str, expected: 
         line.replace("t('home.headline', lang)", "headline") + h1
     )
     assert template.render(headline=headline).strip() == f"<h1>{expected}</h1>"
+
+
+# --- facts and test results ---------------------------------------------------------------------
+
+EVAL_OK = {
+    "checks_passed": 77,
+    "checks_total": 81,
+    "cases": 12,
+    "prices_exact": True,
+    "run_date": "2026-11-03",
+}
+
+
+def _eval_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, content: str | None) -> None:
+    path = tmp_path / "latest.json"
+    if content is not None:
+        path.write_text(content, encoding="utf-8")
+    monkeypatch.setattr(showcase, "EVAL_SUMMARY", path)
+
+
+def _facts(page: str) -> str:
+    return page.split('class="facts-group"')[1].split("</section>")[0]
+
+
+def test_facts_show_languages_and_eval_from_their_sources(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _eval_file(tmp_path, monkeypatch, json.dumps(EVAL_OK))
+    facts = _facts(client.get("/").text)
+    assert "Facts and test results" in facts
+    assert f"{len(SUPPORTED)} languages" in facts
+    assert "77/81" in facts and "on 12 reviewed test cases, not live traffic" in facts
+    assert "last run 03/11/2026" in facts
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        None,
+        "not json",
+        json.dumps({**EVAL_OK, "checks_passed": 90}),
+        json.dumps({**EVAL_OK, "run_date": "yesterday"}),
+        json.dumps({k: v for k, v in EVAL_OK.items() if k != "cases"}),
+    ],
+)
+def test_missing_or_bad_eval_summary_hides_only_that_figure(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, content: str | None
+) -> None:
+    _eval_file(tmp_path, monkeypatch, content)
+    facts = _facts(client.get("/").text)
+    assert f"{len(SUPPORTED)} languages" in facts
+    assert "Extraction checks passed" not in facts
+
+
+def test_without_live_numbers_only_the_facts_group_shows(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _eval_file(tmp_path, monkeypatch, json.dumps(EVAL_OK))
+    page = client.get("/").text
+    assert "Measured on the live system" not in page and "Real numbers from real use" not in page
+    assert '<h2 id="facts-title">Facts and test results</h2>' in page
+    assert 'aria-labelledby="facts-title"' in page
+
+
+def test_with_live_numbers_both_groups_show_live_first(
+    client: TestClient, engine: Engine, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _eval_file(tmp_path, monkeypatch, json.dumps(EVAL_OK))
+    _usage(engine, "ai_checks", 0.04, mock=False)
+    page = client.get("/").text
+    assert page.index("Measured on the live system") < page.index("Facts and test results")
+    assert '<h3 id="facts-title">' in page
+
+
+def test_no_figure_is_hard_coded_in_the_template() -> None:
+    source = (Path(__file__).parents[1] / "app/templates/app/home.html").read_text("utf-8")
+    strip = source.split('class="home-section home-band measured proof-band"')[1].split(
+        "</section>"
+    )[0]
+    allowed = r"'%\.\d+f'|\* 100|== 1\b|'%d/%m/%Y'|\bh[23]\b"  # formats, plural switch, tags
+    assert not re.search(r"\d", re.sub(allowed, "", strip))
+
+
+def test_committed_eval_summary_is_valid() -> None:
+    summary = showcase.load_eval_summary()
+    assert summary is not None and summary.checks_passed <= summary.checks_total

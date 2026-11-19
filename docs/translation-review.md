@@ -95,6 +95,11 @@ stored, how long, and the right to delete). Please read them first.
 | `home.built_for` | Built for the GoDaddy Inclusive Innovation Hackathon 2026, powered by Claude and GoDaddy. | GoDaddy Inclusive Innovation Hackathon 2026 के लिए बनाया गया, Claude और GoDaddy की मदद से। | GoDaddy Inclusive Innovation Hackathon 2026 साठी बनवले, Claude आणि GoDaddy च्या मदतीने. |  |
 | `home.back` | Back to the home page | होम पेज पर वापस | होम पेजवर परत |  |
 | `home.demo_panel_note` | {name} is a demo business. Every step below was decided by Toran's agent on its own. | {name} एक डेमो व्यवसाय है। नीचे का हर कदम Toran के एजेंट ने खुद तय किया। | {name} हा एक डेमो व्यवसाय आहे. खालील प्रत्येक पाऊल Toran च्या एजंटने स्वतःहून ठरवले. |  |
+| `home.facts_title` | Facts and test results | तथ्य और टेस्ट के नतीजे | तथ्य आणि टेस्टचे निकाल |  |
+| `home.stat_languages` | {n} languages | {n} भाषाएँ | {n} भाषा |  |
+| `home.stat_languages_note` | Marathi, Hindi and English, spoken or typed | मराठी, हिंदी और अंग्रेज़ी, बोलकर या लिखकर | मराठी, हिंदी आणि इंग्रजी, बोलून किंवा लिहून |  |
+| `home.stat_eval` | Extraction checks passed | जानकारी निकालने की जाँचें पास हुईं | माहिती काढण्याच्या तपासण्या पास झाल्या |  |
+| `home.stat_eval_note` | on {cases} reviewed test cases, not live traffic · last run {date} | {cases} जाँचे हुए टेस्ट केस पर, असली इस्तेमाल पर नहीं · आख़िरी बार {date} को चलाया गया | {cases} तपासलेल्या टेस्ट केसवर, खऱ्या वापरावर नाही · शेवटचे {date} रोजी चालवले |  |
 | `home.measured_title` | Measured on the live system | चालू सिस्टम पर मापा गया | चालू प्रणालीवर मोजलेले |  |
 | `home.measured_intro` | Real numbers from real use, updated as people use {app_name}. | असली इस्तेमाल से आए असली आँकड़े, जो लोगों के {app_name} इस्तेमाल करने के साथ अपडेट होते हैं। | खऱ्या वापरातून आलेले खरे आकडे, लोक {app_name} वापरतात तसे अपडेट होतात. |  |
 | `home.measured_on` | last measured {date} | आख़िरी बार {date} को मापा गया | शेवटचे {date} रोजी मोजले |  |
