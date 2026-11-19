@@ -29,6 +29,8 @@ COPY tests/fixtures/claude ./tests/fixtures/claude
 COPY tests/fixtures/gddy ./tests/fixtures/gddy
 # Customer checklists are read by the AI checks.
 COPY docs/checklists.md ./docs/checklists.md
+# Totals of the latest real eval run, shown on the home page (no case names or reports).
+COPY evals/latest.json ./evals/latest.json
 
 # pwuser is the image's built-in non-root user.
 RUN mkdir -p /app/data /app/backups && chown -R pwuser:pwuser /app/data /app/backups

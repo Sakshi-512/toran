@@ -9,6 +9,7 @@ tests
 !tests/fixtures/claude
 !tests/fixtures/gddy
 evals
+!evals/latest.json
 docs
 !docs/checklists.md
 **/__pycache__
