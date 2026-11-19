@@ -320,10 +320,14 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
 
 /* 2. Proof strip: two groups (live figures, then facts and test results) with one item style. */
 .home .proof-band { --band: var(--ink); --hair: rgba(251, 247, 243, .22); color: var(--cream); border-top: 0; padding: 40px 0; }
-.home .proof-band :is(h2, h3) { color: var(--cream); font-family: var(--display); font-weight: 400;
-  font-size: 24px; line-height: 1.3; margin: 0; }
+.home .proof-band :is(h2, h3) { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--figure);
+  font-family: var(--font); font-weight: 700; font-size: 14px; line-height: 1.4; }
+/* A small section label: a short line, then the words. */
+.home .proof-band :is(h2, h3)::before { content: ""; flex: none; width: 28px; height: 3px; background: var(--figure); }
+/* Capitals and letter-spacing in English only: spacing can break Devanagari conjuncts. */
+html[lang="en"] .home .proof-band :is(h2, h3) { text-transform: uppercase; letter-spacing: .12em; }
 .home .proof-band > p.muted { color: var(--cream); font-size: inherit; margin: 8px 0 0; }
-.home .proof-band .stats { margin: 20px 0 0; gap: 24px 48px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.home .proof-band .stats { margin: 28px 0 0; gap: 24px 48px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 /* Each item is a subgrid of figure / label / note, so a row's figures and labels line up. */
 .home .proof-band .stat { background: transparent; padding: 0; border-radius: 0; display: grid; grid-row: span 3;
   grid-template-rows: subgrid; row-gap: 4px; align-content: start; min-width: 0; }
@@ -336,8 +340,8 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
 .home .proof-band > .facts-group:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 @media (max-width: 720px) {
   .home .proof-band { padding: 32px 0; }
-  .home .proof-band :is(h2, h3) { font-size: 22px; }
-  .home .proof-band .stats { margin-top: 16px; gap: 16px 20px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home .proof-band :is(h2, h3) { font-size: 13px; }
+  .home .proof-band .stats { margin-top: 20px; gap: 16px 20px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home .proof-band .stat strong { font-size: clamp(28px, 8.5vw, 36px); }
   .home .proof-band .stat dt { font-size: 15px; line-height: 1.35; }
   .home .proof-band .stat dd .muted { font-size: 14px; line-height: 1.35; }
