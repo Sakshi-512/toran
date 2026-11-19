@@ -147,6 +147,7 @@ def _cards(
     errors: dict[str, str] | None = None,
     status_code: int = 200,
     sample: bool = False,
+    new_row: str = "",
 ) -> Response:
     return render(
         request,
@@ -159,6 +160,7 @@ def _cards(
             "errors": errors or {},
             "photo_error": (errors or {}).get("photos"),
             "sample": sample,
+            "new_row": new_row,  # the row an add button just made: the page lands on it
         },
         status_code=status_code,
     )
@@ -202,19 +204,22 @@ async def confirm_submit(token: str, request: Request) -> Response:
             raise AppError("error.not_found", status_code=404)
         source = intake.source
         sample = svc.is_sample_intake(intake)
+        new_row = ""
         if action == "add_product":
             draft["products"].append(
                 {"name": "", "unit": "piece", "options": [{"label": "", "price": ""}], "notes": ""}
             )
+            new_row = f"p{len(draft['products']) - 1}"
         elif action.startswith("add_option:") and action[11:].isdigit():
             index = int(action[11:])
             if index < len(draft["products"]):
                 draft["products"][index]["options"].append({"label": "", "price": ""})
+                new_row = f"p{index}_o{len(draft['products'][index]['options']) - 1}"
         intake.draft, intake.web_address = draft, address
         session.add(intake)
         session.commit()
         if action != "confirm":
-            return _cards(request, token, draft, address, source, sample=sample)
+            return _cards(request, token, draft, address, source, sample=sample, new_row=new_row)
         profile = svc.validate_draft(session, dict(draft), address, errors)
         photos = [await _file_bytes(f) for f in form.getlist("photos")]
         photos = [p for p in photos if p]

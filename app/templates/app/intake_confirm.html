@@ -47,7 +47,7 @@
     {% for code in LANGUAGES %}<label class="check"><input type="checkbox" name="languages" value="{{ code }}"{% if code in draft.languages %} checked{% endif %}> {{ t('lang.' ~ code, lang) }}</label>{% endfor %}</fieldset></section>
 
   <h2>{{ t('confirm.products', lang) }}</h2>
-  {% include "app/_product_cards.html" %}
+  {% set cards_action = "/start/" ~ token ~ "/confirm" %}{% include "app/_product_cards.html" %}
 
   <section class="card"><label for="f-lead">{{ t('confirm.lead_time', lang) }}</label>
     <input id="f-lead" name="lead_time" value="{{ draft.lead_time }}" maxlength="120">
@@ -64,4 +64,5 @@
   </div>
 </form>
 <script src="{{ static_url('once.js') }}" defer></script>
+<script src="{{ static_url('focus-new.js') }}" defer></script>
 {% endblock %}

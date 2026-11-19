@@ -88,11 +88,13 @@ async def menu_save(request: Request, business_id: int = Depends(require_owner))
     action = str(form.get("action", "save"))
     if action == "add_product":
         products.append({"name": "", "unit": "piece", "options": [dict(NEW_OPTION)], "notes": ""})
-        return _show(request, business_id, products)
+        return _show(request, business_id, products, new_row=f"p{len(products) - 1}")
     if action.startswith("add_option:") and action[11:].isdigit():
         index = int(action[11:])
         if index < len(products):
             products[index]["options"].append(dict(NEW_OPTION))
+            new_row = f"p{index}_o{len(products[index]['options']) - 1}"
+            return _show(request, business_id, products, new_row=new_row)
         return _show(request, business_id, products)
     if errors.errors:
         return _show(request, business_id, products, 422, errors=errors.errors)

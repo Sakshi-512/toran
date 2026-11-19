@@ -13,7 +13,7 @@
 <form class="form" method="post" action="/owner/menu">
   <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
   {{ err('products') }}
-  {% include "app/_product_cards.html" %}
+  {% set cards_action = "/owner/menu" %}{% include "app/_product_cards.html" %}
   {% if ask_pin or errors.get('pin') %}
   <section class="card" id="pin">
     <label for="m-pin">{{ t('menu.pin_label', lang) }}</label>
@@ -30,4 +30,5 @@
   <button class="button secondary" type="submit">{{ t('menu.restore', lang) }} ({{ previous_when }}, {{ t('menu.product_count' ~ ('_one' if previous.product_count == 1 else ''), lang, n=previous.product_count) }})</button>
 </form>
 {% endif %}
+<script src="{{ static_url('focus-new.js') }}" defer></script>
 {% endblock %}
