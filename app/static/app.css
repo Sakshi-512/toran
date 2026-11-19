@@ -6,15 +6,19 @@
 @font-face { font-family: "Rozha One"; font-style: normal; font-weight: 400; font-display: swap; src: url("/static/fonts/rozha-400-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: "Rozha One"; font-style: normal; font-weight: 400; font-display: swap; src: url("/static/fonts/rozha-400-devanagari.woff2") format("woff2"); unicode-range: U+0900-097F, U+1CD0-1CF4, U+1CF7-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B0A; }
 :root {
-  --bg: #fffaf3; --fg: #1f1a17; --muted: #5c534c; --accent: #b4361e; --accent-fg: #fff;
+  --bg: #fbf7f3; --fg: #1f1a17; --muted: #5c534c; --accent: #b4361e; --accent-fg: #fff;
   --font: "Mukta", "Noto Sans Devanagari", "Mangal", system-ui, sans-serif;
   --display: "Rozha One", "Mukta", serif; --heading: #6b2412; --line: #eadfd2; --soft: #f6ede3;
   /* Form controls: one look on every Toran page. The border is --muted (7.5:1 on white). */
   --field-border: var(--muted); --field-border-w: 1.5px; --field-radius: 10px; --field-h: 48px;
   --field-pad: 10px 12px; --field-bg: #fff; --placeholder: var(--muted); --error: #a3302a;
   --ring: 3px solid var(--accent); --ring-offset: 2px; --check-size: 24px;
+  /* Decorative cards: a quiet border and soft shadow. Form controls keep --field-border. */
+  --card-border: 1px solid #e5d6ca; --card-border-on-sand: 1px solid #eadbce;
+  --card-shadow: 0 8px 24px rgba(74, 20, 32, .07);
   /* Home page palette (the "/" page only). */
-  --ink: #4a1420; --cream: #fff6e6; --saffron: #f6c26b; --saffron-tint: #fbe3b5; --terracotta: #b5432a;
+  --ink: #4a1420; --cream: #fbf7f3; --pill: #f4dccb; --highlight: #f4d5c2; --panel: #f6e3d5; --figure: #f2ce8f;
+  --sand: #f7ece1; --terracotta: #b5432a;
   --home-text: #2b1a14; --home-muted: #4a3a32;
 }
 * { box-sizing: border-box; }
@@ -68,7 +72,7 @@ main:has(.score-layout) { max-width: 1100px; }
 .choice { border: 1px solid #eadfd2; border-radius: 12px; padding: 12px 16px; margin: 8px 0; }
 .choice legend { font-weight: 700; padding: 0 4px; }
 .radio, .check { display: flex; gap: 10px; align-items: center; min-height: 44px; font-weight: 400; }
-.card { background: #fff; border: 1px solid #eadfd2; border-radius: 14px; padding: 16px; margin: 12px 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.card { background: #fff; border: var(--card-border); box-shadow: var(--card-shadow); border-radius: 14px; padding: 16px; margin: 12px 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .card.questions { border-color: #e2a24a; background: #fff7ea; }
 .cards h2 { margin-top: 24px; }
 .option-row { display: grid; grid-template-columns: 1fr 120px; gap: 8px; }
@@ -140,7 +144,7 @@ main:has(.home) { max-width: 1120px; padding: 0 16px; }
 .phone-frame img { display: block; width: 100%; height: auto; border-radius: 28px; }
 .phone-figure figcaption { font-size: 16px; color: var(--muted); text-align: center; max-width: 300px; }
 .how { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; counter-reset: step; }
-.how-step { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: grid; gap: 8px; }
+.how-step { background: #fff; border: var(--card-border); box-shadow: var(--card-shadow); border-radius: 16px; padding: 20px; display: grid; gap: 8px; }
 .how-step p { margin: 0; color: var(--muted); }
 .how-icon { display: inline-flex; width: 48px; height: 48px; align-items: center; justify-content: center; border-radius: 14px; background: var(--soft); color: var(--accent); }
 .stats { display: grid; gap: 12px; margin: 24px 0 0; }
@@ -149,7 +153,7 @@ main:has(.home) { max-width: 1120px; padding: 0 16px; }
 .stat dd { margin: 4px 0 0; }
 .stat strong { font-size: 26px; color: var(--heading); }
 .try-grid { display: grid; gap: 16px; margin: 16px 0; }
-.try-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: grid; gap: 8px; align-content: start; }
+.try-card { background: #fff; border: var(--card-border); box-shadow: var(--card-shadow); border-radius: 16px; padding: 20px; display: grid; gap: 8px; align-content: start; }
 .try-card p { margin: 0; }
 .try-lang { font-family: var(--display); font-size: 26px; color: var(--heading); }
 .try-card .button, .text-link { gap: 8px; }
@@ -298,16 +302,16 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
 .home-hero { padding: 24px 0 0; gap: 28px; align-items: end; }
 .home .hero-copy { padding-bottom: 8px; min-width: 0; }
 .home .hero-pill { display: inline-block; margin: 0 0 16px; padding: 6px 14px; border-radius: 999px;
-  background: var(--saffron); color: var(--ink); font-weight: 700; font-size: 16px; line-height: 1.4; }
+  background: var(--pill); color: var(--ink); font-weight: 700; font-size: 16px; line-height: 1.4; }
 .home h1 { color: var(--ink); font-size: clamp(40px, 7vw, 68px); line-height: 1.12; overflow-wrap: break-word; }
-.home h1 .hl { background: var(--saffron); padding: 0 .12em; border-radius: 6px;
+.home h1 .hl { background: var(--highlight); padding: 0 .12em; border-radius: 6px;
   box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .home .lead { color: var(--home-text); }
 .home .cta-row { align-items: center; gap: 12px 24px; }
 .home .big-cta { background: var(--terracotta); color: #fff; min-height: 56px; padding: 0 28px; font-size: 20px; }
 .home .big-cta:hover { background: var(--ink); }
 .home .hero-link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
-.home .phone-figure { background: var(--saffron); border-radius: 28px 28px 0 0; padding: 32px 16px 0; align-self: end;
+.home .phone-figure { background: var(--panel); border-radius: 28px 28px 0 0; padding: 32px 16px 0; align-self: end;
   gap: 0; overflow: hidden; }
 .home .phone-frame { background: var(--ink); border-radius: 40px 40px 0 0; padding: 12px 12px 0; box-shadow: none;
   max-width: 100%; }
@@ -324,23 +328,23 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
 .home .proof-band .stat strong { order: 1; }
 .home .proof-band .stat dt { order: 2; font-weight: 700; margin-top: 4px; }
 .home .proof-band .stat dd .muted { order: 3; font-size: 15px; }
-.home .proof-band .stat strong { color: var(--saffron); font-family: var(--display); font-weight: 400; font-size: 48px; line-height: 1.1; }
+.home .proof-band .stat strong { color: var(--figure); font-family: var(--display); font-weight: 400; font-size: 48px; line-height: 1.1; }
 
 /* 3. How it works. */
-.home .how-band { --band: var(--saffron-tint); border-top: 0; }
-.home .how-step { background: #fff; border: 0; border-radius: 18px; padding: 20px; position: relative; }
+.home .how-band { --band: var(--sand); border-top: 0; }
+.home .how-step { background: #fff; border: var(--card-border-on-sand); box-shadow: var(--card-shadow); border-radius: 18px; padding: 20px; position: relative; }
 .home .how-step::before { content: counter(step); counter-increment: step; font-family: var(--display);
   font-size: 44px; line-height: 1; color: var(--terracotta); }
 .home .how-step p { color: var(--home-muted); }
-.home .how-icon { background: var(--saffron-tint); color: var(--ink); }
+.home .how-icon { background: var(--sand); color: var(--ink); }
 .home .how-step:last-child { background: var(--ink); color: var(--cream); }
 .home .how-step:last-child::before, .home .how-step:last-child p { color: var(--cream); }
-.home .how-step:last-child h3 { color: var(--saffron); }
-.home .how-step:last-child .how-icon { background: var(--saffron); }
+.home .how-step:last-child h3 { color: var(--figure); }
+.home .how-step:last-child .how-icon { background: var(--figure); }
 
 /* 4. Samples and the gallery. */
 .home .home-section { border-top: 0; }
-.home .try-card, .home .gallery-card a, .home .card { border: 2px solid var(--ink); border-radius: 18px; box-shadow: none; }
+.home .try-card, .home .gallery-card a, .home .card { border: var(--card-border); border-radius: 18px; box-shadow: var(--card-shadow); }
 .home .try-card .button { background: var(--terracotta); color: #fff; }
 .home .try-lang { color: var(--ink); }
 .home .contact-section, .home-footer { border-top: 2px solid var(--line); }
