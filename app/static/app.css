@@ -349,6 +349,20 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
   .home .proof-band .facts .stat:first-child { padding-top: 0; }
   .home .facts-group { margin-top: 24px; padding-top: 24px; }
 }
+/* Desktop: each item is its own block (figure, label, note), with a hairline between items. */
+@media (min-width: 721px) {
+  .home .proof-band .stats { align-items: start; }
+  .home .proof-band .stat { display: flex; flex-direction: column; grid-row: auto; row-gap: 0; position: relative; }
+  .home .proof-band .stat strong { font-size: clamp(32px, 3.2vw, 40px); line-height: 1.1; }
+  .home .proof-band .stat dt { margin-top: 8px; }
+  .home .proof-band .stat dd .muted { margin-top: 4px; }
+  .home .proof-band .stat:not(:nth-child(3n + 1))::before { content: ""; position: absolute; top: 0; bottom: 0;
+    left: -24px; border-left: 1px solid rgba(251, 247, 243, .2); }
+}
+/* English figures stay on one line where three columns are wide enough; Hindi and Marathi wrap. */
+@media (min-width: 1024px) {
+  html[lang="en"] .home .proof-band .stat strong { white-space: nowrap; }
+}
 
 /* 3. How it works. */
 .home .how-band { --band: var(--sand); border-top: 0; }
