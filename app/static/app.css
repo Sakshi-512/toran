@@ -391,3 +391,16 @@ a.back-link:hover { text-decoration: none; }
 a.back-link:hover .back-word { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .req { color: var(--accent); font-weight: 700; }
 .req-legend { margin: 0; color: var(--muted); }
+
+/* Live field checks (validate.js): an icon and text under the field, never colour alone. */
+.live-msg { display: flex; gap: 8px; align-items: flex-start; }
+.live-msg::before { content: "!" / ""; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; margin-top: 2px; border-radius: 50%; background: var(--error); color: #fff;
+  font-size: 15px; line-height: 1; }
+.live-msg[hidden], .field-count[hidden] { display: none; }
+.field-count { margin: 0; color: var(--muted); font-size: 15px; }
+.live-summary { display: grid; gap: 8px; margin: 12px 0; }
+.live-summary:focus { outline: var(--ring); outline-offset: var(--ring-offset); }
+.live-summary-title { margin: 0; font-weight: 700; color: var(--error); }
+.live-summary ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; }
+.live-summary a { color: var(--error); display: block; min-height: 44px; padding: 10px 0; }

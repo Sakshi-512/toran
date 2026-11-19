@@ -7,7 +7,7 @@
 <p>{{ t('details.intro', lang) }}</p>
 {% if saved %}<p class="notice-ok" role="status">{{ t('details.saved', lang) }}</p>{% endif %}
 {% set v = sent if sent else profile %}
-<form class="form" method="post" action="/owner/details">
+<form class="form" method="post" action="/owner/details" data-live="details">
   <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
   <section class="card" id="phone">
     <label for="d-phone">{{ t('confirm.phone', lang) }}</label>
@@ -36,4 +36,5 @@
   <p class="muted">{{ t('details.products_note', lang) }}</p>
   <button class="button" type="submit">{{ t('details.save', lang) }}</button>
 </form>
+{% include "app/_live_checks.html" %}
 {% endblock %}

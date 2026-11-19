@@ -10,7 +10,7 @@
 {% if busy %}<p class="notice-error" role="status">{{ t('menu.busy', lang) }}</p>{% endif %}
 {{ err('form') }}
 <p class="muted">{{ t('menu.translations_note', lang) }}</p>
-<form class="form" method="post" action="/owner/menu">
+<form class="form" method="post" action="/owner/menu" data-live="menu">
   <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
   {{ err('products') }}
   {% set cards_action = "/owner/menu" %}{% include "app/_product_cards.html" %}
@@ -31,4 +31,5 @@
 </form>
 {% endif %}
 <script src="{{ static_url('focus-new.js') }}" defer></script>
+{% include "app/_live_checks.html" %}
 {% endblock %}

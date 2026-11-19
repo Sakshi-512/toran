@@ -41,6 +41,7 @@ def _build() -> Jinja2Templates:
         SPAM_TRAP_FIELD=SPAM_TRAP_FIELD,
         LANGUAGES=SUPPORTED,
         NAME_MAX=field_rules.NAME_MAX,
+        PRICE_MAX=field_rules.PRICE_MAX,
         ADDRESS_MAX=web_address.MAX_LENGTH,
         static_url=static_url,
     )

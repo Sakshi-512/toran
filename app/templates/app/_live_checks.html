@@ -1,0 +1,9 @@
+{# Live field checks (app/static/validate.js): translated messages and the price limit, read by the
+   script. A progressive enhancement: without JavaScript the server checks everything as before. #}
+{% set v_keys = ['intake.name_needed', 'intake.name_length', 'intake.name_chars', 'intake.name_letter',
+  'intake.address_invalid', 'intake.phone_invalid', 'intake.price_invalid', 'intake.price_needed',
+  'v.too_long', 'v.counter', 'v.at_limit', 'v.phone_letters', 'v.price_high', 'v.summary',
+  'v.summary_one', 'v.leave'] %}
+{% set v = namespace(msgs={}) %}{% for k in v_keys %}{% set v.msgs = dict(v.msgs, **{k: t(k, lang)}) %}{% endfor %}
+<div id="v-msgs" hidden data-msgs='{{ v.msgs|tojson }}' data-price-max="{{ PRICE_MAX }}"></div>
+<script src="{{ static_url('validate.js') }}" defer></script>

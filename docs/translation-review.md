@@ -706,6 +706,14 @@ stored, how long, and the right to delete). Please read them first.
 | --- | --- | --- | --- | --- |
 | `nav.back` | Back | वापस | मागे |  |
 | `form.required` | Required | ज़रूरी | आवश्यक |  |
+| `v.counter` | {n} of {max} characters | {max} में से {n} अक्षर | {max} पैकी {n} अक्षरे |  |
+| `v.at_limit` | That is the limit: {max} characters. | बस इतना ही: {max} अक्षर। | इतकीच मर्यादा: {max} अक्षरे. |  |
+| `v.too_long` | This is too long: please keep it to {max} characters (now {n}). | यह बहुत लंबा है: {max} अक्षर तक रखिए (अभी {n})। | हे खूप मोठे आहे: {max} अक्षरांपर्यंत ठेवा (सध्या {n}). |  |
+| `v.phone_letters` | A phone number can only have numbers, spaces and + - ( ) . | फ़ोन नंबर में सिर्फ़ अंक, स्पेस और + - ( ) . हो सकते हैं। | फोन नंबरमध्ये फक्त अंक, स्पेस आणि + - ( ) . असू शकतात. |  |
+| `v.price_high` | Please use a price up to ₹{max}. | ₹{max} तक का दाम लिखिए। | ₹{max} पर्यंतचा दर लिहा. |  |
+| `v.summary` | Please fix {n} things | {n} चीज़ें ठीक कीजिए | {n} गोष्टी दुरुस्त करा |  |
+| `v.summary_one` | Please fix 1 thing | 1 चीज़ ठीक कीजिए | 1 गोष्ट दुरुस्त करा |  |
+| `v.leave` | Leave without saving? | बिना सेव किए जाना है? | सेव्ह न करता बाहेर जायचे? |  |
 | `menu.title` | Edit my menu and prices | मेरा मेन्यू और दाम बदलें | माझा मेन्यू आणि दर बदला |  |
 | `menu.intro` | Change your products, options and prices. Prices are whole rupees. Your draft is rebuilt and tested again after you save. | अपने प्रोडक्ट, विकल्प और दाम बदलें। दाम पूरे रुपयों में लिखें। सेव करने के बाद आपका ड्राफ़्ट फिर से बनेगा और जाँचा जाएगा। | तुमची उत्पादने, पर्याय आणि दर बदला. दर पूर्ण रुपयांत लिहा. सेव्ह केल्यावर तुमचा ड्राफ्ट पुन्हा तयार होईल आणि तपासला जाईल. |  |
 | `menu.save` | Save my menu | मेन्यू सेव करें | मेन्यू सेव्ह करा |  |

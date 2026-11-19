@@ -6,7 +6,7 @@
 <h1>{{ t('confirm.title', lang) }}</h1>
 <p>{{ t('confirm.intro', lang) }}</p>
 {% if errors %}<p class="notice-error" role="alert">{{ t('confirm.fix_errors', lang) }}</p>{% endif %}
-<form class="form cards" method="post" action="/start/{{ token }}/confirm" enctype="multipart/form-data">
+<form class="form cards" method="post" action="/start/{{ token }}/confirm" enctype="multipart/form-data" data-live="confirm">
   <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
   <p class="req-legend"><span class="req" aria-hidden="true">*</span> {{ t('form.required', lang) }}</p>
 
@@ -66,4 +66,5 @@
 </form>
 <script src="{{ static_url('once.js') }}" defer></script>
 <script src="{{ static_url('focus-new.js') }}" defer></script>
+{% include "app/_live_checks.html" %}
 {% endblock %}
