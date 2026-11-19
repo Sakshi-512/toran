@@ -1,0 +1,18 @@
+{# One waiting component for every background wait: a ring next to plain words, the real stages
+   only, and a calm note if the wait passes that job's own limit (app/static/wait.js). The words
+   always carry the meaning; the ring is decoration and stays still with reduced motion. #}
+{% macro waiting(text, kind, steps=[], auto=True, can_leave=False, late='owner') -%}
+<div class="progress waiting" role="status" aria-live="polite" data-wait-key="{{ kind }}" data-wait-limit="{{ WAIT_LIMITS[kind] }}">
+  <span class="spinner" aria-hidden="true"></span>
+  <div class="waiting-body">
+    <p class="waiting-text">{{ text }}</p>
+    {% if steps %}<ol class="wait-steps">{% for label, state in steps %}
+      <li class="is-{{ state }}"{% if state == 'current' %} aria-current="step"{% endif %}>{{ label }}{% if state == 'done' %} <span class="visually-hidden">({{ t('wait.done', lang) }})</span>{% endif %}</li>{% endfor %}
+    </ol>{% endif %}
+    {% if auto %}<p class="waiting-note">{{ t('wait.auto', lang) }}</p>{% endif %}
+    {% if can_leave %}<p class="waiting-note">{{ t('wait.can_leave', lang) }}</p>{% endif %}
+    <p class="waiting-late" hidden>{{ t('wait.late_' ~ late, lang) }}
+      <a class="text-link" href="{{ '/start?option=type#options' if late == 'intake' else '/#contact' }}">{{ t('wait.late_' ~ late ~ '_link', lang) }}</a></p>
+  </div>
+</div>
+{%- endmacro %}

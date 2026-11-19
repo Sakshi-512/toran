@@ -19,7 +19,7 @@
       <input type="hidden" name="sample" value="{{ s }}">
       <p class="try-lang" lang="{{ code }}">{{ t('lang.' ~ code, code) }}</p>
       <p>{{ t('home.try_' ~ code, lang) }}</p>
-      <button class="button" type="submit">{{ icon('play', 22) }}<span>{{ t('home.try_button', lang) }}</span></button>
+      <button class="button" type="submit" data-once="{{ t('busy.working', lang) }}">{{ icon('play', 22) }}<span>{{ t('home.try_button', lang) }}</span></button>
     </form>
     {% endfor %}
   </div>
@@ -34,7 +34,7 @@
         <input type="radio" name="source" value="voice" id="opt-record"{% if option == 'record' %} checked{% endif %}>
         <label for="opt-record" class="option-head">{{ icon('mic') }}<span><strong>{{ t('start.opt_record', lang) }}</strong><span class="muted">{{ t('start.opt_record_hint', lang) }}</span></span></label>
         <div class="option-panel">
-          <button type="button" class="button big" id="record-button" data-idle="{{ t('start.record', lang) }}" data-recording="{{ t('start.recording', lang) }}" hidden>{{ t('start.record', lang) }}</button>
+          <button type="button" class="button big" id="record-button" data-idle="{{ t('start.record', lang) }}" data-recording="{{ t('start.recording', lang) }}" data-sending="{{ t('record.sending', lang) }}" data-failed="{{ t('record.failed', lang) }}" data-again="{{ t('record.send_again', lang) }}" hidden>{{ t('start.record', lang) }}</button>
           <p class="muted" id="record-status" aria-live="polite">{{ t('start.record_hint', lang) }}</p>
           <p class="muted" id="record-unsupported" hidden>{{ t('start.no_mic', lang) }}</p>
         </div>
@@ -70,7 +70,7 @@
       </select>
       <label class="check"><input type="checkbox" name="consent" value="yes" required> <span>{{ t('intake.consent', lang) }}</span></label>
       <label class="check"><input type="checkbox" name="keep_input" value="yes"> <span>{{ t('intake.keep_input', lang) }}</span></label>
-      <button class="button send" type="submit">{{ t('start.send', lang) }}</button>
+      <button class="button send" type="submit" data-once="{{ t('busy.sending', lang) }}">{{ t('start.send', lang) }}</button>
     </div>
   </form>
 </section>

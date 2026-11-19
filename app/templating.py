@@ -14,6 +14,7 @@ from app.config import get_settings
 from app.services import field_rules, web_address
 from app.services.i18n import SUPPORTED, normalise_language, pick_language, t
 from app.services.security import CSRF_FIELD, SPAM_TRAP_FIELD, csrf_token
+from app.services.waiting import WAIT_LIMITS
 
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -42,6 +43,7 @@ def _build() -> Jinja2Templates:
         LANGUAGES=SUPPORTED,
         NAME_MAX=field_rules.NAME_MAX,
         PRICE_MAX=field_rules.PRICE_MAX,
+        WAIT_LIMITS=WAIT_LIMITS,
         ADDRESS_MAX=web_address.MAX_LENGTH,
         static_url=static_url,
     )

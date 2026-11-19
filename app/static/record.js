@@ -13,6 +13,7 @@
   }
   button.hidden = false;
   var recorder = null, chunks = [], timer = null, started = 0;
+  var unsent = null; // a recording that could not be sent yet: kept, never thrown away
 
   function tick() {
     var left = Math.max(0, Math.ceil((MAX_MS - (Date.now() - started)) / 1000));
@@ -28,12 +29,22 @@
     data.set("source", "voice");
     data.set("upload", blob, "voice-note" + (blob.type.indexOf("mp4") >= 0 ? ".m4a" : ".webm"));
     if (!form.querySelector("[name=consent]").checked) { form.reportValidity(); return; }
+    unsent = blob;
     button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    status.textContent = button.dataset.sending;
     fetch(form.action, { method: "POST", body: data, credentials: "same-origin" })
-      .then(function (r) { window.location.assign(r.url); })
-      .catch(function () { button.disabled = false; });
+      .then(function (r) { unsent = null; window.location.assign(r.url); })
+      .catch(function () {
+        // Keep the recording and offer to send the same one again.
+        button.disabled = false;
+        button.removeAttribute("aria-busy");
+        button.textContent = button.dataset.again;
+        status.textContent = button.dataset.failed;
+      });
   }
   button.addEventListener("click", function () {
+    if (unsent && !(recorder && recorder.state === "recording")) { send(unsent); return; }
     if (recorder && recorder.state === "recording") { stop(); return; }
     navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
       chunks = [];

@@ -17,7 +17,7 @@
 <form method="post" action="/owner/delete">
   <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
   <div class="cta-row">
-    <button class="button danger" type="submit">{{ t('delete.yes', lang) }}</button>
+    <button class="button danger" type="submit" data-once="{{ t('busy.deleting', lang) }}">{{ t('delete.yes', lang) }}</button>
     <a class="button secondary" href="/owner">{{ t('delete.no', lang) }}</a>
   </div>
 </form>

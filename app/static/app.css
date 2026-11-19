@@ -404,3 +404,34 @@ a.back-link:hover .back-word { text-decoration: underline; text-decoration-thick
 .live-summary-title { margin: 0; font-weight: 700; color: var(--error); }
 .live-summary ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; }
 .live-summary a { color: var(--error); display: block; min-height: 44px; padding: 10px 0; }
+
+/* Waiting: a ring next to plain words (the words always carry the meaning). */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.waiting { display: flex; gap: 12px; align-items: flex-start; }
+.waiting-body { display: grid; gap: 6px; min-width: 0; }
+.waiting-body p { margin: 0; }
+.waiting-text { font-weight: 700; }
+.waiting-note { color: var(--muted); }
+.spinner { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 3px solid #f1d6cd;
+  border-top-color: var(--accent); margin-top: 2px; }
+.spinner[hidden] { display: none; }
+.spinner-small { width: 18px; height: 18px; border-width: 2.5px; margin: 0; border-color: rgba(255, 255, 255, .45);
+  border-top-color: #fff; }
+.button.secondary .spinner-small { border-color: #f1d6cd; border-top-color: var(--accent); }
+button[aria-busy=true] { gap: 10px; cursor: progress; }
+@media (prefers-reduced-motion: no-preference) {
+  .spinner { animation: spin .9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner { border-color: var(--accent); } /* a still ring: no rotation */
+}
+.wait-steps { list-style: none; margin: 4px 0; padding: 0; display: grid; gap: 4px; }
+.wait-steps li { display: flex; gap: 8px; align-items: baseline; }
+.wait-steps li::before { content: "" / ""; flex: none; width: 1.1em; text-align: center; }
+.wait-steps .is-done::before { content: "✓" / ""; color: #2f7a4d; font-weight: 700; }
+.wait-steps .is-current { font-weight: 700; }
+.wait-steps .is-current::before { content: "•" / ""; color: var(--accent); }
+.wait-steps .is-next { color: var(--muted); }
+.wait-steps .is-next::before { content: "○" / ""; }
+.waiting.is-late .waiting-late { font-weight: 700; }

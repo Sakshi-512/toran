@@ -21,13 +21,13 @@
     {{ err('pin') }}
   </section>
   {% endif %}
-  <button class="button" type="submit" name="action" value="save">{{ t('menu.save', lang) }}</button>
+  <button class="button" type="submit" name="action" value="save" data-once="{{ t('busy.saving', lang) }}">{{ t('menu.save', lang) }}</button>
 </form>
 {% if previous %}
 <form class="form" method="post" action="/owner/menu/restore">
   <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
   <p class="muted">{{ t('menu.restore_hint', lang) }}</p>
-  <button class="button secondary" type="submit">{{ t('menu.restore', lang) }} ({{ previous_when }}, {{ t('menu.product_count' ~ ('_one' if previous.product_count == 1 else ''), lang, n=previous.product_count) }})</button>
+  <button class="button secondary" type="submit" data-once="{{ t('busy.working', lang) }}">{{ t('menu.restore', lang) }} ({{ previous_when }}, {{ t('menu.product_count' ~ ('_one' if previous.product_count == 1 else ''), lang, n=previous.product_count) }})</button>
 </form>
 {% endif %}
 <script src="{{ static_url('focus-new.js') }}" defer></script>

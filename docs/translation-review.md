@@ -138,10 +138,23 @@ stored, how long, and the right to delete). Please read them first.
 | `start.sample_en` | Sample in English | अंग्रेज़ी में नमूना | इंग्रजीतील नमुना |  |
 | `start.sample_hi` | Sample in Hindi | हिंदी में नमूना | हिंदीतील नमुना |  |
 | `start.sample_mr` | Sample in Marathi | मराठी में नमूना | मराठीतील नमुना |  |
+| `wait.auto` | This page updates by itself. You don't need to do anything. | यह पेज अपने-आप अपडेट होता है। आपको कुछ करने की ज़रूरत नहीं। | हे पान आपोआप अपडेट होते. तुम्हाला काहीही करायची गरज नाही. |  |
+| `wait.can_leave` | You can close this page; your work is kept. Come back any time with your private link. | आप यह पेज बंद कर सकते हैं; आपका काम सुरक्षित रहता है। अपनी निजी लिंक से कभी भी वापस आइए। | तुम्ही हे पान बंद करू शकता; तुमचे काम जपले जाते. तुमच्या खाजगी लिंकने कधीही परत या. |  |
+| `wait.step_received` | Your details are received | आपकी जानकारी मिल गई | तुमची माहिती मिळाली |  |
+| `wait.step_reading` | Listening and reading | सुनना और पढ़ना | ऐकणे आणि वाचणे |  |
+| `wait.step_check` | You check the details | आप जानकारी जाँचें | तुम्ही माहिती तपासा |  |
+| `wait.step_built` | Your website is built | आपकी वेबसाइट बन गई | तुमची वेबसाइट तयार झाली |  |
+| `wait.step_testing` | Testing like a customer | ग्राहक की तरह जाँच | ग्राहकासारखी तपासणी |  |
+| `wait.step_score` | Your score | आपका स्कोर | तुमचा स्कोर |  |
+| `wait.done` | done | पूरा | झाले |  |
+| `wait.late_intake` | This is taking longer than usual. You can type your details instead. | इसमें सामान्य से ज़्यादा समय लग रहा है। आप अपनी जानकारी लिखकर भी भेज सकते हैं। | याला नेहमीपेक्षा जास्त वेळ लागत आहे. तुम्ही तुमची माहिती लिहूनही पाठवू शकता. |  |
+| `wait.late_intake_link` | Type instead | लिखकर भेजिए | लिहून पाठवा |  |
+| `wait.late_owner` | This is taking longer than usual. Your work is kept. If it does not finish soon, please write to us. | इसमें सामान्य से ज़्यादा समय लग रहा है। आपका काम सुरक्षित है। अगर जल्दी पूरा न हो, तो हमें लिखिए। | याला नेहमीपेक्षा जास्त वेळ लागत आहे. तुमचे काम जपलेले आहे. लवकर पूर्ण न झाल्यास आम्हाला लिहा. |  |
+| `wait.late_owner_link` | Write to us | हमें लिखिए | आम्हाला लिहा |  |
 | `wait.title` | Working on it… | काम चल रहा है… | काम सुरू आहे… |  |
 | `wait.queued` | Waiting to start… | शुरू होने का इंतज़ार… | सुरू होण्याची वाट… |  |
 | `wait.processing` | Listening and reading your details… | आपकी बात सुन रहे हैं और जानकारी समझ रहे हैं… | तुमचं बोलणं ऐकून माहिती समजून घेत आहोत… |  |
-| `wait.hint` | This can take up to 2 minutes. This page updates by itself. | इसमें 2 मिनट तक लग सकते हैं। यह पेज अपने-आप बदल जाएगा। | याला 2 मिनिटांपर्यंत लागू शकतात. हे पान आपोआप बदलेल. |  |
+| `wait.hint` | This can take a few minutes. Please keep this page open. | इसमें कुछ मिनट लग सकते हैं। कृपया यह पेज खुला रखिए। | याला काही मिनिटे लागू शकतात. कृपया हे पान उघडे ठेवा. |  |
 | `wait.failed_title` | Something went wrong | कुछ गड़बड़ हो गई | काहीतरी चुकलं |  |
 | `wait.try_again` | Try again | फिर कोशिश करें | पुन्हा प्रयत्न करा |  |
 | `start.samples_title` | Try a sample | नमूना आज़माइए | नमुना वापरून पाहा |  |
@@ -704,6 +717,14 @@ stored, how long, and the right to delete). Please read them first.
 
 | Key | English | Hindi | Marathi | Fix |
 | --- | --- | --- | --- | --- |
+| `busy.saving` | Saving… | सेव हो रहा है… | सेव्ह होत आहे… |  |
+| `busy.working` | Working… | काम चल रहा है… | काम सुरू आहे… |  |
+| `busy.sending` | Sending… | भेजा जा रहा है… | पाठवत आहे… |  |
+| `busy.publishing` | Publishing… | लाइव किया जा रहा है… | लाइव्ह करत आहे… |  |
+| `busy.deleting` | Deleting… | हटाया जा रहा है… | हटवत आहे… |  |
+| `record.sending` | Sending your voice note… | आपका वॉइस नोट भेजा जा रहा है… | तुमची व्हॉइस नोट पाठवत आहे… |  |
+| `record.failed` | We could not send your voice note. Your recording is kept: check your internet and tap Send again. | आपका वॉइस नोट नहीं भेजा जा सका। आपकी रिकॉर्डिंग सुरक्षित है: इंटरनेट देखिए और फिर से भेजें पर टैप कीजिए। | तुमची व्हॉइस नोट पाठवता आली नाही. तुमचे रेकॉर्डिंग जपलेले आहे: इंटरनेट तपासा आणि पुन्हा पाठवा वर टॅप करा. |  |
+| `record.send_again` | Send again | फिर से भेजें | पुन्हा पाठवा |  |
 | `nav.back` | Back | वापस | मागे |  |
 | `form.required` | Required | ज़रूरी | आवश्यक |  |
 | `v.counter` | {n} of {max} characters | {max} में से {n} अक्षर | {max} पैकी {n} अक्षरे |  |

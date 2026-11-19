@@ -1,5 +1,6 @@
 {% extends "app/base.html" %}
 {% from "app/_auto_refresh.html" import auto_refresh with context %}
+{% from "app/_waiting.html" import waiting with context %}
 {% block head %}{% if (scoring and scoring.state != "failed") or (agent and agent.state in ('queued', 'running')) or (domains_lookup and domains_lookup.status == 'running') %}{{ auto_refresh(5) }}{% endif %}{% endblock %}
 {% block title %}{{ business.display_name }} · {{ app_name }}{% endblock %}
 {% block content %}
@@ -15,7 +16,10 @@
   {% if needs_phone %}<div class="notice-error" role="alert"><p>{{ t('phone.missing_owner', lang) }}</p><a class="text-link" href="/owner/details#phone">{{ t('phone.add_now', lang) }}</a></div>{% endif %}
 
   {% if scoring %}
-  <p class="progress" role="status" aria-live="polite">{% if scoring.state == 'failed' %}{{ t('owner.score_failed', lang) }}{% else %}{{ scoring.text }}{% endif %}</p>
+  {% if scoring.state == 'failed' %}<p class="progress" role="status" aria-live="polite">{{ t('owner.score_failed', lang) }}</p>
+  {% else %}{{ waiting(scoring.text, 'score', steps=[
+    (t('wait.step_built', lang), 'done'), (t('wait.step_testing', lang), 'current'), (t('wait.step_score', lang), 'next')],
+    can_leave=True) }}{% endif %}
   {% elif latest_draft_run %}{% set s = summaries[latest_draft_run.id] %}
   <p class="score-total"><strong>{{ s.headline(lang) }}</strong></p>
   {% if s.sentence(lang) %}<p>{{ s.sentence(lang) }}</p>{% endif %}
@@ -28,15 +32,15 @@
     <a class="button secondary" href="/owner/styles">{{ t('owner.styles', lang) }}</a>
     <a class="button secondary" href="/owner/details">{{ t('details.title', lang) }}</a>
     <a class="button secondary" href="/owner/menu">{{ t('menu.title', lang) }}</a>
-    <form method="post" action="/owner/draft"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.rebuild', lang) }}</button></form>
+    <form method="post" action="/owner/draft"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary" data-once="{{ t('busy.working', lang) }}">{{ t('owner.rebuild', lang) }}</button></form>
   </div>
   {% if live %}
   <div class="action-grid live-actions">
-    <form method="post" action="/owner/undo"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.undo', lang) }}</button></form>
+    <form method="post" action="/owner/undo"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary" data-once="{{ t('busy.working', lang) }}">{{ t('owner.undo', lang) }}</button></form>
     {% if business.status == 'live' %}
-    <form method="post" action="/owner/offline"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.offline', lang) }}</button></form>
+    <form method="post" action="/owner/offline"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary" data-once="{{ t('busy.working', lang) }}">{{ t('owner.offline', lang) }}</button></form>
     {% else %}
-    <form method="post" action="/owner/online"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('owner.online', lang) }}</button></form>
+    <form method="post" action="/owner/online"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary" data-once="{{ t('busy.working', lang) }}">{{ t('owner.online', lang) }}</button></form>
     {% endif %}
   </div>
   {% endif %}
@@ -50,7 +54,7 @@
   <h2>{{ t('agent.title', lang) }}</h2>
   {% if agent_error %}<p class="notice-error" role="alert">{{ t(agent_error, lang) }}</p>{% endif %}
   {% if agent and agent.state in ('queued', 'running') %}
-  <p class="progress" role="status" aria-live="polite">{{ agent.progress }}</p>
+  {{ waiting(agent.progress, 'agent', can_leave=True) }}
   {% elif agent %}
   {% include "app/_agent_summary.html" %}
   {% else %}
@@ -58,7 +62,7 @@
   {% endif %}
   {% if agent %}<p><a class="text-link" href="/owner/agent/{{ agent.run.id }}">{{ t('agent.see_thinking', lang) }}</a></p>{% endif %}
   {% if can_improve %}
-  <form method="post" action="/owner/agent"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button{% if agent %} secondary{% endif %}">{{ t('agent.start', lang) }}</button></form>
+  <form method="post" action="/owner/agent"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button{% if agent %} secondary{% endif %}" data-once="{{ t('busy.working', lang) }}">{{ t('agent.start', lang) }}</button></form>
   {% endif %}
 </section>
 {% if questions %}
@@ -142,11 +146,11 @@
   {% elif not domains_available %}
   <p class="muted">{{ t('domains.unavailable', lang) }}</p>
   {% elif domains_lookup and domains_lookup.status == 'running' %}
-  <p class="progress" role="status" aria-live="polite">{{ t('domains.checking', lang) }}</p>
+  {{ waiting(t('domains.checking', lang), 'domains', can_leave=True) }}
   {% elif domains_lookup and domains_lookup.status in ('unavailable', 'timed_out') %}
   <p class="muted">{{ t('domains.unavailable', lang) }}</p>
   {% if domains_lookup.status == 'timed_out' %}
-  <form method="post" action="/owner/domains"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary">{{ t('domains.find', lang) }}</button></form>
+  <form method="post" action="/owner/domains"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button secondary" data-once="{{ t('busy.working', lang) }}">{{ t('domains.find', lang) }}</button></form>
   {% endif %}
   {% elif domains_lookup %}
   {% if domains_offers %}
@@ -156,7 +160,7 @@
     <li class="domain-item">
       <p class="domain-name">{{ o.domain }}</p>
       <p>{{ t('domains.price', lang, usd='%.2f'|format(o.price_usd), inr=o.inr) }} <span class="muted">· {{ t('domains.before_tax', lang) }}</span></p>
-      <form method="post" action="/owner/domains/request"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><input type="hidden" name="domain" value="{{ o.domain }}"><button class="button secondary">{{ t('domains.want', lang) }}</button></form>
+      <form method="post" action="/owner/domains/request"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><input type="hidden" name="domain" value="{{ o.domain }}"><button class="button secondary" data-once="{{ t('busy.sending', lang) }}">{{ t('domains.want', lang) }}</button></form>
     </li>
     {% endfor %}
   </ul>
@@ -164,7 +168,7 @@
   <p class="muted">{{ t('domains.how_it_works', lang) }}</p>
   {% else %}
   <p>{{ t('domains.intro', lang) }}</p>
-  <form method="post" action="/owner/domains"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button">{{ t('domains.find', lang) }}</button></form>
+  <form method="post" action="/owner/domains"><input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}"><button class="button" data-once="{{ t('busy.working', lang) }}">{{ t('domains.find', lang) }}</button></form>
   <p class="muted">{{ t('domains.how_it_works', lang) }}</p>
   {% endif %}
   {% if domains_calls %}

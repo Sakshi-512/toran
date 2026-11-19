@@ -1,5 +1,6 @@
 {% extends "app/base.html" %}
 {% from "app/_auto_refresh.html" import auto_refresh with context %}
+{% from "app/_waiting.html" import waiting with context %}
 {% block head %}{% if agent.state in ('queued', 'running') %}{{ auto_refresh(5) }}{% endif %}{% endblock %}
 {% block title %}{{ t('agent.panel_title', lang) }} · {{ business.display_name }}{% endblock %}
 {% block content %}
@@ -9,7 +10,7 @@
 {% elif business.is_sample %}<p class="notice">{{ t('publish.sample_note', lang) }}</p>{% endif %}
 
 <section class="card agent-summary">
-  {% if agent.progress %}<p class="progress" role="status" aria-live="polite">{{ agent.progress }}</p>{% endif %}
+  {% if agent.progress %}{{ waiting(agent.progress, 'agent', can_leave=not public) }}{% endif %}
   {% include "app/_agent_summary.html" %}
 </section>
 

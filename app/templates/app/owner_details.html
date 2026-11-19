@@ -34,7 +34,7 @@
     {{ err('policy') }}
   </section>
   <p class="muted">{{ t('details.products_note', lang) }}</p>
-  <button class="button" type="submit">{{ t('details.save', lang) }}</button>
+  <button class="button" type="submit" data-once="{{ t('busy.saving', lang) }}">{{ t('details.save', lang) }}</button>
 </form>
 {% include "app/_live_checks.html" %}
 {% endblock %}

@@ -45,6 +45,7 @@ items 1 to 7 the test was written first and seen to fail before the fix.
 | 28 | `deleted_at` was checked but never set | Now used by the two-step delete (item 8); the remaining scattered checks go with the refactor |
 | 29 | Mixed session handling in routes and services | Same refactor as 26 |
 | 30 | Restoring a backup brings back data deleted within the last 7 days | Inherent to backups; the restore steps in `docs/deploy.md` say what to do after a restore |
+| 31 | Devanagari phone digits are treated differently on two pages: the confirm page turns `०-९` into `0-9` before checking (`draft_from_form` uses `ascii_digits`), My details does not (`details.check` calls `normalise_phone` on the raw text). So `९८७६५४३२१०` is accepted on confirm and refused on My details, and a number mixing scripts can be stored with Devanagari digits from My details | A server validation change, outside the feature freeze. The live checks (`app/static/validate.js`) mirror each page exactly as it is today; fixing it means calling `ascii_digits` in `details.check` and `details.save`, with a test |
 
 ## What could not be checked here
 

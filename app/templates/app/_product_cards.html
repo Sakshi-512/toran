@@ -14,10 +14,10 @@
     {% if from_photo and o.price != '' %}<p class="from-photo">{{ t('confirm.from_photo', lang) }}</p>{% endif %}
     {{ err('p' ~ i ~ '_o' ~ j ~ '_price') }}
     {% endfor %}
-    <button class="button secondary" type="submit" name="action" value="add_option:{{ i }}" formaction="{{ cards_action }}#new">{{ t('confirm.add_option', lang) }}</button>
+    <button class="button secondary" type="submit" name="action" value="add_option:{{ i }}" data-once="{{ t('busy.working', lang) }}" formaction="{{ cards_action }}#new">{{ t('confirm.add_option', lang) }}</button>
     <label for="p{{ i }}-notes">{{ t('confirm.notes', lang) }}</label>
     <input id="p{{ i }}-notes" name="p{{ i }}_notes" value="{{ p.notes }}" maxlength="500">{{ err('p' ~ i ~ '_notes') }}
     <label class="check"><input type="checkbox" name="p{{ i }}_remove" value="yes"> {{ t('confirm.remove', lang) }}</label>
   </section>
   {% endfor %}
-  <button class="button secondary" type="submit" name="action" value="add_product" formaction="{{ cards_action }}#new">{{ t('confirm.add_product', lang) }}</button>
+  <button class="button secondary" type="submit" name="action" value="add_product" data-once="{{ t('busy.working', lang) }}" formaction="{{ cards_action }}#new">{{ t('confirm.add_product', lang) }}</button>

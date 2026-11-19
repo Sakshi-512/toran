@@ -84,7 +84,7 @@
       <input type="hidden" name="sample" value="{{ s }}">
       <p class="try-lang" lang="{{ code }}">{{ t('lang.' ~ code, code) }}</p>
       <p>{{ t('home.try_' ~ code, lang) }}</p>
-      <button class="button" type="submit">{{ icon('play', 22) }}<span>{{ t('home.try_button', lang) }}</span></button>
+      <button class="button" type="submit" data-once="{{ t('busy.working', lang) }}">{{ icon('play', 22) }}<span>{{ t('home.try_button', lang) }}</span></button>
     </form>
     {% endfor %}
   </div>
@@ -149,7 +149,7 @@
       <label for="c-website">{{ t('site.enquiry_trap', lang) }}</label>
       <input id="c-website" name="{{ SPAM_TRAP_FIELD }}" tabindex="-1" autocomplete="off">
     </div>
-    <button class="button" type="submit">{{ t('contact.send', lang) }}</button>
+    <button class="button" type="submit" data-once="{{ t('busy.sending', lang) }}">{{ t('contact.send', lang) }}</button>
   </form>
   {% endif %}
 </section>
