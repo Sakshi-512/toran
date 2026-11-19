@@ -7,10 +7,13 @@
 
 <section class="home-hero">
   <div class="hero-copy">
-    <h1>{{ t('home.headline', lang) }}</h1>
+    <p class="hero-pill">{{ t('home.pill', lang) }}</p>
+    {% set head = t('home.headline', lang).strip().rsplit(' ', 1) %}
+    <h1>{% if head|length == 2 %}{{ head[0] }} <span class="hl">{{ head[1] }}</span>{% elif head[0] %}<span class="hl">{{ head[0] }}</span>{% endif %}</h1>
     <p class="lead">{{ t('home.lead', lang) }}</p>
     <div class="cta-row">
       <a class="button big-cta" href="/start">{{ t('home.try_now', lang) }}</a>
+      <a class="text-link hero-link" href="/start?option=record#options">{{ t('home.record_own', lang) }}</a>
     </div>
     <p class="muted">{{ t('home.no_signup', lang) }}</p>
   </div>
@@ -24,7 +27,25 @@
   </figure>
 </section>
 
-<section class="home-section" aria-labelledby="how-title">
+{% if stats.any %}
+<section class="home-section home-band measured proof-band" aria-labelledby="measured-title">
+  <h2 id="measured-title">{{ t('home.measured_title', lang) }}</h2>
+  <p class="muted">{{ t('home.measured_intro', lang, app_name=app_name) }}</p>
+  <dl class="stats">
+    {% if stats.check_cost_usd is not none %}
+    <div class="stat"><dt>{{ t('home.stat_cost', lang) }}</dt><dd><strong>${{ '%.2f'|format(stats.check_cost_usd) }}</strong> <span class="muted">{{ t('home.stat_cost_note' ~ ('_one' if stats.check_count == 1 else ''), lang, n=stats.check_count) }} · {{ t('home.measured_on', lang, date=stats.check_date.strftime('%d/%m/%Y')) }}</span></dd></div>
+    {% endif %}
+    {% if stats.minutes_to_tested_draft is not none %}
+    <div class="stat"><dt>{{ t('home.stat_time', lang) }}</dt><dd><strong>{{ t('home.minutes', lang, n=('%.1f'|format(stats.minutes_to_tested_draft))) }}</strong> <span class="muted">{{ t('home.stat_time_note' ~ ('_one' if stats.draft_count == 1 else ''), lang, n=stats.draft_count) }} · {{ t('home.measured_on', lang, date=stats.draft_date.strftime('%d/%m/%Y')) }}</span></dd></div>
+    {% endif %}
+    {% if stats.field_accuracy is not none %}
+    <div class="stat"><dt>{{ t('home.stat_accuracy', lang) }}</dt><dd><strong>{{ '%.0f'|format(stats.field_accuracy * 100) }}%</strong> <span class="muted">{{ t('home.stat_accuracy_note' ~ ('_one' if stats.accuracy_count == 1 else ''), lang, prices=('%.0f'|format(stats.price_accuracy * 100)), n=stats.accuracy_count) }} · {{ t('home.measured_on', lang, date=stats.accuracy_date.strftime('%d/%m/%Y')) }}</span></dd></div>
+    {% endif %}
+  </dl>
+</section>
+{% endif %}
+
+<section class="home-section home-band how-band" aria-labelledby="how-title">
   <h2 id="how-title">{{ t('home.how_title', lang) }}</h2>
   <ol class="how">
     {% for key, ic in [('speak', 'mic'), ('check', 'check'), ('test', 'phone'), ('live', 'live')] %}
@@ -92,24 +113,6 @@
     </div>
   </div>
 </section>
-
-{% if stats.any %}
-<section class="home-section measured" aria-labelledby="measured-title">
-  <h2 id="measured-title">{{ t('home.measured_title', lang) }}</h2>
-  <p class="muted">{{ t('home.measured_intro', lang, app_name=app_name) }}</p>
-  <dl class="stats">
-    {% if stats.check_cost_usd is not none %}
-    <div class="stat"><dt>{{ t('home.stat_cost', lang) }}</dt><dd><strong>${{ '%.2f'|format(stats.check_cost_usd) }}</strong> <span class="muted">{{ t('home.stat_cost_note' ~ ('_one' if stats.check_count == 1 else ''), lang, n=stats.check_count) }} · {{ t('home.measured_on', lang, date=stats.check_date.strftime('%d/%m/%Y')) }}</span></dd></div>
-    {% endif %}
-    {% if stats.minutes_to_tested_draft is not none %}
-    <div class="stat"><dt>{{ t('home.stat_time', lang) }}</dt><dd><strong>{{ t('home.minutes', lang, n=('%.1f'|format(stats.minutes_to_tested_draft))) }}</strong> <span class="muted">{{ t('home.stat_time_note' ~ ('_one' if stats.draft_count == 1 else ''), lang, n=stats.draft_count) }} · {{ t('home.measured_on', lang, date=stats.draft_date.strftime('%d/%m/%Y')) }}</span></dd></div>
-    {% endif %}
-    {% if stats.field_accuracy is not none %}
-    <div class="stat"><dt>{{ t('home.stat_accuracy', lang) }}</dt><dd><strong>{{ '%.0f'|format(stats.field_accuracy * 100) }}%</strong> <span class="muted">{{ t('home.stat_accuracy_note' ~ ('_one' if stats.accuracy_count == 1 else ''), lang, prices=('%.0f'|format(stats.price_accuracy * 100)), n=stats.accuracy_count) }} · {{ t('home.measured_on', lang, date=stats.accuracy_date.strftime('%d/%m/%Y')) }}</span></dd></div>
-    {% endif %}
-  </dl>
-</section>
-{% endif %}
 
 <section class="contact-section" id="contact" aria-labelledby="contact-title">
   <h2 id="contact-title">{{ t('contact.title', lang) }}</h2>

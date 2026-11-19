@@ -5,9 +5,11 @@ import asyncio
 import io
 import re
 from datetime import timedelta
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from jinja2 import Environment
 from PIL import Image
 from sqlalchemy.engine import Engine
 from sqlmodel import Session
@@ -22,6 +24,7 @@ from app.models import (
     utcnow,
 )
 from app.routes.intake import _first_file
+from app.services.i18n import t
 from app.services.security import CSRF_FIELD
 from tests.test_publish import _business
 
@@ -312,3 +315,28 @@ def test_every_image_has_alt_text(client: TestClient, engine: Engine) -> None:
         page = client.get(path).text
         for tag in re.findall(r"<img [^>]*>", page):
             assert re.search(r'alt="[^"]+"', tag), tag
+
+
+# --- headline highlight -------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("lang", ["en", "hi", "mr"])
+def test_headline_highlights_only_its_last_word(client: TestClient, lang: str) -> None:
+    headline = t("home.headline", lang)
+    h1 = client.get(f"/?lang={lang}").text.split("<h1>")[1].split("</h1>")[0]
+    first, last = headline.rsplit(" ", 1)
+    assert h1 == f'{first} <span class="hl">{last}</span>'
+    assert re.sub(r"<[^>]+>", "", h1) == headline  # the words themselves are unchanged
+
+
+@pytest.mark.parametrize(
+    ("headline", "expected"), [("Toran", '<span class="hl">Toran</span>'), ("", "")]
+)
+def test_headline_highlight_handles_one_word_and_empty(headline: str, expected: str) -> None:
+    source = (Path(__file__).parents[1] / "app/templates/app/home.html").read_text(encoding="utf-8")
+    line = next(x for x in source.splitlines() if "set head =" in x)
+    h1 = next(x for x in source.splitlines() if x.strip().startswith("<h1>"))
+    template = Environment(autoescape=True).from_string(
+        line.replace("t('home.headline', lang)", "headline") + h1
+    )
+    assert template.render(headline=headline).strip() == f"<h1>{expected}</h1>"

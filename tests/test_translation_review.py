@@ -60,12 +60,13 @@ def test_corrections_round_trip_and_bad_placeholders_are_refused() -> None:
     assert "{name}" in data["hi"]["home.ba_intro"]  # the broken fix was not applied
 
 
-def test_measured_block_is_lower_with_sample_size_and_date(
+def test_measured_block_follows_the_hero_with_sample_size_and_date(
     client: TestClient, engine: Engine
 ) -> None:
     _usage(engine, "ai_checks", 0.04, mock=False)
     page = client.get("/").text
-    assert page.index("How it works") < page.index("Measured on the live system")
+    assert page.index('class="home-hero"') < page.index("Measured on the live system")
+    assert page.index("Measured on the live system") < page.index("How it works")
     assert page.index("Measured on the live system") < page.index('id="contact"')
     how = page.split("How it works")[1].split("</section>")[0]
     assert "AI cost of one full check" not in how

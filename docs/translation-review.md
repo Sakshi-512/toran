@@ -46,6 +46,7 @@ stored, how long, and the right to delete). Please read them first.
 | `contact.send` | Send message | संदेश भेजें | संदेश पाठवा |  |
 | `contact.thanks` | Thank you! Your message has been sent. We will get back to you soon. | धन्यवाद! आपका संदेश हमें मिल गया है। हम जल्द ही जवाब देंगे। | धन्यवाद! तुमचा संदेश आम्हाला मिळाला आहे. आम्ही लवकरच उत्तर देऊ. |  |
 | `contact.bad_contact` | Please enter a valid email address or phone number. | कृपया सही ईमेल या फ़ोन नंबर लिखिए। | कृपया योग्य ईमेल पत्ता किंवा फोन नंबर लिहा. |  |
+| `home.pill` | For small business owners | छोटे व्यवसाय चलाने वालों के लिए | छोट्या व्यवसाय करणाऱ्यांसाठी |  |
 | `home.headline` | Speak your business. Get your website. | अपना व्यवसाय बोलिए। अपनी वेबसाइट पाइए। | तुमचा व्यवसाय बोला. तुमची वेबसाइट मिळवा. |  |
 | `home.lead` | Describe your business in Marathi, Hindi or English. Toran builds a website that works on any phone, tests it the way your customers will, and fixes what it can before you say yes. | मराठी, हिंदी या अंग्रेज़ी में अपने व्यवसाय के बारे में बताइए। Toran ऐसी वेबसाइट बनाता है जो हर फ़ोन पर चले, उसे आपके ग्राहकों की तरह जाँचता है, और आपकी हाँ से पहले जो ठीक हो सके, ठीक कर देता है। | मराठी, हिंदी किंवा इंग्रजीत तुमच्या व्यवसायाबद्दल सांगा. Toran कोणत्याही फोनवर चालणारी वेबसाइट बनवतो, ती तुमच्या ग्राहकांसारखी तपासतो, आणि तुम्ही हो म्हणण्याआधी जे दुरुस्त करता येईल ते दुरुस्त करतो. |  |
 | `home.hero_open` | Open this sample website | यह नमूना वेबसाइट खोलें | ही नमुना वेबसाइट उघडा |  |
