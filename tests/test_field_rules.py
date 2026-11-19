@@ -97,3 +97,22 @@ def test_confirm_back_link(client: TestClient, engine: Engine) -> None:
     token = _start(client, engine, source="text", text=TEXT)
     page, _ = _cards(client, token)
     assert '<a class="back-link" href="/start">' in page
+
+
+@pytest.mark.parametrize("lang", ["en", "hi", "mr"])
+def test_confirm_tab_title_is_plain_text(client: TestClient, engine: Engine, lang: str) -> None:
+    from playwright.sync_api import sync_playwright
+
+    from app.services.i18n import t
+    from tests.live_server import live_server
+    from tests.test_add_rows import _in_thread
+
+    token = _in_thread(lambda: _start(client, engine, source="text", text=TEXT))
+    with sync_playwright() as p, live_server() as port:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.goto(f"http://localhost:{port}/start/{token}/confirm?lang={lang}")
+        title = page.evaluate("document.title")
+        browser.close()
+    assert "<" not in title
+    assert title.startswith(t("confirm.title", lang) + " · ")

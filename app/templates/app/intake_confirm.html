@@ -1,6 +1,5 @@
 {% extends "app/base.html" %}
-{% block title %}{{ t('confirm.title', lang) }} · {{ app_name }}<script src="{{ static_url('once.js') }}" defer></script>
-{% endblock %}
+{% block title %}{{ t('confirm.title', lang) }} · {{ app_name }}{% endblock %}
 {% macro err(name) %}{% if errors.get(name) %}<p class="field-error" role="alert">{{ t(errors[name], lang) }}</p>{% endif %}{% endmacro %}
 {% block content %}
 <p class="back"><a class="back-link" href="/start"><span aria-hidden="true">←</span> {{ t('nav.back', lang) }}</a></p>
