@@ -299,7 +299,7 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
 .home-band { border-image: linear-gradient(var(--band) 0 0) fill 0 / / 0 100vw; }
 
 /* 1. Hero. */
-.home-hero { padding: 24px 0 0; gap: 28px; align-items: end; }
+.home-hero { padding: 24px 0 32px; gap: 28px; align-items: end; }
 .home .hero-copy { padding-bottom: 8px; min-width: 0; }
 .home .hero-pill { display: inline-block; margin: 0 0 16px; padding: 6px 14px; border-radius: 999px;
   background: var(--pill); color: var(--ink); font-weight: 700; font-size: 16px; line-height: 1.4; }
@@ -311,7 +311,7 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
 .home .big-cta { background: var(--terracotta); color: #fff; min-height: 56px; padding: 0 28px; font-size: 20px; }
 .home .big-cta:hover { background: var(--ink); }
 .home .hero-link { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
-.home .phone-figure { background: var(--panel); border-radius: 28px 28px 0 0; padding: 32px 16px 0; align-self: end;
+.home .phone-figure { background: var(--panel); border-radius: 28px; padding: 32px 16px 0; align-self: end;
   gap: 0; overflow: hidden; }
 .home .phone-frame { background: var(--ink); border-radius: 40px 40px 0 0; padding: 12px 12px 0; box-shadow: none;
   max-width: 100%; }
@@ -344,13 +344,16 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
 
 /* 4. Samples and the gallery. */
 .home .home-section { border-top: 0; }
+/* A quiet divider between consecutive cream sections (the coloured bands keep their own edges). */
+.home .home-section:not(.home-band) + .home-section:not(.home-band),
+.home .home-section:not(.home-band) + .contact-section, .home .home-footer { border-top: 1px solid #e5d6ca; }
+.home .home-section:not(.home-band) > :last-child { margin-bottom: 0; }
 .home .try-card, .home .gallery-card a, .home .card { border: var(--card-border); border-radius: 18px; box-shadow: var(--card-shadow); }
 .home .try-card .button { background: var(--terracotta); color: #fff; }
 .home .try-lang { color: var(--ink); }
-.home .contact-section, .home-footer { border-top: 2px solid var(--line); }
 
 @media (min-width: 900px) {
-  .home-hero { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); padding-top: 40px; }
+  .home-hero { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); padding-top: 40px; padding-bottom: 48px; }
   .home h1 { font-size: clamp(48px, 5.4vw, 68px); }
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -361,3 +364,4 @@ body:has(.home) a.lang:focus-visible, body:has(.home) a.brand:focus-visible { ou
 .home .proof-band .facts-group > :is(h2, h3) { color: var(--cream); font-family: var(--display); font-weight: 400;
   font-size: 24px; margin: 0; }
 .home .proof-band > .facts-group:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.home .proof-band .stat strong.fact-words { font-size: clamp(28px, 4vw, 36px); line-height: 1.2; overflow-wrap: anywhere; }

@@ -375,6 +375,8 @@ def test_facts_show_languages_and_eval_from_their_sources(
     assert f"{len(SUPPORTED)} languages" in facts
     assert "77/81" in facts and "on 12 reviewed test cases, not live traffic" in facts
     assert "last run 03/11/2026" in facts
+    assert "You say yes first" in facts and "until you have checked every detail" in facts
+    assert facts.count('<div class="stat">') == 3
 
 
 @pytest.mark.parametrize(
@@ -394,6 +396,7 @@ def test_missing_or_bad_eval_summary_hides_only_that_figure(
     facts = _facts(client.get("/").text)
     assert f"{len(SUPPORTED)} languages" in facts
     assert "Extraction checks passed" not in facts
+    assert "You say yes first" in facts and facts.count('<div class="stat">') == 2
 
 
 def test_without_live_numbers_only_the_facts_group_shows(
@@ -428,3 +431,9 @@ def test_no_figure_is_hard_coded_in_the_template() -> None:
 def test_committed_eval_summary_is_valid() -> None:
     summary = showcase.load_eval_summary()
     assert summary is not None and summary.checks_passed <= summary.checks_total
+
+
+@pytest.mark.parametrize("lang", ["en", "hi", "mr"])
+def test_the_yes_first_fact_in_three_languages(client: TestClient, lang: str) -> None:
+    facts = _facts(client.get(f"/?lang={lang}").text)
+    assert t("home.stat_yes", lang) in facts and t("home.stat_yes_note", lang) in facts

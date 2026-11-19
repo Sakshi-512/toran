@@ -54,6 +54,7 @@
       {% if stats.eval %}
       <div class="stat"><dt>{{ t('home.stat_eval', lang) }}</dt><dd><strong>{{ stats.eval.checks_passed }}/{{ stats.eval.checks_total }}</strong> <span class="muted">{{ t('home.stat_eval_note', lang, cases=stats.eval.cases, date=stats.eval.run_date.strftime('%d/%m/%Y')) }}</span></dd></div>
       {% endif %}
+      <div class="stat"><dt>{{ t('home.stat_yes_note', lang) }}</dt><dd><strong class="fact-words">{{ t('home.stat_yes', lang) }}</strong></dd></div>
     </dl>
   </div>
   {% endif %}

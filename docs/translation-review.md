@@ -100,6 +100,8 @@ stored, how long, and the right to delete). Please read them first.
 | `home.stat_languages_note` | Marathi, Hindi and English, spoken or typed | मराठी, हिंदी और अंग्रेज़ी, बोलकर या लिखकर | मराठी, हिंदी आणि इंग्रजी, बोलून किंवा लिहून |  |
 | `home.stat_eval` | Extraction checks passed | जानकारी निकालने की जाँचें पास हुईं | माहिती काढण्याच्या तपासण्या पास झाल्या |  |
 | `home.stat_eval_note` | on {cases} reviewed test cases, not live traffic · last run {date} | {cases} जाँचे हुए टेस्ट केस पर, असली इस्तेमाल पर नहीं · आख़िरी बार {date} को चलाया गया | {cases} तपासलेल्या टेस्ट केसवर, खऱ्या वापरावर नाही · शेवटचे {date} रोजी चालवले |  |
+| `home.stat_yes` | You say yes first | पहले आपकी मंज़ूरी | आधी तुमची संमती |  |
+| `home.stat_yes_note` | Nothing goes live until you have checked every detail. | आप हर जानकारी जाँचकर हाँ कहें, उसके बाद ही कुछ लाइव होता है। | तुम्ही प्रत्येक माहिती तपासून हो म्हणेपर्यंत काहीही लाइव्ह होत नाही. |  |
 | `home.measured_title` | Measured on the live system | चालू सिस्टम पर मापा गया | चालू प्रणालीवर मोजलेले |  |
 | `home.measured_intro` | Real numbers from real use, updated as people use {app_name}. | असली इस्तेमाल से आए असली आँकड़े, जो लोगों के {app_name} इस्तेमाल करने के साथ अपडेट होते हैं। | खऱ्या वापरातून आलेले खरे आकडे, लोक {app_name} वापरतात तसे अपडेट होतात. |  |
 | `home.measured_on` | last measured {date} | आख़िरी बार {date} को मापा गया | शेवटचे {date} रोजी मोजले |  |

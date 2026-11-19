@@ -613,6 +613,8 @@
   "home.stat_languages_note": "Marathi, Hindi and English, spoken or typed",
   "home.stat_eval": "Extraction checks passed",
   "home.stat_eval_note": "on {cases} reviewed test cases, not live traffic · last run {date}",
+  "home.stat_yes": "You say yes first",
+  "home.stat_yes_note": "Nothing goes live until you have checked every detail.",
   "home.measured_title": "Measured on the live system",
   "home.measured_intro": "Real numbers from real use, updated as people use {app_name}.",
   "home.measured_on": "last measured {date}",
