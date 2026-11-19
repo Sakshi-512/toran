@@ -2,7 +2,7 @@
 {% block title %}{{ t('confirm.title', lang) }} · {{ app_name }}{% endblock %}
 {% macro err(name) %}{% if errors.get(name) %}<p class="field-error" role="alert">{{ t(errors[name], lang) }}</p>{% endif %}{% endmacro %}
 {% block content %}
-<p class="back"><a class="back-link" href="/start"><span aria-hidden="true">←</span> {{ t('nav.back', lang) }}</a></p>
+<p class="back"><a class="back-link" href="/start"><span aria-hidden="true">←</span> <span class="back-word">{{ t('nav.back', lang) }}</span></a></p>
 <h1>{{ t('confirm.title', lang) }}</h1>
 <p>{{ t('confirm.intro', lang) }}</p>
 {% if errors %}<p class="notice-error" role="alert">{{ t('confirm.fix_errors', lang) }}</p>{% endif %}

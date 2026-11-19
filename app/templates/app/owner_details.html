@@ -2,7 +2,7 @@
 {% block title %}{{ t('details.title', lang) }} · {{ business.display_name }}{% endblock %}
 {% macro err(name) %}{% if errors.get(name) %}<p class="field-error" role="alert">{{ t(errors[name], lang) }}</p>{% endif %}{% endmacro %}
 {% block content %}
-<p class="back"><a class="back-link" href="/owner"><span aria-hidden="true">←</span> {{ t('owner.back', lang) }}</a></p>
+<p class="back"><a class="back-link" href="/owner"><span aria-hidden="true">←</span> <span class="back-word">{{ t('owner.back', lang) }}</span></a></p>
 <h1>{{ t('details.title', lang) }}</h1>
 <p>{{ t('details.intro', lang) }}</p>
 {% if saved %}<p class="notice-ok" role="status">{{ t('details.saved', lang) }}</p>{% endif %}

@@ -3,7 +3,7 @@
 {% block title %}{{ t('start.title', lang) }} · {{ app_name }}{% endblock %}
 {% block content %}
 <div class="start">
-<p class="back"><a class="back-link" href="/"><span aria-hidden="true">←</span> {{ t('nav.back', lang) }}</a></p>
+<p class="back"><a class="back-link" href="/"><span aria-hidden="true">←</span> <span class="back-word">{{ t('nav.back', lang) }}</span></a></p>
 <h1>{{ t('start.title', lang) }}</h1>
 <p>{{ t('start.intro', lang) }}</p>
 {% if wait_seconds %}{% include "app/_wait_notice.html" %}{% endif %}
