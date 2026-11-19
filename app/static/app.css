@@ -9,6 +9,10 @@
   --bg: #fffaf3; --fg: #1f1a17; --muted: #5c534c; --accent: #b4361e; --accent-fg: #fff;
   --font: "Mukta", "Noto Sans Devanagari", "Mangal", system-ui, sans-serif;
   --display: "Rozha One", "Mukta", serif; --heading: #6b2412; --line: #eadfd2; --soft: #f6ede3;
+  /* Form controls: one look on every Toran page. The border is --muted (7.5:1 on white). */
+  --field-border: var(--muted); --field-border-w: 1.5px; --field-radius: 10px; --field-h: 48px;
+  --field-pad: 10px 12px; --field-bg: #fff; --placeholder: var(--muted); --error: #a3302a;
+  --ring: 3px solid var(--accent); --ring-offset: 2px; --check-size: 24px;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font);
@@ -51,26 +55,21 @@ main:has(.score-layout) { max-width: 1100px; }
 .contact-section { margin-top: 40px; padding-top: 24px; border-top: 1px solid #eadfd2; }
 .form { display: grid; gap: 8px; max-width: 560px; }
 .form label { font-weight: 700; margin-top: 8px; }
-.form input, .form textarea { width: 100%; min-height: 48px; font: inherit; padding: 10px 12px;
-  border: 1.5px solid #cbbfb3; border-radius: 10px; background: #fff; color: var(--fg); }
 .form .button { justify-self: start; margin-top: 12px; }
 .trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .notice-ok { background: #e7f3ec; border-left: 4px solid #2f7a4d; padding: 12px 16px; border-radius: 8px; }
 .notice-error { background: #fbeaea; border-left: 4px solid #a3302a; padding: 12px 16px; border-radius: 8px; }
 .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
-.form select { min-height: 48px; font: inherit; padding: 8px 12px; border: 1.5px solid #cbbfb3; border-radius: 10px; background: #fff; }
 .button.secondary { background: #fff; color: var(--accent); border: 1.5px solid var(--accent); }
 .button.big { font-size: 20px; min-height: 64px; width: 100%; }
 .choice { border: 1px solid #eadfd2; border-radius: 12px; padding: 12px 16px; margin: 8px 0; }
 .choice legend { font-weight: 700; padding: 0 4px; }
 .radio, .check { display: flex; gap: 10px; align-items: center; min-height: 44px; font-weight: 400; }
-.radio input, .check input { width: 22px; height: 22px; min-height: 0; }
 .card { background: #fff; border: 1px solid #eadfd2; border-radius: 14px; padding: 16px; margin: 12px 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .card.questions { border-color: #e2a24a; background: #fff7ea; }
 .cards h2 { margin-top: 24px; }
 .option-row { display: grid; grid-template-columns: 1fr 120px; gap: 8px; }
-.address { display: flex; align-items: center; gap: 6px; }
-.field-error { color: #a3302a; font-weight: 700; margin: 0; }
+.field-error { color: var(--error); font-weight: 700; margin: 0; }
 .from-photo { color: #8a5a00; background: #fff3d6; border-radius: 8px; padding: 4px 8px; margin: 0; font-size: 15px; }
 .secret-value { font-size: 20px; font-weight: 700; word-break: break-all; }
 .secret-value.pin { font-size: 40px; letter-spacing: .2em; }
@@ -193,12 +192,9 @@ main:has(.start) { max-width: 820px; }
 .option > input:checked ~ .option-panel { display: grid; gap: 8px; }
 .option:has(> input:checked) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .option > input:focus-visible + .option-head { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 14px; }
-.option-panel input[type=file] { min-height: 48px; font: inherit; width: 100%; max-width: 100%; }
-.option-panel textarea { width: 100%; font: inherit; padding: 10px 12px; border: 1.5px solid #cbbfb3; border-radius: 10px; }
 .before-send { background: var(--soft); border-radius: 16px; padding: 16px; display: grid; gap: 8px; }
 .before-send h3 { margin: 0; font-size: 20px; }
 .before-send label[for] { font-weight: 700; }
-.before-send select { min-height: 48px; font: inherit; padding: 8px 12px; border: 1.5px solid #cbbfb3; border-radius: 10px; background: #fff; max-width: 280px; }
 .before-send .check { align-items: flex-start; }
 .before-send .check input { margin-top: 4px; flex: none; }
 .before-send .send { justify-self: start; margin-top: 8px; min-height: 52px; }
@@ -223,7 +219,7 @@ main:has(.start) { max-width: 820px; }
 a { color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 a:visited { color: var(--accent); }
 a:hover, a:focus-visible { text-decoration-thickness: 2.5px; }
-a:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: var(--ring); outline-offset: var(--ring-offset); border-radius: 6px; }
 a.button, a.button:visited, a.brand, a.lang, .gallery-card a { text-decoration: none; }
 a.button:visited { color: var(--accent-fg); }
 a.button.secondary, a.button.secondary:visited { color: var(--accent); }
@@ -256,3 +252,32 @@ main img, main iframe, main video, main select, main input, main textarea { max-
 .button { max-width: 100%; text-align: center; }
 
 .measured .stats { margin-top: 12px; }
+
+/* ---- Form controls (one rule set; values come from the variables in :root). ---- */
+main :where(input:not([type=checkbox], [type=radio], [type=hidden]), select, textarea) {
+  width: 100%; min-height: var(--field-h); font: inherit; color: var(--fg); padding: var(--field-pad);
+  border: var(--field-border-w) solid var(--field-border); border-radius: var(--field-radius); background: var(--field-bg); }
+main :where(input[type=file]) { padding: 8px 12px; }
+main :where(select) { appearance: none; padding-right: 44px; text-overflow: ellipsis;
+  background: var(--field-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M3 6l5 5 5-5' fill='none' stroke='%235c534c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center / 16px 16px; }
+main ::placeholder { color: var(--placeholder); opacity: 1; }
+main input:focus-visible, main select:focus-visible, main textarea:focus-visible {
+  outline: var(--ring); outline-offset: var(--ring-offset); border-color: var(--accent); }
+main input:disabled, main select:disabled, main textarea:disabled { background-color: var(--soft); color: var(--muted); cursor: not-allowed; }
+main [aria-invalid=true], main input:has(+ .field-error), main select:has(+ .field-error), main textarea:has(+ .field-error),
+main .option-row:has(+ .field-error) input { border-color: var(--error); }
+main input[type=checkbox], main input[type=radio] { width: var(--check-size); height: var(--check-size); min-height: 0;
+  margin: 0; flex: none; accent-color: var(--accent); }
+main input[type=checkbox]:focus-visible, main input[type=radio]:focus-visible { outline: var(--ring); outline-offset: var(--ring-offset); }
+.radio, .check { min-height: 44px; cursor: pointer; }
+.before-send select { max-width: 280px; }
+
+/* The web address: one bordered field, the editable part left, the fixed suffix inside the border. */
+.field-group { display: flex; align-items: stretch; min-height: var(--field-h); max-width: 100%;
+  border: var(--field-border-w) solid var(--field-border); border-radius: var(--field-radius); background: var(--field-bg); }
+main .field-group > input { flex: 1 1 auto; min-width: 0; width: auto; border: 0; border-radius: var(--field-radius) 0 0 var(--field-radius);
+  padding-right: 2px; background: transparent; }
+main .field-group > input:focus-visible { outline: 0; }
+.field-group:focus-within { outline: var(--ring); outline-offset: var(--ring-offset); border-color: var(--accent); }
+.field-group:has(+ .field-error) { border-color: var(--error); }
+.field-suffix { flex: none; display: flex; align-items: center; padding: 0 12px 0 0; color: var(--muted); white-space: nowrap; user-select: none; }

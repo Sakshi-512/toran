@@ -21,7 +21,7 @@
     <input id="f-name" name="business_name" value="{{ draft.business_name }}" maxlength="120">{{ err('business_name') }}</section>
 
   <section class="card"><label for="f-address">{{ t('confirm.web_address', lang) }}</label>
-    <div class="address"><input id="f-address" name="web_address" value="{{ address }}" maxlength="40" pattern="[a-z0-9-]+" autocapitalize="none" spellcheck="false"><span class="muted">.{{ base_domain }}</span></div>
+    <div class="address field-group"><input id="f-address" name="web_address" value="{{ address }}" maxlength="40" pattern="[a-z0-9-]+" autocapitalize="none" spellcheck="false"><span class="field-suffix">.{{ base_domain }}</span></div>
     <p class="muted">{{ t('confirm.web_address_hint', lang) }}</p>{{ err('web_address') }}</section>
 
   <section class="card"><label for="f-type">{{ t('confirm.type', lang) }}</label>
