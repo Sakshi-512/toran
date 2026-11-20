@@ -4,7 +4,7 @@
 
 **Try it, no sign-up:** https://gettoran.com → tap one of the three sample voice notes.
 
-**Headline:** a voice note becomes a tested draft website in minutes, and in a real run (real Claude, real browser) Toran's agent raised a demo draft's Readiness Score from 85 to 87 on its own, for about $0.24. Real-world accuracy: <!-- TODO(Sakshi): fill in --> **[to be filled in]**.
+**Headline:** a voice note becomes a tested draft website in minutes, and Toran's agent then improves the draft on its own: it keeps a change only if the Readiness Score rises, and rolls it back otherwise. Real-voice test: results in the project brief.
 
 ---
 
@@ -35,8 +35,28 @@ Toran is a voice-first agent that takes a small business owner from idea to laun
 | --- | --- | --- |
 | **Impact (35%)** | Built for small business owners in India who find technology a barrier, starting with home-based businesses (first real users: women running businesses from home in Pune); voice in Marathi, Hindi and English; sites readable in all three; real vs sample businesses tracked; accuracy measured on real voice notes; cost per business measured | `app/services/accuracy.py`, `scripts/accuracy_report.py`, `app/services/showcase.py` ("Measured on the live system"), real-world results below |
 | **Demo (35%)** | One-tap samples, no sign-up; the score improves visibly; "How Toran thinks" panel; friendly messages instead of errors (spend cap, Claude down, stuck jobs); works at 360 px to 1280 px | `app/templates/app/home.html`, `app/templates/app/owner_agent.html`, `tests/test_layout.py` |
-| **Tech Usage (15%)** | Claude agent loop with six guarded tools, vision (price-list photos), structured outputs, prompt caching, cost logging and a daily cap; GoDaddy CLI for live domain availability and prices, DNS, VPS and mailbox | "How it uses Claude" and "How it uses GoDaddy" below |
-| **Execution (15%)** | Layered FastAPI app (thin routes, services, swappable providers), Alembic migrations, 777 tests including real-Chromium layout and end-to-end checks, ruff, mypy, gitleaks, pip-audit, CI on every push, an independent code review with fixes | `docs/review.md`, `.github/workflows/ci.yml`, `tests/` |
+| **Tech Usage (15%)** | Claude Sonnet for profile extraction (with vision), AI-assessed checks and an agent loop with six guarded tools; Claude Haiku for web address ideas; Sarvam speech-to-text; prompt caching, cost logging and daily caps. GoDaddy: the Docker VPS, the domain with wildcard DNS (set once at GoDaddy), the mailbox, and the gddy CLI inside the product for live domain availability and prices | "How Toran uses Claude and GoDaddy" below |
+| **Execution (15%)** | Layered FastAPI app (thin routes, services, swappable providers), Alembic migrations, over 800 automated tests including real-Chromium layout and end-to-end checks, ruff, mypy, gitleaks, pip-audit, CI on every push, an independent code review with fixes | `docs/review.md`, `.github/workflows/ci.yml`, `tests/` |
+
+### How Toran uses Claude and GoDaddy
+
+Every Claude call goes through `ClaudeClient` (`app/services/claude_client.py`): `max_tokens`, a timeout, retries with backoff, prompt caching of the system prompt (which also covers the tools sent before it), token and cost logging per business, and a daily spend cap (`check_spend_cap`, with 30% reserved for existing businesses, `RESERVED_SHARE`). Mock mode (`CLAUDE_MOCK=1`) answers from `tests/fixtures/claude/`. Text from voice notes, photos, websites and forms is passed to Claude as data inside tagged blocks (angle brackets neutralised), never as instructions.
+
+| Use | What it does | Model or service | Main files | Covered by |
+| --- | --- | --- | --- | --- |
+| Speech-to-text | Turns a Marathi, Hindi or English voice note into text: the REST endpoint for short notes, the batch API for longer ones; audio is never logged | Sarvam Saaras v4 (`saaras:v4`, `sarvamai` SDK); providers `none`, `mock`, `sarvam` | `app/services/stt.py` | `tests/test_stt.py` |
+| Profile extraction | A transcript, typed text or a price-list photo (vision) becomes a business profile as Pydantic-validated JSON; owner text is data, nothing is invented | Claude Sonnet | `app/services/extract.py`, `app/schemas.py` | `tests/test_extract.py`, `tests/test_schemas.py`; `make eval` (`scripts/run_evals.py`, `evals/cases/`, latest totals in `evals/latest.json`); `make accuracy` (`scripts/accuracy_report.py`) |
+| Eval name judge | Decides whether two product names mean the same item when scoring evals | Claude Haiku | `app/services/evals.py` | `tests/test_evals_owner.py` |
+| Readiness checks: measured | A real browser opens the site like a customer: speed, page weight, order button above the fold, tap targets, sideways scroll, laptop overflow, phone shown, area shown, HTTPS (9 items, 52 points); at most 2 browsers at once | Playwright with Chromium | `app/services/customer_tests.py`, `app/services/score.py`, `docs/score.md` | `tests/test_customer_tests.py`, `tests/test_score.py`; `make score` |
+| Readiness checks: AI-assessed | Language clarity, real photos, ordering policy, customer questions answered, judged from the page text in three languages and a phone screenshot; each item records `ai_assessed` (4 items, 48 points) | Claude Sonnet (vision) | `app/services/ai_checks.py`, `app/services/checklists.py`, `docs/checklists.md` | `tests/test_ai_checks.py`, `tests/test_score.py` |
+| Agent fix loop | Improves the draft with tool use: reads the score items, calls tools, re-tests | Claude Sonnet | `app/services/agent.py` (`AgentLoop`), `app/services/agent_report.py` | `tests/test_agent.py`; `make agent` |
+| Agent tools and guards | Exactly six tools (`run_tests`, `compress_images`, `add_translation`, `edit_layout`, `ask_owner`, `rebuild_draft`). Strict inputs (a `price` or `phone` field is rejected); translations keep the same numbers, with no prices, phone numbers or links; layout choices come from a fixed list. At most 5 rounds and 3 calls per round; a round that does not raise the score is rolled back; one run at a time and 3 runs per business per day. It cannot change facts, publish or spend money | Code checks around Claude | `app/services/agent_tools.py`, `app/services/agent.py` | `tests/test_agent.py` |
+| Domain name ideas | Suggests 6 short names from the confirmed profile | Claude Haiku | `suggest_names` in `app/services/godaddy.py` | `tests/test_domains_and_delete.py` (saved answers in `tests/fixtures/gddy/`) |
+| Domain availability and prices | Each name with `.in` and `.com`, checked with `gddy domain available <domain> --check-type full --json` and shown as tool calls in the owner's view. Nothing is bought from the app: "I want this one" records the request and emails the team, who buy it on godaddy.com | GoDaddy gddy CLI (pinned, SHA-256 checked, authenticates with `GDDY_PAT`) | `run_lookup`, `request_domain` in `app/services/godaddy.py`, `scripts/install_gddy.py`, `Dockerfile` | `tests/test_domains_and_delete.py` |
+| VPS, Docker and Caddy | The app (non-root container) and Caddy for HTTPS, with restart policies, health checks on both and tagged images for rollback | GoDaddy Docker VPS, Docker Compose, Caddy | `docker-compose.yml`, `Dockerfile`, `Caddyfile`, `docs/deploy.md`, `/health` in `app/routes/health.py` | `tests/test_health_and_home.py`, `tests/test_docker_files.py`; the server checklist in `docs/deploy.md` |
+| Wildcard DNS and per-site HTTPS | `A` records for `@`, `www` and `*` were set once at GoDaddy and point at the VPS. Each business subdomain gets its own certificate on demand, only after `/internal/tls-check` confirms it belongs to a real business. The app never changes DNS | GoDaddy DNS, Caddy on-demand TLS | `Caddyfile`, `tls_check` in `app/routes/health.py`, `docs/deploy.md` | `tests/test_health_and_home.py`, `tests/test_publish.py` |
+| Mailbox and email | Contact form to our mailbox, enquiry notifications, domain requests to the team, and error alerts (at most one per error type per hour), over SMTP as background jobs with retry | GoDaddy mailbox (SMTP) | `app/services/mailer.py`, `app/services/mail_jobs.py`, `app/services/contact.py`, `app/services/alerts.py` | `tests/test_mail.py`, `tests/test_enquiry.py` |
+| Spend caps | Claude: a daily dollar cap (Asia/Kolkata days, 30% kept for existing businesses). Speech-to-text: a daily minutes cap, after which owners are asked to type. Agent: 3 runs per business per day. Tokens and estimated cost are logged per business | | `check_spend_cap` in `app/services/claude_client.py`, `app/services/stt.py`, `app/services/agent.py` | `tests/test_claude_client.py`, `tests/test_spend_cap_samples.py`, `tests/test_review_fixes.py` (speech-to-text cap), `tests/test_agent.py` |
 
 ## Architecture
 
@@ -68,32 +88,6 @@ flowchart LR
 - Routes stay thin (`app/routes/`); logic lives in `app/services/`; providers (Claude, speech-to-text, GoDaddy CLI, SMTP) sit behind interfaces with mock versions.
 - Browser tests and the agent run as background jobs (`app/services/jobs.py`); pages refresh themselves while they wait.
 - Business sites are static files built from the confirmed profile (`app/services/sitegen.py`) and served on their own subdomain.
-
-## How it uses Claude
-
-Every call goes through `ClaudeClient` (`app/services/claude_client.py`): `max_tokens`, a timeout, retries with backoff, prompt caching of the system prompt (and tools), token and cost logging per business, and a daily spend cap (`check_spend_cap`, with 30% reserved for existing businesses, `RESERVED_SHARE`). Mock mode (`CLAUDE_MOCK=1`) answers from `tests/fixtures/claude/`.
-
-| Use | Model | Where |
-| --- | --- | --- |
-| Voice transcript or price-list photo (vision) → business profile, as validated JSON | Sonnet | `extract_profile` in `app/services/extract.py` |
-| AI-assessed score items (language clarity, policy, customer questions), judged with the phone screenshot | Sonnet | `run_ai_checks` in `app/services/ai_checks.py` |
-| Agent fix loop with tool use: reads score items, calls tools, re-tests, up to 5 rounds | Sonnet | `AgentLoop` in `app/services/agent.py` |
-| The six tools, each checked in code before anything changes (a price or fact change is rejected) | — | `TOOL_DEFINITIONS`, `apply_tool`, `translation_problem` in `app/services/agent_tools.py` |
-| Web address name suggestions | Haiku | `suggest_names` in `app/services/godaddy.py` |
-| Eval name judge | Haiku | `app/services/evals.py` |
-
-Text from voice notes, photos, websites and forms is passed to Claude as data inside tagged blocks (angle brackets neutralised), never as instructions.
-
-## How it uses GoDaddy
-
-| Use | Where |
-| --- | --- |
-| **Domain availability and first-year prices** inside the product: 6 suggested names × `.in` and `.com`, each checked with `gddy domain available <domain> --check-type full --json`, shown as tool calls in the owner's view | `GddyCli`, `command_for`, `run_lookup` in `app/services/godaddy.py` |
-| **Nothing bought from the app**: "I want this one" records the request and emails the team, who buy it on godaddy.com and point DNS | `request_domain` in `app/services/godaddy.py`, `app/services/mail_jobs.py` |
-| **Pinned, checksum-verified gddy CLI** in the Docker image; `/health` reports it; authenticates with `GDDY_PAT` | `scripts/install_gddy.py`, `Dockerfile` |
-| **Domain and DNS**: gettoran.com, with `A` records for `@`, `www` and `*` (every business subdomain) | `docs/deploy.md` |
-| **Docker VPS** running Caddy and the app | `docker-compose.yml`, `Caddyfile`, `docs/deploy.md` |
-| **Mailbox** on our domain over SMTP: contact form, enquiry notifications, team notes, error alerts | `send_mail` in `app/services/mailer.py` |
 
 ## Safety and privacy
 
@@ -148,7 +142,7 @@ Everything works in mock mode (`CLAUDE_MOCK=1`, `GDDY_MOCK=1`, `STT_PROVIDER=moc
 
 ```bash
 make lint      # ruff, formatting, mypy, gitleaks, private-files hook, whitespace (pre-commit)
-make test      # 777 tests, mock mode, including real-Chromium end-to-end and layout checks
+make test      # over 800 automated tests, mock mode, including real-Chromium end-to-end and layout checks
 make eval      # extraction evals (evals/), checked in code
 ```
 

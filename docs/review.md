@@ -47,6 +47,19 @@ items 1 to 7 the test was written first and seen to fail before the fix.
 | 30 | Restoring a backup brings back data deleted within the last 7 days | Inherent to backups; the restore steps in `docs/deploy.md` say what to do after a restore |
 | 31 | Devanagari phone digits are treated differently on two pages: the confirm page turns `०-९` into `0-9` before checking (`draft_from_form` uses `ascii_digits`), My details does not (`details.check` calls `normalise_phone` on the raw text). So `९८७६५४३२१०` is accepted on confirm and refused on My details, and a number mixing scripts can be stored with Devanagari digits from My details | A server validation change, outside the feature freeze. The live checks (`app/static/validate.js`) mirror each page exactly as it is today; fixing it means calling `ascii_digits` in `details.check` and `details.save`, with a test |
 
+## Still to do before submission
+
+- TODO(Sakshi): the README headline says "Real-voice test: results in the project brief". Fill in the
+  final tally of the real-voice test (field and price accuracy, number of real voice notes) in the
+  brief, and then in the README headline.
+- TODO(Sakshi): the "Real-world results" table in the README still shows "[to be filled in]" for
+  real businesses onboarded, field accuracy, price accuracy, median time to a tested draft and the
+  Pune audit. `make accuracy` prints the accuracy and timing from real (non-sample) businesses.
+- TODO(Sakshi): agent results. Each agent run is recorded in the `agentrun` table (`AgentRun` in
+  `app/models.py`): `score_before`, `score_after`, `cost_usd_estimate`, `rounds`, `stop_reason`
+  and `status`; each round's kept or rolled-back result is in the action log. Once the production
+  results are in, the README can state them per real run instead of the general sentence.
+
 ## What could not be checked here
 
 - The x86_64 gddy build was checked against the release checksums, but only the arm64 build was
