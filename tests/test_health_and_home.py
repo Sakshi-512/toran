@@ -19,10 +19,10 @@ def test_home_uses_settings(client: TestClient) -> None:
 
 
 def test_home_in_marathi_and_hindi(client: TestClient) -> None:
-    assert "आत्ता वापरून पाहा" in client.get("/?lang=mr").text
-    assert "अभी आज़माइए" in client.get("/?lang=hi").text
+    assert "आत्ताच वापरून पाहा" in client.get("/?lang=mr").text
+    assert "अभी आज़माएँ" in client.get("/?lang=hi").text
     # The choice is remembered in the session.
-    assert "आज़माइए" in client.get("/").text
+    assert "अभी आज़माएँ" in client.get("/").text
 
 
 def test_home_from_accept_language(client: TestClient) -> None:

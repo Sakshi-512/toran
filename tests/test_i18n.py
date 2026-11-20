@@ -20,7 +20,7 @@ def test_no_empty_strings() -> None:
 
 
 def test_lookup_and_formatting() -> None:
-    assert t("home.try_now", "mr") == "आत्ता वापरून पाहा"
+    assert t("home.try_now", "mr") == "आत्ताच वापरून पाहा"
     assert t("home.title", "en", app_name="Shop") == "Shop"
 
 

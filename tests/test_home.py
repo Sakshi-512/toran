@@ -255,8 +255,8 @@ def test_each_language_card_starts_the_real_flow(client: TestClient) -> None:
     ("lang", "headline", "try_title"),
     [
         ("en", "Speak your business. Get your website.", "Try it in 3 languages"),
-        ("hi", "अपना व्यवसाय बोलिए। अपनी वेबसाइट पाइए।", "3 भाषाओं में आज़माइए"),
-        ("mr", "तुमचा व्यवसाय बोला. तुमची वेबसाइट मिळवा.", "3 भाषांत वापरून पाहा"),
+        ("hi", "अपने कारोबार के बारे में बताइए। अपनी वेबसाइट पाइए।", "3 भाषाओं में आज़माएँ"),
+        ("mr", "तुमच्या व्यवसायाबद्दल सांगा. तुमची वेबसाइट तयार!", "3 भाषांमध्ये वापरून पाहा"),
     ],
 )
 def test_home_in_three_languages(

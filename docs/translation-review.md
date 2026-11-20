@@ -30,81 +30,81 @@ stored, how long, and the right to delete). Please read them first.
 | `home.step_1` | Speak in Marathi, Hindi or English, or send a photo of your rate card. | मराठी, हिन्दी या अंग्रेज़ी में बोलिए, या अपने रेट कार्ड की फ़ोटो भेजिए। | मराठी, हिंदी किंवा इंग्रजीत बोला, किंवा तुमच्या दरपत्रकाचा फोटो पाठवा. |  |
 | `home.step_2` | Check each detail. Nothing goes on your site until you say yes. | हर जानकारी जाँचिए। आपकी हाँ के बिना साइट पर कुछ नहीं जाएगा। | प्रत्येक माहिती तपासा. तुमच्या होकाराशिवाय साइटवर काहीही जाणार नाही. |  |
 | `home.step_3` | Get a live website with a readiness score. | रेडीनेस स्कोर के साथ अपनी वेबसाइट लाइव कीजिए। | तयारी स्कोअरसह तुमची चालू वेबसाइट मिळवा. |  |
-| `home.try_now` | Try it now | अभी आज़माइए | आत्ता वापरून पाहा |  |
+| `home.try_now` | Try it now | अभी आज़माएँ | आत्ताच वापरून पाहा |  |
 | `home.try_soon` | Opening soon | जल्द शुरू होगा | लवकरच सुरू होईल |  |
-| `home.no_signup` | No sign-up needed. | साइन-अप की ज़रूरत नहीं। | साइन-अपची गरज नाही. |  |
+| `home.no_signup` | No sign-up needed. | साइन-अप करने की ज़रूरत नहीं। | साइन-अप करण्याची गरज नाही. |  |
 | `lang.label` | Language | भाषा | भाषा |  |
 | `lang.en` | English | English | English |  |
 | `lang.hi` | हिन्दी | हिन्दी | हिन्दी |  |
 | `lang.mr` | मराठी | मराठी | मराठी |  |
 | `label.sample` | Sample | नमूना | नमुना |  |
 | `contact.title` | Contact us | हमसे संपर्क करें | आमच्याशी संपर्क साधा |  |
-| `contact.intro` | Questions or feedback? Write to us and we will get back to you. | कोई सवाल या सुझाव है? हमें लिखिए, हम जवाब देंगे। | काही प्रश्न किंवा सूचना आहे? आम्हाला लिहा, आम्ही उत्तर देऊ. |  |
-| `contact.name` | Your name | आपका नाम | तुमचे नाव |  |
-| `contact.contact` | Your email or phone number | आपका ईमेल या फ़ोन नंबर | तुमचा ईमेल किंवा फोन नंबर |  |
+| `contact.intro` | Questions or feedback? Write to us and we will get back to you. | कोई सवाल है या कुछ सुझाव देना चाहते हैं? हमें लिखें। हम आपसे संपर्क करेंगे। | काही प्रश्न आहेत किंवा काही सूचना द्यायच्या आहेत? आम्हाला लिहा. आम्ही तुम्हाला उत्तर देऊ. |  |
+| `contact.name` | Your name | आपका नाम | तुमचं नाव |  |
+| `contact.contact` | Your email or phone number | ईमेल या फ़ोन नंबर | तुमचा ईमेल किंवा फोन नंबर |  |
 | `contact.message` | Your message | आपका संदेश | तुमचा संदेश |  |
 | `contact.send` | Send message | संदेश भेजें | संदेश पाठवा |  |
 | `contact.thanks` | Thank you! Your message has been sent. We will get back to you soon. | धन्यवाद! आपका संदेश हमें मिल गया है। हम जल्द ही जवाब देंगे। | धन्यवाद! तुमचा संदेश आम्हाला मिळाला आहे. आम्ही लवकरच उत्तर देऊ. |  |
 | `contact.bad_contact` | Please enter a valid email address or phone number. | कृपया सही ईमेल या फ़ोन नंबर लिखिए। | कृपया योग्य ईमेल पत्ता किंवा फोन नंबर लिहा. |  |
-| `home.pill` | For small business owners | छोटे व्यवसाय चलाने वालों के लिए | छोट्या व्यवसाय करणाऱ्यांसाठी |  |
-| `home.headline` | Speak your business. Get your website. | अपना व्यवसाय बोलिए। अपनी वेबसाइट पाइए। | तुमचा व्यवसाय बोला. तुमची वेबसाइट मिळवा. |  |
-| `home.lead` | Describe your business in Marathi, Hindi or English. Toran builds a website that works on any phone, tests it the way your customers will, and fixes what it can before you say yes. | मराठी, हिंदी या अंग्रेज़ी में अपने व्यवसाय के बारे में बताइए। Toran ऐसी वेबसाइट बनाता है जो हर फ़ोन पर चले, उसे आपके ग्राहकों की तरह जाँचता है, और आपकी हाँ से पहले जो ठीक हो सके, ठीक कर देता है। | मराठी, हिंदी किंवा इंग्रजीत तुमच्या व्यवसायाबद्दल सांगा. Toran कोणत्याही फोनवर चालणारी वेबसाइट बनवतो, ती तुमच्या ग्राहकांसारखी तपासतो, आणि तुम्ही हो म्हणण्याआधी जे दुरुस्त करता येईल ते दुरुस्त करतो. |  |
+| `home.pill` | For small business owners | छोटे कारोबार करने वालों के लिए | छोट्या व्यावसायिकांसाठी |  |
+| `home.headline` | Speak your business. Get your website. | अपने कारोबार के बारे में बताइए। अपनी वेबसाइट पाइए। | तुमच्या व्यवसायाबद्दल सांगा. तुमची वेबसाइट तयार! |  |
+| `home.lead` | Describe your business in Marathi, Hindi or English. Toran builds a website that works on any phone, tests it the way your customers will, and fixes what it can before you say yes. | मराठी, हिंदी या अंग्रेज़ी में अपने कारोबार के बारे में बताइए। Toran आपके लिए ऐसी वेबसाइट बनाता है जो हर तरह के फ़ोन पर आसानी से चलती है। फिर यह जाँचता है कि आपके ग्राहक आपकी वेबसाइट का इस्तेमाल आसानी से कर पाएँगे या नहीं। और आपके हाँ कहने से पहले, जो कमियाँ ठीक हो सकती हैं, उन्हें खुद ठीक कर देता है। | तुमच्या व्यवसायाबद्दल मराठी, हिंदी किंवा इंग्रजीत सांगा. Toran तुमच्यासाठी अशी वेबसाइट तयार करतं जी कोणत्याही फोनवर सहज चालते. तुमचे ग्राहक ती कशी वापरतील, याचीही तपासणी करतं. आणि तुम्ही होकार देण्याआधी, ज्या चुका स्वतःहून दुरुस्त करता येतील त्या दुरुस्त करतं. |  |
 | `home.hero_open` | Open this sample website | यह नमूना वेबसाइट खोलें | ही नमुना वेबसाइट उघडा |  |
 | `home.hero_alt` | A phone showing the website Toran made for Asha's Home Bakery, a sample business: the cake photo, the order button and the delivery areas. | एक फ़ोन जिस पर Toran की बनाई आशा होम बेकरी (नमूना व्यवसाय) की वेबसाइट है: केक की फ़ोटो, ऑर्डर बटन और डिलीवरी के इलाक़े। | एक फोन ज्यावर Toran ने बनवलेली आशा होम बेकरी (नमुना व्यवसाय) ची वेबसाइट आहे: केकचा फोटो, ऑर्डर बटण आणि डिलिव्हरीचे भाग. |  |
-| `home.hero_caption` | A real website made by Toran for a demo bakery. | एक डेमो बेकरी के लिए Toran की बनाई असली वेबसाइट। | एका डेमो बेकरीसाठी Toran ने बनवलेली खरी वेबसाइट. |  |
-| `home.how_title` | How it works | यह कैसे काम करता है | हे कसं काम करतं |  |
-| `home.how_speak` | Speak | बोलिए | बोला |  |
-| `home.how_speak_text` | Talk about your business for a minute, send a photo of your price list, or type. | एक मिनट अपने व्यवसाय के बारे में बोलिए, रेट लिस्ट की फ़ोटो भेजिए, या लिख दीजिए। | एक मिनिट तुमच्या व्यवसायाबद्दल बोला, दरपत्रकाचा फोटो पाठवा, किंवा लिहा. |  |
-| `home.how_check` | Check the details | जानकारी जाँचिए | माहिती तपासा |  |
-| `home.how_check_text` | See each detail on a simple card. Anything unclear becomes a question, never a guess. | हर जानकारी एक आसान कार्ड पर दिखेगी। जो बात साफ़ न हो, उस पर सवाल पूछा जाएगा, अंदाज़ा नहीं लगाया जाएगा। | प्रत्येक माहिती एका सोप्या कार्डवर दिसेल. जे स्पष्ट नसेल त्याबद्दल प्रश्न विचारला जाईल, अंदाज लावला जाणार नाही. |  |
-| `home.how_test` | Test like a customer | ग्राहक की तरह जाँच | ग्राहकासारखी तपासणी |  |
-| `home.how_test_text` | A real browser opens your site on a slow phone and gives it a Readiness Score. | एक असली ब्राउज़र आपकी साइट को धीमे फ़ोन पर खोलकर देखता है और रेडीनेस स्कोर देता है। | एक खरा ब्राउझर तुमची साइट हळू फोनवर उघडतो आणि तयारी स्कोअर देतो. |  |
-| `home.how_live` | Go live | लाइव करें | लाइव्ह करा |  |
-| `home.how_live_text` | Toran fixes what it can. Nothing goes live until you say yes. | Toran जो ठीक कर सकता है, कर देता है। आपकी हाँ के बिना कुछ भी लाइव नहीं होता। | Toran जे दुरुस्त करता येईल ते करतो. तुम्ही हो म्हणेपर्यंत काहीही लाइव्ह होत नाही. |  |
-| `home.stat_cost` | AI cost of one full check | एक पूरी जाँच का AI खर्च | एका पूर्ण तपासणीचा AI खर्च |  |
-| `home.stat_cost_note` | median of {n} real checks | {n} असली जाँचों का मीडियन | {n} खऱ्या तपासण्यांचा मध्यक |  |
-| `home.stat_time` | From voice note to a tested draft | वॉइस नोट से जाँचे हुए ड्राफ्ट तक | व्हॉइस नोटपासून तपासलेल्या ड्राफ्टपर्यंत |  |
+| `home.hero_caption` | A real website made by Toran for a demo bakery. | Toran की बनाई एक असली वेबसाइट, एक डेमो बेकरी के लिए | Asha's Home Bakery साठी Toran ने तयार केलेली वेबसाइट. हा एक डेमो व्यवसाय आहे. |  |
+| `home.how_title` | How it works | Toran कैसे काम करता है? | Toran कसं काम करतं? |  |
+| `home.how_speak` | Speak | अपने कारोबार के बारे में बताइए | तुमच्या व्यवसायाबद्दल सांगा |  |
+| `home.how_speak_text` | Talk about your business for a minute, send a photo of your price list, or type. | एक मिनट का वॉइस नोट भेजें, अपनी रेट लिस्ट की फ़ोटो भेजें या सारी जानकारी टाइप करें। | एक मिनिट तुमच्या व्यवसायाबद्दल बोला, दरपत्रकाचा फोटो पाठवा किंवा माहिती टाइप करा. |  |
+| `home.how_check` | Check the details | जानकारी जाँचें | माहिती तपासून घ्या |  |
+| `home.how_check_text` | See each detail on a simple card. Anything unclear becomes a question, never a guess. | आपके कारोबार से जुड़ी हर जानकारी आपको एक आसान कार्ड में दिखाई जाएगी। अगर कोई जानकारी अधूरी या समझने में मुश्किल होगी, तो Toran आपसे पूछेगा। अपनी तरफ़ से कोई अंदाज़ा नहीं लगाएगा। | तुम्ही दिलेली प्रत्येक माहिती एका सोप्या कार्डवर दिसेल. काही माहिती अपुरी किंवा स्पष्ट नसेल, तर Toran तुम्हाला प्रश्न विचारेल. स्वतःहून अंदाज लावणार नाही. |  |
+| `home.how_test` | Test like a customer | ग्राहक बनकर अपनी वेबसाइट देखें | ग्राहक बनून वेबसाइट तपासा |  |
+| `home.how_test_text` | A real browser opens your site on a slow phone and gives it a Readiness Score. | Toran एक असली ब्राउज़र में आपकी वेबसाइट खोलकर जाँचता है कि वह धीमे इंटरनेट और साधारण फ़ोन पर भी ठीक से काम करती है या नहीं। इसके बाद आपको एक रेडीनेस स्कोर मिलता है। | Toran तुमची वेबसाइट एका खऱ्या ब्राउझरमध्ये उघडून तपासतं. कमी इंटरनेट स्पीड आणि साध्या फोनवरही ती व्यवस्थित चालते का, हे पाहतं. त्यानंतर तुम्हाला तयारी स्कोअर मिळतो. |  |
+| `home.how_live` | Go live | आपकी मंज़ूरी के बाद वेबसाइट लाइव करें | तुमच्या मंजुरीनंतर वेबसाइट लाइव्ह करा |  |
+| `home.how_live_text` | Toran fixes what it can. Nothing goes live until you say yes. | Toran वेबसाइट में जो कमियाँ खुद ठीक कर सकता है, उन्हें ठीक करता है। लेकिन आपकी मंज़ूरी के बिना कुछ भी लाइव नहीं होता। | Toran कडून ज्या चुका दुरुस्त करता येतील, त्या ते दुरुस्त करतं. पण तुम्ही मंजुरी दिल्याशिवाय वेबसाइट लाइव्ह होत नाही. |  |
+| `home.stat_cost` | AI cost of one full check | एक पूरी जाँच में AI का खर्च | एका पूर्ण तपासणीसाठी AI चा खर्च |  |
+| `home.stat_cost_note` | median of {n} real checks | {n} असली जाँचों का बीच का मान | प्रत्यक्ष केलेल्या {n} तपासण्यांमधील मधले मूल्य |  |
+| `home.stat_time` | From voice note to a tested draft | वॉइस नोट से जाँची हुई वेबसाइट के ड्राफ्ट तक | व्हॉइस नोटपासून तपासलेल्या वेबसाइटच्या ड्राफ्टपर्यंत |  |
 | `home.minutes` | {n} min | {n} मिनट | {n} मिनिटे |  |
-| `home.stat_time_note` | median of {n} real runs | {n} असली बार का मीडियन | {n} खऱ्या वेळांचा मध्यक |  |
+| `home.stat_time_note` | median of {n} real runs | {n} असली बार में बीच का समय | प्रत्यक्ष वापराच्या {n} वेळांमधील मधला वेळ |  |
 | `home.stat_accuracy` | Details right first time on real voice notes | असली वॉइस नोट से पहली बार में सही जानकारी | खऱ्या व्हॉइस नोटमधून पहिल्याच वेळी बरोबर माहिती |  |
 | `home.stat_accuracy_note` | prices {prices}% · based on {n} real businesses | दाम {prices}% · {n} असली व्यवसायों पर आधारित | दर {prices}% · {n} खऱ्या व्यवसायांवर आधारित |  |
-| `home.try_title` | Try it in 3 languages | 3 भाषाओं में आज़माइए | 3 भाषांत वापरून पाहा |  |
-| `home.try_intro` | Tap a sample voice note to start the real flow. No microphone or sign-up needed. | किसी भी नमूना वॉइस नोट पर टैप कीजिए, और पूरी प्रक्रिया शुरू हो जाएगी। | कोणत्याही नमुना व्हॉइस नोटवर टॅप करा, आणि संपूर्ण प्रक्रिया सुरू होईल. |  |
-| `home.try_en` | Asha describes her home bakery in English. | आशा अंग्रेज़ी में अपनी होम बेकरी के बारे में बताती हैं। | आशा इंग्रजीत तिच्या होम बेकरीबद्दल सांगते. |  |
-| `home.try_hi` | Asha describes her home bakery in Hindi. | आशा हिंदी में अपनी होम बेकरी के बारे में बताती हैं। | आशा हिंदीत तिच्या होम बेकरीबद्दल सांगते. |  |
-| `home.try_mr` | Asha describes her home bakery in Marathi. | आशा मराठी में अपनी होम बेकरी के बारे में बताती हैं। | आशा मराठीत तिच्या होम बेकरीबद्दल सांगते. |  |
-| `home.try_button` | Try this voice note | यह वॉइस नोट आज़माइए | ही व्हॉइस नोट वापरून पाहा |  |
-| `home.record_own` | Or record your own | या अपना वॉइस नोट रिकॉर्ड कीजिए | किंवा तुमची स्वतःची व्हॉइस नोट रेकॉर्ड करा |  |
+| `home.try_title` | Try it in 3 languages | 3 भाषाओं में आज़माएँ | 3 भाषांमध्ये वापरून पाहा |  |
+| `home.try_intro` | Tap a sample voice note to start the real flow. No microphone or sign-up needed. | नीचे दिए गए किसी भी वॉइस नोट पर टैप करें और Toran का पूरा अनुभव आज़माएँ। इसके लिए आपको न तो माइक्रोफ़ोन की ज़रूरत है और न ही साइन-अप करने की। | खालीलपैकी कोणत्याही नमुना व्हॉइस नोटवर टॅप करा आणि Toran कसं काम करतं ते प्रत्यक्ष पाहा. यासाठी माइक किंवा साइन-अपची गरज नाही. |  |
+| `home.try_en` | Asha describes her home bakery in English. | आशा अंग्रेज़ी में अपनी होम बेकरी के बारे में बता रही हैं। | आशा इंग्रजीत तिच्या होम बेकरीबद्दल सांगते. |  |
+| `home.try_hi` | Asha describes her home bakery in Hindi. | आशा हिंदी में अपनी होम बेकरी के बारे में बता रही हैं। | आशा हिंदीत तिच्या होम बेकरीबद्दल सांगते. |  |
+| `home.try_mr` | Asha describes her home bakery in Marathi. | आशा मराठी में अपनी होम बेकरी के बारे में बता रही हैं। | आशा मराठीत तिच्या होम बेकरीबद्दल सांगते. |  |
+| `home.try_button` | Try this voice note | यह वॉइस नोट आज़माएँ | ही व्हॉइस नोट वापरून पाहा |  |
+| `home.record_own` | Or record your own | या अपना वॉइस नोट रिकॉर्ड करें | किंवा तुमची स्वतःची व्हॉइस नोट रेकॉर्ड करा |  |
 | `home.ba_title` | Before and after | पहले और बाद में | आधी आणि नंतर |  |
 | `home.ba_intro` | Toran's agent improved the draft of {name}, a demo business, on its own. | Toran के एजेंट ने डेमो व्यवसाय {name} का ड्राफ्ट खुद से बेहतर किया। | Toran च्या एजंटने डेमो व्यवसाय {name} चा ड्राफ्ट स्वतःहून सुधारला. |  |
-| `home.gallery_title` | Websites made with Toran | Toran से बनी वेबसाइटें | Toran ने बनवलेल्या वेबसाइट |  |
-| `home.demo_title` | Demo businesses | डेमो व्यवसाय | डेमो व्यवसाय |  |
-| `home.demo_intro` | Made from sample details to show what Toran builds. They are not real shops. | ये नमूना जानकारी से बनाए गए हैं, ताकि आप देख सकें कि Toran क्या बनाता है। ये असली दुकानें नहीं हैं। | Toran काय बनवतो ते दाखवण्यासाठी हे नमुना माहितीवरून बनवले आहेत. ही खरी दुकाने नाहीत. |  |
+| `home.gallery_title` | Websites made with Toran | Toran से बनी कुछ वेबसाइटें | Toran ने तयार केलेल्या काही वेबसाइट्स |  |
+| `home.demo_title` | Demo businesses | डेमो कारोबार | डेमो व्यवसाय |  |
+| `home.demo_intro` | Made from sample details to show what Toran builds. They are not real shops. | ये वेबसाइटें नमूने के तौर पर दी गई जानकारी से बनाई गई हैं, ताकि आप देख सकें कि Toran आपके कारोबार के लिए कैसी वेबसाइट बना सकता है। ये असली दुकानें नहीं हैं। | Toran काय तयार करू शकतं हे दाखवण्यासाठी नमुना माहिती वापरून या वेबसाइट्स बनवल्या आहेत. ही खरी दुकाने नाहीत. |  |
 | `home.thumb_alt` | The website of {name} on a phone | फ़ोन पर {name} की वेबसाइट | फोनवर {name} ची वेबसाइट |  |
 | `home.score` | Readiness Score {n}/100 | रेडीनेस स्कोर {n}/100 | तयारी स्कोअर {n}/100 |  |
-| `home.inclusive_title` | Inclusive at both ends | दोनों तरफ़ सबके लिए | दोन्ही बाजूंनी सर्वांसाठी |  |
-| `home.inclusive_owner` | Simple for you | आपके लिए आसान | तुमच्यासाठी सोपे |  |
-| `home.inclusive_owner_1` | You speak; there is nothing to learn. | बस बोलिए, कुछ सीखने की ज़रूरत नहीं। | फक्त बोला; काहीही शिकावं लागत नाही. |  |
-| `home.inclusive_owner_2` | Everything is in your language: Marathi, Hindi or English. | सब कुछ आपकी भाषा में: मराठी, हिंदी या अंग्रेज़ी। | सगळं तुमच्या भाषेत: मराठी, हिंदी किंवा इंग्रजी. |  |
-| `home.inclusive_owner_3` | You approve every detail and every change. | हर जानकारी और हर बदलाव पर आख़िरी फ़ैसला आपका। | प्रत्येक माहिती आणि प्रत्येक बदलावर शेवटचा निर्णय तुमचा. |  |
-| `home.inclusive_customers` | Good for your customers | आपके ग्राहकों के लिए अच्छा | तुमच्या ग्राहकांसाठी चांगले |  |
-| `home.inclusive_customers_1` | Fast on cheap phones and slow internet. | सस्ते फ़ोन और धीमे इंटरनेट पर भी जल्दी खुलती है। | स्वस्त फोन आणि हळू इंटरनेटवरही पटकन उघडते. |  |
+| `home.inclusive_title` | Inclusive at both ends | कारोबार चलाने वालों और उनके ग्राहकों, दोनों के लिए | तुमच्यासाठीही सोपं, तुमच्या ग्राहकांसाठीही |  |
+| `home.inclusive_owner` | Simple for you | आपके लिए आसान | तुमच्यासाठी सोपं |  |
+| `home.inclusive_owner_1` | You speak; there is nothing to learn. | बस अपने कारोबार के बारे में बताइए। कुछ नया सीखने की ज़रूरत नहीं। | फक्त तुमच्या व्यवसायाबद्दल सांगा. काही वेगळं शिकण्याची गरज नाही. |  |
+| `home.inclusive_owner_2` | Everything is in your language: Marathi, Hindi or English. | अपनी भाषा में इस्तेमाल करें: मराठी, हिंदी या अंग्रेज़ी। | मराठी, हिंदी किंवा इंग्रजीत वापरा. |  |
+| `home.inclusive_owner_3` | You approve every detail and every change. | हर जानकारी और हर बदलाव आपकी मंज़ूरी से ही होगा। | प्रत्येक माहिती आणि प्रत्येक बदल तुमच्या मंजुरीनंतरच होईल. |  |
+| `home.inclusive_customers` | Good for your customers | आपके ग्राहकों के लिए आसान | तुमच्या ग्राहकांसाठी सोपं |  |
+| `home.inclusive_customers_1` | Fast on cheap phones and slow internet. | साधारण फ़ोन और धीमे इंटरनेट पर भी जल्दी खुलती है। | साध्या फोनवर आणि कमी इंटरनेट स्पीडमध्येही पटकन उघडते. |  |
 | `home.inclusive_customers_2` | Readable in English, Hindi and Marathi. | अंग्रेज़ी, हिंदी और मराठी में आसानी से पढ़ी जा सकती है। | इंग्रजी, हिंदी आणि मराठीत सहज वाचता येते. |  |
-| `home.inclusive_customers_3` | Big buttons to order on WhatsApp or call. | WhatsApp पर ऑर्डर या कॉल के लिए बड़े बटन। | WhatsApp वर ऑर्डर किंवा कॉलसाठी मोठी बटणे. |  |
-| `home.privacy` | Privacy: what we store and how to delete it | प्राइवेसी: हम क्या रखते हैं और उसे कैसे हटाया जाए | प्रायव्हसी: आम्ही काय ठेवतो आणि ते कसे काढायचे |  |
-| `home.built_for` | Built for the GoDaddy Inclusive Innovation Hackathon 2026, powered by Claude and GoDaddy. | GoDaddy Inclusive Innovation Hackathon 2026 के लिए बनाया गया, Claude और GoDaddy की मदद से। | GoDaddy Inclusive Innovation Hackathon 2026 साठी बनवले, Claude आणि GoDaddy च्या मदतीने. |  |
+| `home.inclusive_customers_3` | Big buttons to order on WhatsApp or call. | WhatsApp पर ऑर्डर देने और फ़ोन करने के लिए बड़े और साफ़ बटन। | WhatsApp वर ऑर्डर देण्यासाठी किंवा फोन करण्यासाठी मोठी आणि स्पष्ट बटणे. |  |
+| `home.privacy` | Privacy: what we store and how to delete it | प्राइवेसी: हम आपकी कौन-सी जानकारी रखते हैं और उसे कैसे हटाया जा सकता है। | प्रायव्हसी: आम्ही तुमची कोणती माहिती साठवतो आणि ती कशी हटवता येईल. |  |
+| `home.built_for` | Built for the GoDaddy Inclusive Innovation Hackathon 2026, powered by Claude and GoDaddy. | GoDaddy Inclusive Innovation Hackathon 2026 के लिए बनाया गया। Claude और GoDaddy की मदद से। | GoDaddy Inclusive Innovation Hackathon 2026 साठी तयार केले. Claude आणि GoDaddy यांच्या मदतीने. |  |
 | `home.back` | Back to the home page | होम पेज पर वापस | होम पेजवर परत |  |
 | `home.demo_panel_note` | {name} is a demo business. Every step below was decided by Toran's agent on its own. | {name} एक डेमो व्यवसाय है। नीचे का हर कदम Toran के एजेंट ने खुद तय किया। | {name} हा एक डेमो व्यवसाय आहे. खालील प्रत्येक पाऊल Toran च्या एजंटने स्वतःहून ठरवले. |  |
 | `home.facts_title` | Facts and test results | तथ्य और टेस्ट के नतीजे | तथ्य आणि टेस्टचे निकाल |  |
 | `home.stat_languages` | {n} languages | {n} भाषाएँ | {n} भाषा |  |
-| `home.stat_languages_note` | Marathi, Hindi and English, spoken or typed | मराठी, हिंदी और अंग्रेज़ी, बोलकर या लिखकर | मराठी, हिंदी आणि इंग्रजी, बोलून किंवा लिहून |  |
-| `home.stat_eval` | Extraction checks passed | जानकारी निकालने की जाँचें पास हुईं | माहिती काढण्याच्या तपासण्या पास झाल्या |  |
-| `home.stat_eval_note` | on {cases} reviewed test cases, not live traffic · last run {date} | {cases} जाँचे हुए टेस्ट केस पर, असली इस्तेमाल पर नहीं · आख़िरी बार {date} को चलाया गया | {cases} तपासलेल्या टेस्ट केसवर, खऱ्या वापरावर नाही · शेवटचे {date} रोजी चालवले |  |
-| `home.stat_yes` | You say yes first | पहले आपकी मंज़ूरी | आधी तुमची संमती |  |
-| `home.stat_yes_note` | Nothing goes live until you have checked every detail. | आप हर जानकारी जाँचकर हाँ कहें, उसके बाद ही कुछ लाइव होता है। | तुम्ही प्रत्येक माहिती तपासून हो म्हणेपर्यंत काहीही लाइव्ह होत नाही. |  |
-| `home.measured_title` | Measured on the live system | चालू सिस्टम पर मापा गया | चालू प्रणालीवर मोजलेले |  |
-| `home.measured_intro` | Real numbers from real use, updated as people use {app_name}. | असली इस्तेमाल से आए असली आँकड़े, जो लोगों के {app_name} इस्तेमाल करने के साथ अपडेट होते हैं। | खऱ्या वापरातून आलेले खरे आकडे, लोक {app_name} वापरतात तसे अपडेट होतात. |  |
-| `home.measured_on` | last measured {date} | आख़िरी बार {date} को मापा गया | शेवटचे {date} रोजी मोजले |  |
+| `home.stat_languages_note` | Marathi, Hindi and English, spoken or typed | बोलकर या लिखकर, तीनों भाषाओं में इस्तेमाल करें | बोलून किंवा लिहून, तीन भाषांमध्ये वापरता येते |  |
+| `home.stat_eval` | Extraction checks passed | सही जानकारी निकालने की जाँचें पास हुईं | माहिती अचूक ओळखण्याच्या चाचण्या उत्तीर्ण |  |
+| `home.stat_eval_note` | on {cases} reviewed test cases, not live traffic · last run {date} | जाँचे हुए {cases} टेस्ट केस पर, असली ग्राहकों के इस्तेमाल पर नहीं · आखिरी बार {date} को चलाया गया | तपासलेल्या {cases} टेस्ट केसेसमधील निकाल. हे प्रत्यक्ष ग्राहकांच्या वापरातील निकाल नाहीत. · शेवटची चाचणी {date} |  |
+| `home.stat_yes` | You say yes first | पहले आपकी मंज़ूरी, फिर वेबसाइट लाइव। | आधी तुमची मंजुरी, मगच वेबसाइट लाइव्ह. |  |
+| `home.stat_yes_note` | Nothing goes live until you have checked every detail. | आपकी मंज़ूरी के बिना आपकी वेबसाइट कभी लाइव नहीं होगी। | तुम्ही प्रत्येक गोष्ट तपासून मंजुरी दिल्याशिवाय तुमची वेबसाइट लाइव्ह होणार नाही. |  |
+| `home.measured_title` | Measured on the live system | असली इस्तेमाल के आँकड़े | प्रत्यक्ष वापरातील आकडे |  |
+| `home.measured_intro` | Real numbers from real use, updated as people use {app_name}. | {app_name} के असली इस्तेमाल से मिले आँकड़े। जैसे-जैसे लोग इसका इस्तेमाल करते हैं, ये अपडेट होते रहते हैं। | लोक {app_name} वापरतात त्यातून मिळालेले खरे आकडे. वापरानुसार ते अपडेट होत राहतात. |  |
+| `home.measured_on` | last measured {date} | आखिरी बार {date} को मापा गया | शेवटचे मोजमाप {date} |  |
 | `home.stat_cost_note_one` | median of 1 real check | 1 असली जाँच से | 1 खऱ्या तपासणीवरून |  |
 | `home.stat_time_note_one` | median of 1 real run | 1 असली बार से | 1 खऱ्या वेळेवरून |  |
 | `home.stat_accuracy_note_one` | prices {prices}% · based on 1 real business | दाम {prices}% · 1 असली व्यवसाय पर आधारित | दर {prices}% · 1 खऱ्या व्यवसायावर आधारित |  |
