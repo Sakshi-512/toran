@@ -233,7 +233,7 @@ def _contact(client: TestClient, **fields: str) -> object:
 def test_home_page_has_contact_form_in_three_languages(client: TestClient) -> None:
     for lang, label in (("en", "Contact us"), ("hi", "हमसे संपर्क करें"), ("mr", "आमच्याशी संपर्क साधा")):
         html = client.get(f"/?lang={lang}").text
-        assert label in html and 'action="/contact"' in html and 'name="website"' in html
+        assert label in html and 'action="/contact#contact"' in html and 'name="website"' in html
 
 
 def test_contact_form_saves_and_emails_team(client: TestClient, engine: Engine) -> None:

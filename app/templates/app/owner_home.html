@@ -78,7 +78,7 @@
       <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
       <label for="q{{ q.id }}">{{ t('agent.question.' ~ q.topic, lang) }}</label>
       <p class="muted">{{ t('agent.hint.' ~ q.topic, lang) }}</p>
-      <textarea id="q{{ q.id }}" name="answer" rows="3" maxlength="600" required></textarea>
+      <textarea id="q{{ q.id }}" name="answer" rows="3" maxlength="{{ ANSWER_LIMITS.get(q.topic, 600) }}" required></textarea>
       <button class="button" type="submit">{{ t('agent.answer_next', lang) }}</button>
     </form>
     <div class="cta-row">

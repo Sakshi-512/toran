@@ -23,6 +23,8 @@ from app.services.score_runs import queue_score
 MAX_AREA = 60
 _SPLIT = re.compile(r"[,\n;]+")
 TEXT_TOPICS = ("policy", "lead_time", "delivery_areas")
+# Longest answer allowed for each topic (the forms use the same numbers as their maxlength).
+ANSWER_LIMITS = {"policy": 500, "lead_time": 120, "delivery_areas": 600}
 
 
 def own_question(session: Session, business_id: int, question_id: int) -> OwnerQuestion:
@@ -39,8 +41,7 @@ def clean_answer(topic: str, raw: str) -> str:
     text = " ".join((raw or "").split()) if topic != "delivery_areas" else (raw or "").strip()
     if topic not in TEXT_TOPICS or not text:
         raise AppError("agent.answer_empty", status_code=422)
-    limits = {"policy": 500, "lead_time": 120, "delivery_areas": 600}
-    if len(text) > limits[topic]:
+    if len(text) > ANSWER_LIMITS[topic]:
         raise AppError("agent.answer_long", status_code=422)
     parts = _areas(text) if topic == "delivery_areas" else [text]
     if any(address_reason(part) for part in parts):

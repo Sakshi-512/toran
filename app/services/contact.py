@@ -8,7 +8,7 @@ from sqlmodel import Session
 
 from app.models import Enquiry
 from app.schemas import normalise_phone
-from app.services.errors import AppError
+from app.services.errors import FieldError
 from app.services.mail_jobs import queue_notification
 from app.services.mailer import clean_header, valid_email
 from app.services.security import is_spam
@@ -20,22 +20,30 @@ MAX_CONTACT = 254
 MAX_MESSAGE = 2000
 
 
+# The message for each field when it is empty or too long (the rules are unchanged).
+FIELD_MESSAGES = {
+    "name": "contact.name_invalid",
+    "contact": "contact.bad_contact",
+    "message": "contact.message_invalid",
+}
+
+
 def _field(form: Mapping[str, str], key: str, limit: int) -> str:
     value = str(form.get(key, "")).strip()
     if not value or len(value) > limit:
-        raise AppError("error.invalid_input", status_code=422)
+        raise FieldError(FIELD_MESSAGES[key], key)
     return value
 
 
 def _email_or_phone(value: str) -> tuple[str | None, str | None]:
     if "@" in value:
         if not valid_email(value):
-            raise AppError("contact.bad_contact", status_code=422)
+            raise FieldError("contact.bad_contact", "contact")
         return value, None
     try:
         return None, normalise_phone(value)
     except ValueError as exc:
-        raise AppError("contact.bad_contact", status_code=422) from exc
+        raise FieldError("contact.bad_contact", "contact") from exc
 
 
 def submit_contact(engine: Engine, form: Mapping[str, str]) -> int | None:

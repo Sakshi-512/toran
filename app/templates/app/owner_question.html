@@ -18,7 +18,7 @@
 <form class="form" method="post" action="/owner/questions/{{ question.id }}">
   <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
   <label for="answer">{{ t('agent.edit', lang) }}</label>
-  <textarea id="answer" name="answer" rows="4" maxlength="600" required>{{ answer }}</textarea>
+  <textarea id="answer" name="answer" rows="4" maxlength="{{ ANSWER_LIMITS.get(question.topic, 600) }}" required>{{ answer }}</textarea>
   <button class="button secondary" type="submit">{{ t('agent.answer_next', lang) }}</button>
 </form>
 {% endblock %}

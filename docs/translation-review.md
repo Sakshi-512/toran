@@ -38,6 +38,8 @@ stored, how long, and the right to delete). Please read them first.
 | `lang.hi` | हिन्दी | हिन्दी | हिन्दी |  |
 | `lang.mr` | मराठी | मराठी | मराठी |  |
 | `label.sample` | Sample | नमूना | नमुना |  |
+| `contact.name_invalid` | Please write your name. It can’t be empty or very long. | अपना नाम लिखिए। यह खाली या बहुत लंबा नहीं हो सकता। | तुमचं नाव लिहा. ते रिकामं किंवा खूप मोठं असू शकत नाही. |  |
+| `contact.message_invalid` | Please write your message. It can’t be empty or longer than the box allows. | अपना संदेश लिखिए। यह खाली या बॉक्स की सीमा से लंबा नहीं हो सकता। | तुमचा संदेश लिहा. तो रिकामा किंवा बॉक्सच्या मर्यादेपेक्षा मोठा असू शकत नाही. |  |
 | `contact.title` | Contact us | हमसे संपर्क करें | आमच्याशी संपर्क साधा |  |
 | `contact.intro` | Questions or feedback? Write to us and we will get back to you. | कोई सवाल है या कुछ सुझाव देना चाहते हैं? हमें लिखें। हम आपसे संपर्क करेंगे। | काही प्रश्न आहेत किंवा काही सूचना द्यायच्या आहेत? आम्हाला लिहा. आम्ही तुम्हाला उत्तर देऊ. |  |
 | `contact.name` | Your name | आपका नाम | तुमचं नाव |  |
@@ -693,6 +695,9 @@ stored, how long, and the right to delete). Please read them first.
 | `site.tagline_on.other` | Small business on {area} | {area} पर छोटा व्यवसाय | {area} वरील छोटा व्यवसाय |  |
 | `site.overline_policy` | Policy | नियम | नियम |  |
 | `site.policy_heading` | Ordering policy | ऑर्डर के नियम | ऑर्डरचे नियम |  |
+| `site.enquiry_phone_hint` | Numbers only. Spaces and + - ( ) . are fine. | सिर्फ़ अंक। स्पेस और + - ( ) . चल सकते हैं। | फक्त अंक. स्पेस आणि + - ( ) . चालतील. |  |
+| `site.enquiry_phone_title` | Please use numbers only. | कृपया सिर्फ़ अंक लिखिए। | कृपया फक्त अंक लिहा. |  |
+| `site.enquiry_message_hint` | Please keep it short: a few lines is enough. | कृपया छोटा रखिए: कुछ पंक्तियाँ काफ़ी हैं। | कृपया थोडक्यात लिहा: काही ओळी पुरेत. |  |
 | `site.offline` | This website is offline for now. Please check again later. | यह वेबसाइट अभी बंद है। थोड़ी देर बाद फिर देखिए। | ही वेबसाइट सध्या बंद आहे. थोड्या वेळाने पुन्हा पाहा. |  |
 | `site.preview_note` | This is a private preview. The enquiry form will work once the site is live. | यह आपका निजी प्रीव्यू है। साइट लाइव होने के बाद पूछताछ फ़ॉर्म चलेगा। | हे तुमचं खासगी प्रीव्ह्यू आहे. साइट लाइव्ह झाल्यावर चौकशी फॉर्म चालेल. |  |
 | `site.enquiry_note` | Your message is sent to the business through {app_name}. | आपका संदेश {app_name} के ज़रिए इस व्यवसाय तक पहुँचता है। | तुमचा संदेश {app_name} मार्फत या व्यवसायाला पाठवला जातो. |  |
@@ -717,6 +722,9 @@ stored, how long, and the right to delete). Please read them first.
 
 | Key | English | Hindi | Marathi | Fix |
 | --- | --- | --- | --- | --- |
+| `enquiry.name_invalid` | Please check your name: it can’t be empty or very long. Go back to fix it. | अपना नाम जाँचिए: यह खाली या बहुत लंबा नहीं हो सकता। ठीक करने के लिए वापस जाइए। | तुमचं नाव तपासा: ते रिकामं किंवा खूप मोठं असू शकत नाही. दुरुस्त करण्यासाठी मागे जा. |  |
+| `enquiry.phone_invalid` | Please check your phone number: use numbers only. Go back to fix it. | अपना फ़ोन नंबर जाँचिए: सिर्फ़ अंक लिखिए। ठीक करने के लिए वापस जाइए। | तुमचा फोन नंबर तपासा: फक्त अंक लिहा. दुरुस्त करण्यासाठी मागे जा. |  |
+| `enquiry.message_invalid` | Please check your message: it can’t be empty or very long. Go back to fix it. | अपना संदेश जाँचिए: यह खाली या बहुत लंबा नहीं हो सकता। ठीक करने के लिए वापस जाइए। | तुमचा संदेश तपासा: तो रिकामा किंवा खूप मोठा असू शकत नाही. दुरुस्त करण्यासाठी मागे जा. |  |
 | `busy.saving` | Saving… | सेव हो रहा है… | सेव्ह होत आहे… |  |
 | `busy.working` | Working… | काम चल रहा है… | काम सुरू आहे… |  |
 | `busy.sending` | Sending… | भेजा जा रहा है… | पाठवत आहे… |  |

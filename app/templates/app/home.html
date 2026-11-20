@@ -137,20 +137,24 @@
   <p class="notice-ok" role="status">{{ t('contact.thanks', lang) }}</p>
   {% else %}
   <p>{{ t('contact.intro', lang) }}</p>
-  <form class="form" method="post" action="/contact">
+  {% set cerr = contact_errors or {} %}{% set csent = contact_sent or {} %}
+  {% macro cerror(name) %}{% if cerr.get(name) %}<p class="field-error" role="alert" id="c-{{ name }}-error">{{ t(cerr[name], lang) }}</p>{% endif %}{% endmacro %}
+  {% if cerr %}<p class="notice-error" role="alert">{{ t('confirm.fix_errors', lang) }}</p>{% endif %}
+  <form class="form" method="post" action="/contact#contact" data-live="contact">
     <input type="hidden" name="{{ CSRF_FIELD }}" value="{{ csrf_token(request) }}">
     <label for="c-name">{{ t('contact.name', lang) }}</label>
-    <input id="c-name" name="name" required maxlength="120" autocomplete="name">
+    <input id="c-name" name="name" value="{{ csent.get('name', '') }}" required maxlength="{{ CONTACT_LIMITS.name }}" autocomplete="name" enterkeyhint="next"{% if cerr.get('name') %} aria-invalid="true" aria-describedby="c-name-error"{% endif %}>{{ cerror('name') }}
     <label for="c-contact">{{ t('contact.contact', lang) }}</label>
-    <input id="c-contact" name="contact" required maxlength="254" autocomplete="email">
+    <input id="c-contact" name="contact" value="{{ csent.get('contact', '') }}" required maxlength="{{ CONTACT_LIMITS.contact }}" autocomplete="email" enterkeyhint="next"{% if cerr.get('contact') %} aria-invalid="true" aria-describedby="c-contact-error"{% endif %}>{{ cerror('contact') }}
     <label for="c-message">{{ t('contact.message', lang) }}</label>
-    <textarea id="c-message" name="message" required maxlength="2000" rows="5"></textarea>
+    <textarea id="c-message" name="message" required maxlength="{{ CONTACT_LIMITS.message }}" rows="5"{% if cerr.get('message') %} aria-invalid="true" aria-describedby="c-message-error"{% endif %}>{{ csent.get('message', '') }}</textarea>{{ cerror('message') }}
     <div class="trap" aria-hidden="true">
       <label for="c-website">{{ t('site.enquiry_trap', lang) }}</label>
       <input id="c-website" name="{{ SPAM_TRAP_FIELD }}" tabindex="-1" autocomplete="off">
     </div>
     <button class="button" type="submit" data-once="{{ t('busy.sending', lang) }}">{{ t('contact.send', lang) }}</button>
   </form>
+  {% include "app/_live_checks.html" %}
   {% endif %}
 </section>
 

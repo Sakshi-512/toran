@@ -20,6 +20,19 @@ class AppError(Exception):
         self.status_code = status_code
 
 
+class FieldError(AppError):
+    """An AppError that also says which form field is wrong, and (for forms sent from a business
+    site) the language of that site, so the message can name the field in the visitor's language.
+    It changes no rule: it is raised exactly where the plain error was."""
+
+    def __init__(
+        self, key: str, field: str, lang: str | None = None, status_code: int = 422
+    ) -> None:
+        super().__init__(key, status_code)
+        self.field = field
+        self.lang = lang
+
+
 class SpendCapReached(AppError):
     """Today's Claude spend cap is reached; Claude calls stop until tomorrow (Asia/Kolkata)."""
 
@@ -35,7 +48,7 @@ class SpendCapReached(AppError):
 _STATUS_KEYS = {403: "error.forbidden", 404: "error.not_found", 405: "error.not_found"}
 
 
-def render_error(request: Request, key: str, status_code: int) -> Response:
+def render_error(request: Request, key: str, status_code: int, lang: str | None = None) -> Response:
     """Render the friendly error page (HTML) or a small JSON body for API callers."""
     from app.services.i18n import pick_language, t
     from app.templating import render
@@ -43,9 +56,12 @@ def render_error(request: Request, key: str, status_code: int) -> Response:
     if "application/json" in request.headers.get("accept", ""):
         from fastapi.responses import JSONResponse
 
-        message = t(key, pick_language(request))
+        message = t(key, lang or pick_language(request))
         return JSONResponse({"error": key, "message": message}, status_code=status_code)
-    return render(request, "app/error.html", {"message_key": key}, status_code=status_code)
+    context: dict[str, object] = {"message_key": key}
+    if lang:
+        context["lang"] = lang  # the business site's language, sent with its form
+    return render(request, "app/error.html", context, status_code=status_code)
 
 
 def render_rate_limited(request: Request, retry_after: int) -> Response:
@@ -74,7 +90,8 @@ async def _app_error(request: Request, exc: Exception) -> Response:
     if exc.status_code == 429 and isinstance(retry_after, int):
         return render_rate_limited(request, retry_after)
     logger.info("app_error", extra={"key": exc.key, "status": exc.status_code})
-    return render_error(request, exc.key, exc.status_code)
+    lang = exc.lang if isinstance(exc, FieldError) else None
+    return render_error(request, exc.key, exc.status_code, lang)
 
 
 async def _http_error(request: Request, exc: Exception) -> Response:

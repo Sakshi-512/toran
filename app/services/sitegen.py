@@ -21,6 +21,7 @@ from urllib.parse import quote
 from jinja2 import Environment, FileSystemLoader
 
 from app.schemas import BusinessProfile, Product
+from app.services import field_rules
 from app.services.address_guard import address_reason
 from app.services.i18n import t
 from app.services.site_extras import EMPTY, Extras
@@ -283,6 +284,12 @@ def _page_context(
         "area": areas["area"],
         **_phone(profile.phone, site.is_sample, tr),
         "enquiry_url": site.enquiry_url,
+        "enquiry_max": {
+            "name": field_rules.ENQUIRY_MAX_NAME,
+            "phone": field_rules.ENQUIRY_MAX_PHONE,
+            "message": field_rules.ENQUIRY_MAX_MESSAGE,
+        },
+        "enquiry_phone_pattern": field_rules.ENQUIRY_PHONE_PATTERN,
         "updated": site.prices_updated.strftime("%d/%m/%Y"),
         "app_name": site.app_name,
         "privacy_href": f"{site.main_url}/privacy?lang={lang}",

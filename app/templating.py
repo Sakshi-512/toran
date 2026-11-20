@@ -11,8 +11,9 @@ from jinja2 import Environment, FileSystemLoader
 from starlette.responses import Response
 
 from app.config import get_settings
-from app.services import field_rules, web_address
+from app.services import contact, field_rules, web_address
 from app.services.i18n import SUPPORTED, normalise_language, pick_language, t
+from app.services.owner_questions import ANSWER_LIMITS
 from app.services.security import CSRF_FIELD, SPAM_TRAP_FIELD, csrf_token
 from app.services.waiting import WAIT_LIMITS
 
@@ -43,6 +44,12 @@ def _build() -> Jinja2Templates:
         LANGUAGES=SUPPORTED,
         NAME_MAX=field_rules.NAME_MAX,
         PRICE_MAX=field_rules.PRICE_MAX,
+        ANSWER_LIMITS=ANSWER_LIMITS,
+        CONTACT_LIMITS={
+            "name": contact.MAX_NAME,
+            "contact": contact.MAX_CONTACT,
+            "message": contact.MAX_MESSAGE,
+        },
         WAIT_LIMITS=WAIT_LIMITS,
         ADDRESS_MAX=web_address.MAX_LENGTH,
         static_url=static_url,

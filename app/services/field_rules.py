@@ -17,6 +17,15 @@ _JOINERS = frozenset("‌‍")
 
 PRICE_MAX = MAX_PRICE
 
+# The enquiry form on business sites (checked in app/services/enquiries.py).
+ENQUIRY_MAX_NAME = 120
+ENQUIRY_MAX_PHONE = 20
+ENQUIRY_MAX_MESSAGE = 2000
+# The characters a phone number may use on the business sites' no-JavaScript form: ASCII digits,
+# spaces and + - ( ) . (escaped so the pattern is valid in the browsers' newer "v" mode too). The
+# server then checks the number itself with normalise_phone.
+ENQUIRY_PHONE_PATTERN = r"[0-9 +\-\(\)\.]{0,20}"
+
 
 def business_name_problem(name: str) -> str | None:
     """i18n key saying what is wrong with a business name, or None if it can be used.

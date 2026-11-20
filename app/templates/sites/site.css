@@ -194,3 +194,4 @@ form .btn { justify-self: start; margin-top: var(--s2); }
 }
 
 .enquiry-note { margin: var(--s2) 0 0; font-size: 15px; line-height: 22px; opacity: .85; }
+.enquiry-hint { margin: 0; font-size: 15px; line-height: 22px; opacity: .85; }

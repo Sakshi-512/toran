@@ -118,11 +118,13 @@
     <form method="post" action="{{ enquiry_url }}">
       <input type="hidden" name="lang" value="{{ lang }}">
       <label for="enq-name">{{ t('site.enquiry_name') }}</label>
-      <input id="enq-name" name="name" required maxlength="120" autocomplete="name">
+      <input id="enq-name" name="name" required maxlength="{{ enquiry_max.name }}" autocomplete="name" enterkeyhint="next">
       <label for="enq-phone">{{ t('site.enquiry_phone') }}</label>
-      <input id="enq-phone" name="phone" type="tel" maxlength="20" autocomplete="tel" inputmode="tel">
+      <input id="enq-phone" name="phone" type="tel" maxlength="{{ enquiry_max.phone }}" autocomplete="tel" inputmode="tel" enterkeyhint="next" pattern="{{ enquiry_phone_pattern }}" title="{{ t('site.enquiry_phone_title') }}" aria-describedby="enq-phone-hint">
+      <p class="enquiry-hint" id="enq-phone-hint">{{ t('site.enquiry_phone_hint') }}</p>
       <label for="enq-message">{{ t('site.enquiry_message') }}</label>
-      <textarea id="enq-message" name="message" required maxlength="2000" rows="4"></textarea>
+      <textarea id="enq-message" name="message" required maxlength="{{ enquiry_max.message }}" rows="4" aria-describedby="enq-message-hint"></textarea>
+      <p class="enquiry-hint" id="enq-message-hint">{{ t('site.enquiry_message_hint') }}</p>
       <div class="trap" aria-hidden="true">
         <label for="enq-website">{{ t('site.enquiry_trap') }}</label>
         <input id="enq-website" name="website" tabindex="-1" autocomplete="off">

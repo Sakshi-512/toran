@@ -13,7 +13,8 @@ from sqlmodel import Session
 from app.config import Settings
 from app.models import Enquiry
 from app.schemas import normalise_phone
-from app.services.errors import AppError
+from app.services.errors import AppError, FieldError
+from app.services.field_rules import ENQUIRY_MAX_MESSAGE, ENQUIRY_MAX_NAME, ENQUIRY_MAX_PHONE
 from app.services.i18n import normalise_language
 from app.services.mail_jobs import queue_notification
 from app.services.security import is_spam
@@ -22,8 +23,8 @@ from app.services.sites import active_business, allowed_enquiry_origins
 
 logger = logging.getLogger(__name__)
 
-MAX_NAME = 120
-MAX_MESSAGE = 2000
+MAX_NAME = ENQUIRY_MAX_NAME
+MAX_MESSAGE = ENQUIRY_MAX_MESSAGE
 
 
 class EnquiryRejected(AppError):
@@ -40,20 +41,23 @@ def check_origin(origin: str | None, slug: str, settings: Settings) -> str:
     return origin
 
 
-def _clean(form: Mapping[str, str], key: str, limit: int, required: bool) -> str:
+MAX_PHONE = ENQUIRY_MAX_PHONE
+
+
+def _clean(form: Mapping[str, str], key: str, limit: int, required: bool, lang: str) -> str:
     value = str(form.get(key, "")).strip()
     if (required and not value) or len(value) > limit:
-        raise AppError("error.invalid_input", status_code=422)
+        raise FieldError(f"enquiry.{key}_invalid", key, lang)
     return value
 
 
-def _phone(raw: str) -> str | None:
+def _phone(raw: str, lang: str) -> str | None:
     if not raw:
         return None
     try:
         return normalise_phone(raw)
     except ValueError as exc:
-        raise AppError("error.invalid_input", status_code=422) from exc
+        raise FieldError("enquiry.phone_invalid", "phone", lang) from exc
 
 
 def submit_enquiry(
@@ -75,9 +79,9 @@ def submit_enquiry(
         return thanks_url
     enquiry = Enquiry(
         business_id=business.id,
-        name=_clean(form, "name", MAX_NAME, required=True),
-        phone=_phone(_clean(form, "phone", 20, required=False)),
-        message=_clean(form, "message", MAX_MESSAGE, required=True),
+        name=_clean(form, "name", MAX_NAME, required=True, lang=lang),
+        phone=_phone(_clean(form, "phone", MAX_PHONE, required=False, lang=lang), lang),
+        message=_clean(form, "message", MAX_MESSAGE, required=True, lang=lang),
     )
     session.add(enquiry)
     session.commit()

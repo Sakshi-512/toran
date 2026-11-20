@@ -8,7 +8,7 @@
   if (!box || !form) return;
   var MSG = JSON.parse(box.getAttribute("data-msgs") || "{}");
   var PRICE_MAX = Number(box.getAttribute("data-price-max")) || 0;
-  var page = form.getAttribute("data-live"); // confirm | details | menu
+  var page = form.getAttribute("data-live"); // confirm | details | menu | contact
   var dirty = false;
 
   function text(key, values) {
@@ -53,16 +53,31 @@
   function asciiDigits(value) {
     return value.replace(/[०-९]/g, function (d) { return String(DEVANAGARI.indexOf(d)); });
   }
-  function phoneRule(raw) {
-    var value = page === "confirm" ? asciiDigits(raw).trim() : raw.trim();
-    if (chars(value) > 20) return { key: "intake.phone_invalid" };
+  function phoneNormalises(value) {
     var digits = value.replace(/[\s\-().]/gu, "");
-    if (!digits) return null;
+    if (!digits) return true;
     if (digits.indexOf("00") === 0) digits = "+" + digits.slice(2);
-    if (digits[0] === "+") return /^\+\p{Nd}{10,15}$/u.test(digits) ? null : { key: "intake.phone_invalid" };
+    if (digits[0] === "+") return /^\+\p{Nd}{10,15}$/u.test(digits);
     if (digits[0] === "0" && chars(digits) === 11) digits = digits.slice(1);
     if (digits.indexOf("91") === 0 && chars(digits) === 12) digits = digits.slice(2);
-    return /^[6-9]\p{Nd}{9}$/u.test(digits) ? null : { key: "intake.phone_invalid" };
+    return /^[6-9]\p{Nd}{9}$/u.test(digits);
+  }
+  function phoneRule(raw) {
+    // The profile keeps at most 20 characters (BusinessProfile.phone) before normalising.
+    var value = page === "confirm" ? asciiDigits(raw).trim() : raw.trim();
+    if (chars(value) > 20 || !phoneNormalises(value)) return { key: "intake.phone_invalid" };
+    return null;
+  }
+
+  // app/services/contact.py _email_or_phone: an address like name@example.com (the same pattern
+  // as _EMAIL in app/services/mailer.py, at most 254 characters), or a phone number by the server's
+  // phone rules. Letters are not blocked here, because email addresses need them.
+  var EMAIL = /^[^@\s<>"',;]+@[^@\s<>"',;]+\.[^@\s<>"',;]{2,}$/;
+  function emailOrPhoneRule(raw) {
+    var value = raw.trim();
+    if (!value || chars(value) > 254) return { key: "contact.bad_contact" };
+    if (value.indexOf("@") >= 0) return EMAIL.test(value) ? null : { key: "contact.bad_contact" };
+    return phoneNormalises(value) ? null : { key: "contact.bad_contact" };
   }
 
   // app/services/intake.py _price and _product_from_form, plus MAX_PRICE in app/schemas.py.
@@ -84,6 +99,11 @@
   );
 
   function kind(f) {
+    if (page === "contact") {
+      if (f.name === "contact") return "emailorphone";
+      if (f.name === "name" || f.name === "message") return "required";
+      return "text";
+    }
     if (f.name === "business_name") return "name";
     if (f.name === "web_address") return "address";
     if (f.name === "phone") return "phone";
@@ -117,10 +137,15 @@
     else if (k === "address") rule = addressRule(f.value);
     else if (k === "phone") rule = phoneRule(f.value);
     else if (k === "price") rule = priceRule(f.value, siblingValue(f, /_price$/, "_label"));
+    else if (k === "emailorphone") rule = emailOrPhoneRule(f.value);
+    // app/services/contact.py _field: name and message must not be empty.
+    else if (k === "required" && !f.value.trim()) rule = { key: "contact." + f.name + "_invalid" };
     else if (k === "product" && !f.value.trim() && productHasRows(f)) rule = { key: "intake.name_needed" };
     if (rule) return rule;
     var n = chars(f.value.trim());
-    if (max && n > max && k !== "phone" && k !== "price") return { key: "v.too_long", values: { max: max, n: n } };
+    if (max && n > max && k !== "phone" && k !== "price" && k !== "emailorphone") {
+      return { key: "v.too_long", values: { max: max, n: n } };
+    }
     return null;
   }
 
@@ -167,7 +192,7 @@
   function showCount(f) {
     var max = Number(f.getAttribute("data-maxlength")) || 0;
     var k = kind(f);
-    if (!max || k === "phone" || k === "price" || k === "address") return;
+    if (!max || k === "phone" || k === "price" || k === "address" || k === "emailorphone") return;
     var n = chars(f.value), el = node(f, "field-count");
     if (n >= max * 0.8 && n <= max) {
       el.textContent = n === max ? text("v.at_limit", { max: max }) : text("v.counter", { n: n, max: max });
@@ -279,8 +304,10 @@
   window.addEventListener("submit", function (event) {
     if (event.target !== form) return;
     var button = event.submitter;
-    var confirming = page === "confirm" && button && button.value === "confirm";
-    if (!confirming) { dirty = false; return; } // Save changes and add-row buttons are never blocked
+    // The contact form is checked on every send; on the confirm page only Confirm is (Save
+    // changes and the add-row buttons are never blocked).
+    var confirming = page === "contact" || (page === "confirm" && button && button.value === "confirm");
+    if (!confirming) { dirty = false; return; }
     var bad = [];
     fields.forEach(function (f) {
       f.dataset.touched = "1";

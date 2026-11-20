@@ -13,7 +13,7 @@ from app.models import Business
 from app.services import showcase
 from app.services.agent_report import agent_view
 from app.services.contact import submit_contact
-from app.services.errors import AppError
+from app.services.errors import AppError, FieldError
 from app.services.i18n import normalise_language, pick_language
 from app.services.ratelimit import CONTACT_HOURLY_LIMIT, FORM_LIMIT, RateLimited, check
 from app.services.security import verify_csrf
@@ -117,5 +117,16 @@ async def contact(request: Request) -> Response:
         context = {**home_context(request), "wait_seconds": exc.retry_after}
         return render(request, "app/home.html", context, status_code=429)
     form = await request.form()
-    submit_contact(get_engine(), {k: v for k, v in form.items() if isinstance(v, str)})
+    fields = {k: v for k, v in form.items() if isinstance(v, str)}
+    try:
+        submit_contact(get_engine(), fields)
+    except FieldError as exc:
+        # Show the home page again with the message next to the field and the typed text kept.
+        sent = {k: fields.get(k, "") for k in ("name", "contact", "message")}
+        context = {
+            **home_context(request),
+            "contact_errors": {exc.field: exc.key},
+            "contact_sent": sent,
+        }
+        return render(request, "app/home.html", context, status_code=exc.status_code)
     return RedirectResponse("/?sent=1#contact", status_code=303)
