@@ -360,12 +360,13 @@ html[lang="en"] .home .proof-band :is(h2, h3) { text-transform: uppercase; lette
 }
 /* Desktop: each item is its own block (figure, label, note), with a hairline between items. */
 @media (min-width: 721px) {
-  .home .proof-band .stats { align-items: start; }
-  .home .proof-band .stat { display: flex; flex-direction: column; grid-row: auto; row-gap: 0; position: relative; }
+  /* Each group is one row that fills the width: 1 item takes it all, 2 take half each, 3 a third. */
+  .home .proof-band .stats { display: flex; align-items: flex-start; gap: 48px; }
+  .home .proof-band .stat { display: flex; flex-direction: column; flex: 1 1 0; min-width: 0; row-gap: 0; position: relative; }
   .home .proof-band .stat strong { font-size: clamp(32px, 3.2vw, 40px); line-height: 1.1; }
   .home .proof-band .stat dt { margin-top: 8px; }
   .home .proof-band .stat dd .muted { margin-top: 4px; }
-  .home .proof-band .stat:not(:nth-child(3n + 1))::before { content: ""; position: absolute; top: 0; bottom: 0;
+  .home .proof-band .stat:not(:first-child)::before { content: ""; position: absolute; top: 0; bottom: 0;
     left: -24px; border-left: 1px solid rgba(251, 247, 243, .2); }
 }
 /* English figures stay on one line where three columns are wide enough; Hindi and Marathi wrap. */
