@@ -108,13 +108,13 @@ Each score item records whether it is `measured` or `ai_assessed` (`app/services
 
 ## Cost per business (measured)
 
-- **One full check** (customer tests plus the AI checks): about **$0.05** in Claude cost.
-- **One agent run**: **$0.05 to $0.17** in Claude cost, plus the AI checks of each re-test.
+- **One full check** (customer tests plus the AI checks): about **$0.04** in Claude cost, the median of real checks; see the live figures on the home page ("Measured on the live system"), which the app computes from real runs.
+- **One agent run**: see the agent report on an owner page ("See how Toran thinks"), which shows the tokens and cost of every round.
 - Every call's tokens and estimated cost are stored per business (`claudeusage` table); speech-to-text minutes and estimated cost in `sttusage`. The home page shows measured medians with their sample size and date.
 
 ## Real-world results
 
-<!-- TODO(Sakshi): fill in the real-world numbers below. -->
+<!-- TODO: fill in the real-world numbers below. -->
 
 | Measure | Result |
 | --- | --- |

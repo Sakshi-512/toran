@@ -99,9 +99,9 @@ SMTP: if login to smtp.titan.email is rejected, use smtpout.secureserver.net, wi
 - Keep a person in control: confirm before anything is sent or spent.
 
 Models:
-- claude-haiku-5-5 for simple steps (classify business type, understand update requests, short checks)
+- claude-haiku-5-5 for simple steps: web address (domain name) suggestions and the eval name judge
 - claude-sonnet-5-5 for profile extraction, photo reading, AI-assessed checks with screenshots, and the fix loop
-- claude-opus-5-5 only if a step truly needs it
+- claude-opus-5-5 only if a step truly needs it (not used today: no step needs it)
 
 Every Claude call: set max_tokens, use prompt caching for repeated system prompts, set a timeout, retry with backoff, and log input tokens, output tokens and estimated cost per business. Stop calling Claude when the daily spend cap is reached and show a friendly message.
 
