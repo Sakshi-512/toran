@@ -124,11 +124,11 @@ Each score item records whether it is `measured` or `ai_assessed` (`app/services
 
 | Measure | Result |
 | --- | --- |
-| Real businesses onboarded | **[to be filled in]** |
-| Field accuracy on real voice notes | **[to be filled in]** |
-| Price accuracy on real voice notes | **[to be filled in]** |
-| Median time from voice note to a tested draft | **[to be filled in]** |
-| Pune audit (small, non-random sample) | **[to be filled in]** |
+| Real businesses onboarded | 1 (a beauty parlour in Pune, built from one Marathi voice note, with the owner’s written consent) |
+| Field accuracy on real voice notes | 90% of fields needed no edit (1 note, 1 owner). The edited fields include the business name, a misheard offer (“free” for “pre”), and a phone number that was not in the note. |
+| Price accuracy on real voice notes | 0 prices or products invented, 0 products missed. The owner gave only price ranges, so the app kept them as ranges and asked, rather than guess. (Report shows 0% exact: no exact price existed in the note.) |
+| Median time from voice note to a tested draft | 3.6 min for the one real business, including the owner’s own checking and editing time (4.7 min to live). The home page figure is for sample runs, which skip the owner’s review. |
+| Pune audit (small, non-random sample) | 10 businesses: 5 had no website, 3 only a free builder page, 2 their own domain. 9 of 10 listed a phone number. |
 
 `make accuracy` prints the accuracy and timing report from real (non-sample) businesses.
 
