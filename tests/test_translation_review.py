@@ -70,7 +70,7 @@ def test_measured_block_follows_the_hero_with_sample_size_and_date(
     assert page.index("Measured on the live system") < page.index('id="contact"')
     how = page.split("How it works")[1].split("</section>")[0]
     assert "AI cost of one full check" not in how
-    assert "median of 1 real check ·" in page and "real checks" not in page
+    assert "from 1 check, which may be a sample business ·" in page and "median of" not in page
     from datetime import datetime
 
     from app.services.showcase import IST

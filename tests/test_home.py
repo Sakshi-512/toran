@@ -81,7 +81,7 @@ def test_no_numbers_until_measured_and_mock_never_counts(
     _usage(engine, "ai_checks", 0.06, mock=False)
     page = client.get("/").text
     assert "AI cost of one full check" in page and "$0.05" in page
-    assert "median of 2 real checks" in page
+    assert "median of 2 checks, including sample businesses" in page
 
 
 def _real_intake(engine: Engine, slug: str, guess_price: int, *, sample: bool = False) -> None:

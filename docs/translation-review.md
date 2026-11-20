@@ -62,10 +62,10 @@ stored, how long, and the right to delete). Please read them first.
 | `home.how_live` | Go live | आपकी मंज़ूरी के बाद वेबसाइट लाइव करें | तुमच्या मंजुरीनंतर वेबसाइट लाइव्ह करा |  |
 | `home.how_live_text` | Toran fixes what it can. Nothing goes live until you say yes. | Toran वेबसाइट में जो कमियाँ खुद ठीक कर सकता है, उन्हें ठीक करता है। लेकिन आपकी मंज़ूरी के बिना कुछ भी लाइव नहीं होता। | Toran कडून ज्या चुका दुरुस्त करता येतील, त्या ते दुरुस्त करतं. पण तुम्ही मंजुरी दिल्याशिवाय वेबसाइट लाइव्ह होत नाही. |  |
 | `home.stat_cost` | AI cost of one full check | एक पूरी जाँच में AI का खर्च | एका पूर्ण तपासणीसाठी AI चा खर्च |  |
-| `home.stat_cost_note` | median of {n} real checks | {n} असली जाँचों का बीच का मान | प्रत्यक्ष केलेल्या {n} तपासण्यांमधील मधले मूल्य |  |
+| `home.stat_cost_note` | median of {n} checks, including sample businesses | {n} जाँचों का बीच का मान, नमूना कारोबारों समेत | {n} तपासण्यांमधील मधले मूल्य, नमुना व्यवसायांसह |  |
 | `home.stat_time` | From voice note to a tested draft | वॉइस नोट से जाँची हुई वेबसाइट के ड्राफ्ट तक | व्हॉइस नोटपासून तपासलेल्या वेबसाइटच्या ड्राफ्टपर्यंत |  |
 | `home.minutes` | {n} min | {n} मिनट | {n} मिनिटे |  |
-| `home.stat_time_note` | median of {n} real runs | {n} असली बार में बीच का समय | प्रत्यक्ष वापराच्या {n} वेळांमधील मधला वेळ |  |
+| `home.stat_time_note` | median of {n} runs, including sample voice notes | {n} बार में बीच का समय, नमूना वॉइस नोट समेत | {n} वेळांमधील मधला वेळ, नमुना व्हॉइस नोट्ससह |  |
 | `home.stat_accuracy` | Details right first time on real voice notes | असली वॉइस नोट से पहली बार में सही जानकारी | खऱ्या व्हॉइस नोटमधून पहिल्याच वेळी बरोबर माहिती |  |
 | `home.stat_accuracy_note` | prices {prices}% · based on {n} real businesses | दाम {prices}% · {n} असली व्यवसायों पर आधारित | दर {prices}% · {n} खऱ्या व्यवसायांवर आधारित |  |
 | `home.try_title` | Try it in 3 languages | 3 भाषाओं में आज़माएँ | 3 भाषांमध्ये वापरून पाहा |  |
@@ -105,8 +105,8 @@ stored, how long, and the right to delete). Please read them first.
 | `home.measured_title` | Measured on the live system | असली इस्तेमाल के आँकड़े | प्रत्यक्ष वापरातील आकडे |  |
 | `home.measured_intro` | Real numbers from real use, updated as people use {app_name}. | {app_name} के असली इस्तेमाल से मिले आँकड़े। जैसे-जैसे लोग इसका इस्तेमाल करते हैं, ये अपडेट होते रहते हैं। | लोक {app_name} वापरतात त्यातून मिळालेले खरे आकडे. वापरानुसार ते अपडेट होत राहतात. |  |
 | `home.measured_on` | last measured {date} | आखिरी बार {date} को मापा गया | शेवटचे मोजमाप {date} |  |
-| `home.stat_cost_note_one` | median of 1 real check | 1 असली जाँच से | 1 खऱ्या तपासणीवरून |  |
-| `home.stat_time_note_one` | median of 1 real run | 1 असली बार से | 1 खऱ्या वेळेवरून |  |
+| `home.stat_cost_note_one` | from 1 check, which may be a sample business | 1 जाँच से, जो नमूना कारोबार की भी हो सकती है | 1 तपासणीवरून, जी नमुना व्यवसायाची असू शकते |  |
+| `home.stat_time_note_one` | from 1 run, which may be a sample voice note | 1 बार से, जो नमूना वॉइस नोट भी हो सकता है | 1 वेळेवरून, जी नमुना व्हॉइस नोट असू शकते |  |
 | `home.stat_accuracy_note_one` | prices {prices}% · based on 1 real business | दाम {prices}% · 1 असली व्यवसाय पर आधारित | दर {prices}% · 1 खऱ्या व्यवसायावर आधारित |  |
 
 ## Start page

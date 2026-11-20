@@ -224,8 +224,8 @@ async def score_business(
 
 
 def _record_time_to_draft_scored(engine: Engine, business: Business) -> None:
-    """System time from voice-note submission to the first draft score (excludes the owner's
-    decisions)."""
+    """Time from voice-note submission to the first draft score. It includes the owner's time on
+    the confirm cards, since the draft is only built after the owner confirms."""
     with Session(engine) as session:
         intake = session.exec(
             select(IntakeSession).where(IntakeSession.business_id == business.id)

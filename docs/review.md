@@ -52,9 +52,9 @@ items 1 to 7 the test was written first and seen to fail before the fix.
 - TODO: the README headline says "Real-voice test: results in the project brief". Fill in the
   final tally of the real-voice test (field and price accuracy, number of real voice notes) in the
   brief, and then in the README headline.
-- TODO: the "Real-world results" table in the README still shows "[to be filled in]" for
-  real businesses onboarded, field accuracy, price accuracy, median time to a tested draft and the
-  Pune audit. `make accuracy` prints the accuracy and timing from real (non-sample) businesses.
+- TODO: the "Real-world results" table in the README is filled in, except the price row's
+  denominator (how many confirmed prices the first guess was compared with). `make server-accuracy`
+  prints it as "prices X/Y".
 - TODO: agent results. Each agent run is recorded in the `agentrun` table (`AgentRun` in
   `app/models.py`): `score_before`, `score_after`, `cost_usd_estimate`, `rounds`, `stop_reason`
   and `status`; each round's kept or rolled-back result is in the action log. Once the production

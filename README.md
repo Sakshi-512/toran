@@ -108,23 +108,23 @@ Each score item records whether it is `measured` or `ai_assessed` (`app/services
 
 ## Cost per business (measured)
 
-- **One full check** (customer tests plus the AI checks): about **$0.04** in Claude cost, the median of real checks; see the live figures on the home page ("Measured on the live system"), which the app computes from real runs.
+- **One full check** (customer tests plus the AI checks): about **$0.04** in Claude cost, the median of checks made with real Claude calls, including checks of sample businesses; see the live figures on the home page ("Measured on the live system"), which the app computes from the data.
 - **One agent run**: see the agent report on an owner page ("See how Toran thinks"), which shows the tokens and cost of every round.
 - Every call's tokens and estimated cost are stored per business (`claudeusage` table); speech-to-text minutes and estimated cost in `sttusage`. The home page shows measured medians with their sample size and date.
 
 ## Real-world results
 
-<!-- TODO: fill in the real-world numbers below. -->
-
 | Measure | Result |
 | --- | --- |
 | Real businesses onboarded | 1 (a beauty parlour in Pune, built from one Marathi voice note, with the owner’s written consent) |
-| Field accuracy on real voice notes | 90% of fields needed no edit (1 note, 1 owner). The edited fields include the business name, a misheard offer (“free” for “pre”), and a phone number that was not in the note. |
-| Price accuracy on real voice notes | 0 prices or products invented, 0 products missed. The owner gave only price ranges, so the app kept them as ranges and asked, rather than guess. (Report shows 0% exact: no exact price existed in the note.) |
-| Median time from voice note to a tested draft | 3.6 min for the one real business, including the owner’s own checking and editing time (4.7 min to live). The home page figure is for sample runs, which skip the owner’s review. |
-| Pune audit (small, non-random sample) | 10 businesses: 5 had no website, 3 only a free builder page, 2 their own domain. 9 of 10 listed a phone number. |
+| Field accuracy on real voice notes | 90% of fields needed no edit, hand-counted against a written answer key (1 note, 1 owner). The edited fields include the business name, a misheard offer (“free” for “pre”), and a phone number that was not in the note. |
+| Price accuracy on real voice notes | 0 prices or products invented, 0 products missed. The owner gave only price ranges, so the app kept them as ranges and asked, rather than guess. |
+| Median time from voice note to a tested draft | 3.6 min for the one real business, timed by hand, including the owner’s own checking and editing time (4.7 min to live). |
+| Pune audit (small, non-random sample) | 10 businesses: 5 had no website, 3 only a free builder page, 2 their own domain. 9 of 10 listed a phone number. One result was a sponsored ad. Details: [docs/pune-audit.md](docs/pune-audit.md) |
 
-`make accuracy` prints the accuracy and timing report from real (non-sample) businesses.
+*The rows above are hand measurements. `make accuracy` reports the app's own logged figures, which count every field (including ones the owner never mentioned) and include waiting time, so they read lower.*
+
+`make accuracy` prints the accuracy and timing report from real (non-sample) businesses, with each figure's numerator and denominator; `make server-accuracy` runs it on the server and also lists which fields were edited (names only, never values). `make server-agent-report` lists every agent run: score before and after, cost, and whether each round was kept or rolled back.
 
 ## Setup on a new machine
 

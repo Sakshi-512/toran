@@ -4,8 +4,8 @@ PY := $(VENV)/bin/python
 BIN := $(VENV)/bin
 
 
-.PHONY: server-seed server-agent server-access server-backup server-purge
-.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score agent shots access i18n-sheet i18n-apply eval accuracy up down backup
+.PHONY: server-seed server-agent server-access server-backup server-purge server-accuracy server-agent-report
+.PHONY: setup lock dev test lint format typecheck audit migrate migration seed purge logs score agent shots access i18n-sheet i18n-apply eval accuracy agent-report up down backup
 
 setup: ## Create the venv, install dependencies and git hooks
 	test -d $(VENV) || python3.12 -m venv $(VENV)
@@ -59,6 +59,9 @@ eval: ## Rerun extraction on reviewed eval cases (evals/cases and evals/private)
 accuracy: ## Accuracy from real use: first guesses vs confirmed profiles
 	$(PY) -m scripts.accuracy_report
 
+agent-report: ## Every agent run, its scores, cost and per-round result (read-only)
+	$(PY) -m scripts.agent_report
+
 score: ## Run customer tests and score a site: make score slug=asha-home-bakery
 	APP_ENV=development $(PY) -m scripts.score_site $(slug)
 
@@ -88,6 +91,12 @@ down:
 	docker compose down
 
 # On the server (inside the running app container; the server has no virtualenv).
+server-accuracy: ## Server: accuracy report with the edited field names (never their values)
+	docker compose exec app python -m scripts.accuracy_report --fields
+
+server-agent-report: ## Server: every agent run, its scores, cost and per-round result (read-only)
+	docker compose exec app python -m scripts.agent_report
+
 server-seed: ## Server: create the sample businesses and build their sites
 	docker compose exec app python -m scripts.seed_samples
 
